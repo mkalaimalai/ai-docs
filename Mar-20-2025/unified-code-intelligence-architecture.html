@@ -1,0 +1,657 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Unified Code Intelligence Platform — Architecture & Reference Projects</title>
+<link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;600;700&family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --bg: #0a0e17;
+    --surface: #111827;
+    --surface2: #1a2236;
+    --border: #1e293b;
+    --text: #e2e8f0;
+    --muted: #94a3b8;
+    --accent: #38bdf8;
+    --accent2: #a78bfa;
+    --accent3: #34d399;
+    --accent4: #fb923c;
+    --accent5: #f472b6;
+    --code: #22d3ee;
+  }
+
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+  
+  body {
+    font-family: 'Inter', sans-serif;
+    background: var(--bg);
+    color: var(--text);
+    line-height: 1.7;
+    padding: 2rem;
+    max-width: 1200px;
+    margin: 0 auto;
+  }
+
+  h1 {
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 2rem;
+    font-weight: 700;
+    margin-bottom: 0.5rem;
+    background: linear-gradient(135deg, var(--accent), var(--accent2));
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+  }
+
+  .subtitle {
+    color: var(--muted);
+    font-size: 1.05rem;
+    margin-bottom: 3rem;
+    border-bottom: 1px solid var(--border);
+    padding-bottom: 1.5rem;
+  }
+
+  h2 {
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 1.25rem;
+    font-weight: 600;
+    color: var(--accent);
+    margin: 2.5rem 0 1rem;
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+  }
+
+  h2 .num {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    width: 28px;
+    height: 28px;
+    border-radius: 6px;
+    font-size: 0.8rem;
+    font-weight: 700;
+    flex-shrink: 0;
+  }
+
+  h3 {
+    font-size: 1rem;
+    font-weight: 600;
+    color: var(--text);
+    margin: 1.5rem 0 0.75rem;
+  }
+
+  p, li { color: var(--muted); font-size: 0.92rem; }
+  p { margin-bottom: 0.75rem; }
+
+  .arch-diagram {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: 12px;
+    padding: 2rem;
+    margin: 2rem 0;
+    overflow-x: auto;
+  }
+
+  .arch-diagram pre {
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 0.72rem;
+    line-height: 1.5;
+    color: var(--code);
+    white-space: pre;
+    margin: 0;
+  }
+
+  .layer-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(320px, 1fr));
+    gap: 1.25rem;
+    margin: 1.5rem 0;
+  }
+
+  .layer-card {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: 10px;
+    padding: 1.25rem;
+    transition: border-color 0.2s;
+  }
+
+  .layer-card:hover { border-color: var(--accent); }
+
+  .layer-card .tag {
+    display: inline-block;
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 0.65rem;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 0.08em;
+    padding: 3px 8px;
+    border-radius: 4px;
+    margin-bottom: 0.75rem;
+  }
+
+  .tag-static { background: rgba(56,189,248,0.15); color: var(--accent); }
+  .tag-runtime { background: rgba(52,211,153,0.15); color: var(--accent3); }
+  .tag-infra { background: rgba(251,146,60,0.15); color: var(--accent4); }
+  .tag-knowledge { background: rgba(167,139,250,0.15); color: var(--accent2); }
+  .tag-query { background: rgba(244,114,182,0.15); color: var(--accent5); }
+  .tag-agent { background: rgba(34,211,238,0.15); color: var(--code); }
+
+  .layer-card h4 {
+    font-size: 0.95rem;
+    font-weight: 600;
+    margin-bottom: 0.5rem;
+    color: var(--text);
+  }
+
+  .layer-card p { font-size: 0.85rem; margin-bottom: 0.5rem; }
+
+  .layer-card .tools {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 6px;
+    margin-top: 0.75rem;
+  }
+
+  .layer-card .tools span {
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 0.7rem;
+    background: var(--surface2);
+    border: 1px solid var(--border);
+    padding: 2px 8px;
+    border-radius: 4px;
+    color: var(--muted);
+  }
+
+  .ref-section { margin: 2rem 0; }
+
+  .ref-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(340px, 1fr));
+    gap: 1rem;
+    margin: 1rem 0;
+  }
+
+  .ref-card {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: 10px;
+    padding: 1.25rem;
+    display: flex;
+    flex-direction: column;
+    gap: 0.5rem;
+    transition: border-color 0.2s, transform 0.2s;
+  }
+
+  .ref-card:hover { border-color: var(--accent); transform: translateY(-2px); }
+
+  .ref-card .ref-layer {
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 0.6rem;
+    text-transform: uppercase;
+    letter-spacing: 0.1em;
+    font-weight: 700;
+  }
+
+  .ref-card h4 {
+    font-size: 0.9rem;
+    font-weight: 600;
+    color: var(--text);
+    line-height: 1.3;
+  }
+
+  .ref-card .desc {
+    font-size: 0.82rem;
+    color: var(--muted);
+    line-height: 1.5;
+    flex-grow: 1;
+  }
+
+  .ref-card .link {
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 0.72rem;
+    color: var(--accent);
+    text-decoration: none;
+    word-break: break-all;
+  }
+
+  .ref-card .link:hover { text-decoration: underline; }
+
+  .ref-card .stars {
+    font-size: 0.75rem;
+    color: var(--accent4);
+  }
+
+  .pipeline-table {
+    width: 100%;
+    border-collapse: collapse;
+    margin: 1.5rem 0;
+    font-size: 0.85rem;
+  }
+
+  .pipeline-table th {
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 0.72rem;
+    text-transform: uppercase;
+    letter-spacing: 0.08em;
+    color: var(--accent);
+    text-align: left;
+    padding: 0.75rem 1rem;
+    border-bottom: 2px solid var(--border);
+  }
+
+  .pipeline-table td {
+    padding: 0.65rem 1rem;
+    border-bottom: 1px solid var(--border);
+    color: var(--muted);
+  }
+
+  .pipeline-table tr:hover td { color: var(--text); }
+
+  .pipeline-table .layer-badge {
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 0.65rem;
+    font-weight: 600;
+    padding: 2px 6px;
+    border-radius: 3px;
+  }
+
+  .flow-section {
+    margin: 2rem 0;
+    padding: 1.5rem;
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: 12px;
+  }
+
+  .flow-section h3 {
+    font-family: 'JetBrains Mono', monospace;
+    color: var(--accent2);
+    font-size: 0.9rem;
+    margin-bottom: 1rem;
+  }
+
+  .flow-steps {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(160px, 1fr));
+    gap: 0.75rem;
+  }
+
+  .flow-step {
+    text-align: center;
+    padding: 1rem 0.5rem;
+    border: 1px solid var(--border);
+    border-radius: 8px;
+    background: var(--surface2);
+    position: relative;
+  }
+
+  .flow-step .step-num {
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 0.65rem;
+    color: var(--accent);
+    font-weight: 700;
+    margin-bottom: 0.25rem;
+  }
+
+  .flow-step .step-title {
+    font-size: 0.82rem;
+    font-weight: 600;
+    color: var(--text);
+    margin-bottom: 0.25rem;
+  }
+
+  .flow-step .step-desc {
+    font-size: 0.72rem;
+    color: var(--muted);
+  }
+
+  .principle-box {
+    margin: 2.5rem 0;
+    padding: 1.5rem 2rem;
+    background: linear-gradient(135deg, rgba(56,189,248,0.08), rgba(167,139,250,0.08));
+    border: 1px solid rgba(56,189,248,0.2);
+    border-radius: 12px;
+    text-align: center;
+  }
+
+  .principle-box p {
+    font-size: 1.05rem;
+    color: var(--text);
+    font-weight: 500;
+  }
+
+  .principle-box .highlight {
+    font-family: 'JetBrains Mono', monospace;
+    color: var(--accent);
+  }
+
+  @media (max-width: 768px) {
+    body { padding: 1rem; }
+    h1 { font-size: 1.5rem; }
+    .layer-grid, .ref-grid { grid-template-columns: 1fr; }
+    .flow-steps { grid-template-columns: 1fr 1fr; }
+  }
+</style>
+</head>
+<body>
+
+<h1>Unified Code Intelligence Platform</h1>
+<p class="subtitle">High-Level Architecture & Reference GitHub Projects — merging static analysis, runtime observability, infrastructure-as-code, and organizational knowledge into a single queryable graph for LLM-powered SDLC automation.</p>
+
+<!-- ── ARCHITECTURE DIAGRAM ─────────────────────────── -->
+<h2><span class="num" style="background:rgba(56,189,248,0.15);color:var(--accent);">1</span> High-Level Architecture</h2>
+
+<div class="arch-diagram">
+<pre>
+┌──────────────────────────────────────────────────────────────────────────────────────┐
+│                              LLM AGENT LAYER                                         │
+│                   Claude Code  ·  Custom MCP Agents  ·  IDE Plugins                  │
+│                                                                                      │
+│      "Add a retry pattern to PaymentService"  →  Graph Query  →  Contextual Code     │
+└──────────────────────────────────┬───────────────────────────────────────────────────┘
+                                   │  MCP Tool-Use / Function Calling
+                                   ▼
+┌──────────────────────────────────────────────────────────────────────────────────────┐
+│                           QUERY & ORCHESTRATION LAYER                                │
+│                                                                                      │
+│    ┌─────────────────┐   ┌──────────────────┐   ┌────────────────────────────────┐   │
+│    │  Cypher Engine   │   │  Vector Search   │   │  Hybrid Retrieval (GraphRAG)  │   │
+│    │  (Neo4j native)  │   │  (pgvector /     │   │  Graph traversal + semantic   │   │
+│    │                  │   │   Neo4j vectors)  │   │  similarity in one pass       │   │
+│    └─────────────────┘   └──────────────────┘   └────────────────────────────────┘   │
+└──────────────────────────────────┬───────────────────────────────────────────────────┘
+                                   │
+              ┌────────────────────┴─────────────────────┐
+              ▼                                          ▼
+┌───────────────────────────────┐  ┌───────────────────────────────────────────────────┐
+│       KNOWLEDGE GRAPH         │  │                    CODE GRAPH                      │
+│                               │  │                                                    │
+│  Patterns & Standards         │  │  ┌──────────────────────────────────────────────┐  │
+│  ├─ Circuit Breaker           │  │  │  STATIC LAYER                                │  │
+│  ├─ Saga / CQRS               │  │  │  Classes · Methods · Endpoints · DTOs         │  │
+│  ├─ Auth middleware rules     │  │  │  CALLS · IMPLEMENTS · INJECTS · PUBLISHES     │  │
+│  └─ Naming conventions        │  │  │  Source: LST (Java/Kotlin) + AST (TS/Python)  │  │
+│                               │  │  ├──────────────────────────────────────────────┤  │
+│  ADRs & Post-Mortems          │  │  │  RUNTIME LAYER                               │  │
+│  ├─ Why we chose Kafka        │  │  │  Traces · Spans · Latency · Error rates      │  │
+│  ├─ DB migration playbook     │  │  │  INVOKED_AT_RUNTIME · avg_latency · p99      │  │
+│  └─ Incident root causes      │  │  │  Source: OpenTelemetry + structured logs      │  │
+│                               │  │  ├──────────────────────────────────────────────┤  │
+│  Team Channel Knowledge       │  │  │  INFRASTRUCTURE LAYER                        │  │
+│  ├─ Slack engineering tips    │  │  │  Services · Pods · VPCs · Security Groups     │  │
+│  ├─ Confluence design docs    │  │  │  DEPLOYED_ON · ROUTES_TO · SCALES_WITH       │  │
+│  └─ Review checklists         │  │  │  Source: Terraform · K8s · Helm · Docker      │  │
+│                               │  │  └──────────────────────────────────────────────┘  │
+└───────────────┬───────────────┘  └────────────────────────┬──────────────────────────┘
+                │                                           │
+                └─────────────────┬─────────────────────────┘
+                                  ▼
+                    ┌───────────────────────────┐
+                    │         Neo4j             │
+                    │    Unified Graph Store     │
+                    │  + pgvector (embeddings)   │
+                    │  + MCP Server (neo4j-mcp)  │
+                    └───────────────────────────┘
+</pre>
+</div>
+
+<!-- ── LAYERS DETAIL ────────────────────────────────── -->
+<h2><span class="num" style="background:rgba(52,211,153,0.15);color:var(--accent3);">2</span> Layer Breakdown</h2>
+
+<div class="layer-grid">
+  <div class="layer-card">
+    <span class="tag tag-static">Static Layer</span>
+    <h4>Source Code Structure</h4>
+    <p>Parses repos into type-attributed trees. Resolves cross-file dependencies, generics, DI wiring, and interface implementations.</p>
+    <div class="tools">
+      <span>OpenRewrite LST</span><span>Tree-sitter</span><span>ts-morph</span><span>Joern CPG</span><span>Moderne CLI</span>
+    </div>
+  </div>
+  <div class="layer-card">
+    <span class="tag tag-runtime">Runtime Layer</span>
+    <h4>Production Behavior</h4>
+    <p>Captures actual service-to-service calls, latencies, error rates, throughput. Correlates spans to static code via <code>code.function</code> and <code>service.name</code> attributes.</p>
+    <div class="tools">
+      <span>OpenTelemetry</span><span>Jaeger</span><span>Fluent Bit</span><span>Vector</span><span>Grafana Tempo</span>
+    </div>
+  </div>
+  <div class="layer-card">
+    <span class="tag tag-infra">Infrastructure Layer</span>
+    <h4>Deployment Topology</h4>
+    <p>Maps cloud resources, networking, IAM, K8s workloads, and IaC definitions into the same graph. Bridges logical services to physical environments.</p>
+    <div class="tools">
+      <span>Terraform HCL</span><span>Kubernetes API</span><span>Helm</span><span>Cartography</span><span>AWS/GCP APIs</span>
+    </div>
+  </div>
+  <div class="layer-card">
+    <span class="tag tag-knowledge">Knowledge Layer</span>
+    <h4>Institutional Memory</h4>
+    <p>Extracts patterns, standards, ADRs, post-mortems, and best practices from team channels. Enables the LLM to reason about <em>intent</em>, not just structure.</p>
+    <div class="tools">
+      <span>Slack API</span><span>Confluence</span><span>LLM extraction</span><span>ADR templates</span><span>Git commits</span>
+    </div>
+  </div>
+  <div class="layer-card">
+    <span class="tag tag-query">Query Layer</span>
+    <h4>Hybrid Retrieval</h4>
+    <p>Combines Cypher graph traversal with vector similarity search (GraphRAG). A single query can traverse code structure, check runtime metrics, and surface relevant patterns.</p>
+    <div class="tools">
+      <span>Neo4j Cypher</span><span>pgvector</span><span>LangChain</span><span>LlamaIndex</span><span>text2cypher</span>
+    </div>
+  </div>
+  <div class="layer-card">
+    <span class="tag tag-agent">Agent Layer</span>
+    <h4>LLM Orchestration</h4>
+    <p>LLM agents use MCP tools to query the graph, reason over multi-layer context, and execute actions — code generation, review, refactoring, incident diagnosis.</p>
+    <div class="tools">
+      <span>Claude Code</span><span>MCP Server</span><span>OpenRewrite Recipes</span><span>Custom Agents</span>
+    </div>
+  </div>
+</div>
+
+<!-- ── DATA FLOW ────────────────────────────────────── -->
+<h2><span class="num" style="background:rgba(251,146,60,0.15);color:var(--accent4);">3</span> Data Flow: Ingestion → Graph → LLM</h2>
+
+<div class="flow-section">
+  <h3>End-to-End Pipeline</h3>
+  <div class="flow-steps">
+    <div class="flow-step">
+      <div class="step-num">01</div>
+      <div class="step-title">Parse</div>
+      <div class="step-desc">LST / AST / HCL / YAML → structured trees</div>
+    </div>
+    <div class="flow-step">
+      <div class="step-num">02</div>
+      <div class="step-title">Collect</div>
+      <div class="step-desc">OTel traces + logs → spans + events</div>
+    </div>
+    <div class="flow-step">
+      <div class="step-num">03</div>
+      <div class="step-title">Discover</div>
+      <div class="step-desc">Cloud APIs → infra resources + topology</div>
+    </div>
+    <div class="flow-step">
+      <div class="step-num">04</div>
+      <div class="step-title">Extract</div>
+      <div class="step-desc">Docs + Slack → patterns + knowledge entities</div>
+    </div>
+    <div class="flow-step">
+      <div class="step-num">05</div>
+      <div class="step-title">Ingest</div>
+      <div class="step-desc">All sources → Neo4j nodes + edges + embeddings</div>
+    </div>
+    <div class="flow-step">
+      <div class="step-num">06</div>
+      <div class="step-title">Link</div>
+      <div class="step-desc">Cross-layer edges bridging static ↔ runtime ↔ infra</div>
+    </div>
+    <div class="flow-step">
+      <div class="step-num">07</div>
+      <div class="step-title">Expose</div>
+      <div class="step-desc">MCP server + Cypher tools → agent-accessible</div>
+    </div>
+    <div class="flow-step">
+      <div class="step-num">08</div>
+      <div class="step-title">Reason</div>
+      <div class="step-desc">LLM queries graph → multi-layer contextual output</div>
+    </div>
+  </div>
+</div>
+
+<!-- ── INGESTION TABLE ──────────────────────────────── -->
+<h2><span class="num" style="background:rgba(167,139,250,0.15);color:var(--accent2);">4</span> Ingestion Pipeline Reference</h2>
+
+<table class="pipeline-table">
+  <thead>
+    <tr><th>Source</th><th>Parser / Collector</th><th>Graph Layer</th><th>Reference Project</th></tr>
+  </thead>
+  <tbody>
+    <tr><td>Java / Kotlin source</td><td>OpenRewrite LST (Moderne CLI)</td><td><span class="layer-badge tag-static">Static</span></td><td>openrewrite/rewrite</td></tr>
+    <tr><td>TypeScript / React</td><td>Tree-sitter + ts-morph → Neo4j</td><td><span class="layer-badge tag-static">Static</span></td><td>ChrisRoyse/CodeGraph</td></tr>
+    <tr><td>Python source</td><td>Tree-sitter / Python AST</td><td><span class="layer-badge tag-static">Static</span></td><td>vitali87/code-graph-rag</td></tr>
+    <tr><td>Multi-lang polyglot</td><td>Joern Code Property Graph</td><td><span class="layer-badge tag-static">Static</span></td><td>joernio/joern</td></tr>
+    <tr><td>Distributed traces</td><td>OpenTelemetry Collector → custom exporter</td><td><span class="layer-badge tag-runtime">Runtime</span></td><td>open-telemetry/opentelemetry-collector</td></tr>
+    <tr><td>Application logs</td><td>Fluent Bit / Vector → structured parse</td><td><span class="layer-badge tag-runtime">Runtime</span></td><td>fluent/fluent-bit</td></tr>
+    <tr><td>AWS / GCP / Azure</td><td>Cloud APIs → Neo4j graph</td><td><span class="layer-badge tag-infra">Infra</span></td><td>cartography-cncf/cartography</td></tr>
+    <tr><td>Terraform / HCL</td><td>HCL parser + state file reconciliation</td><td><span class="layer-badge tag-infra">Infra</span></td><td>Custom (temporal infra KG)</td></tr>
+    <tr><td>Kubernetes</td><td>K8s API → node/pod/service graph</td><td><span class="layer-badge tag-infra">Infra</span></td><td>cartography-cncf/cartography</td></tr>
+    <tr><td>Unstructured docs</td><td>LLM extraction → entities + relations</td><td><span class="layer-badge tag-knowledge">Knowledge</span></td><td>neo4j-labs/llm-graph-builder</td></tr>
+    <tr><td>Slack / Confluence</td><td>API + LLM → pattern extraction</td><td><span class="layer-badge tag-knowledge">Knowledge</span></td><td>neo4j-labs/llm-graph-builder</td></tr>
+    <tr><td>Git history</td><td>git log → commit/author/change nodes</td><td><span class="layer-badge tag-static">Static+Runtime</span></td><td>this-rs/project-orchestrator</td></tr>
+  </tbody>
+</table>
+
+<!-- ── REFERENCE PROJECTS ───────────────────────────── -->
+<h2><span class="num" style="background:rgba(244,114,182,0.15);color:var(--accent5);">5</span> Reference GitHub Projects by Layer</h2>
+
+<h3>Static Layer — Code Graph Construction</h3>
+<div class="ref-grid">
+  <div class="ref-card">
+    <span class="ref-layer" style="color:var(--accent);">STATIC · CODE GRAPH</span>
+    <h4>ChrisRoyse/CodeGraph</h4>
+    <div class="desc">Transforms codebases into Neo4j knowledge graphs. Multi-language support (TS, Python, Java, Go, Rust, C#). Two-pass AST analysis with cross-file relationship resolution. MCP integration for AI-powered queries via Cypher.</div>
+    <a class="link" href="https://github.com/ChrisRoyse/CodeGraph" target="_blank">github.com/ChrisRoyse/CodeGraph</a>
+  </div>
+  <div class="ref-card">
+    <span class="ref-layer" style="color:var(--accent);">STATIC · GRAPHRAG</span>
+    <h4>vitali87/code-graph-rag</h4>
+    <div class="desc">Tree-sitter based parsing into Memgraph. MCP server for Claude Code. Semantic code search via UniXcoder embeddings. Pattern recognition and optimization workflows with interactive approval.</div>
+    <a class="link" href="https://github.com/vitali87/code-graph-rag" target="_blank">github.com/vitali87/code-graph-rag</a>
+  </div>
+  <div class="ref-card">
+    <span class="ref-layer" style="color:var(--accent);">STATIC · LST</span>
+    <h4>openrewrite/rewrite</h4>
+    <div class="desc">The OpenRewrite engine powering Lossless Semantic Trees. Full type attribution, format preservation, and 5000+ deterministic recipes. Foundation for Moderne's multi-repo AI agent (Moddy).</div>
+    <a class="link" href="https://github.com/openrewrite/rewrite" target="_blank">github.com/openrewrite/rewrite</a>
+  </div>
+  <div class="ref-card">
+    <span class="ref-layer" style="color:var(--accent);">STATIC · CPG</span>
+    <h4>joernio/joern</h4>
+    <div class="desc">Code Property Graph combining AST + Control Flow + Data Flow into a single supergraph. Supports C/C++, Java, Python, JS, and more. Queryable with Scala-based DSL for vulnerability detection and code understanding.</div>
+    <a class="link" href="https://github.com/joernio/joern" target="_blank">github.com/joernio/joern</a>
+  </div>
+  <div class="ref-card">
+    <span class="ref-layer" style="color:var(--accent);">STATIC · MULTI-AGENT</span>
+    <h4>this-rs/project-orchestrator</h4>
+    <div class="desc">Rust-based orchestrator: Neo4j code graph + Meilisearch semantic search + Tree-sitter for 16 languages. 22 MCP mega-tools for Claude Code. RFC lifecycle, knowledge fabric, multi-project workspaces.</div>
+    <a class="link" href="https://github.com/this-rs/project-orchestrator" target="_blank">github.com/this-rs/project-orchestrator</a>
+  </div>
+  <div class="ref-card">
+    <span class="ref-layer" style="color:var(--accent);">STATIC · MCP</span>
+    <h4>optave/codegraph (npm)</h4>
+    <div class="desc">Function-level dependency graph with sub-second incremental rebuilds. Tree-sitter → SQLite. 30 MCP tools for AI agents. Exports to Neo4j CSV, GraphML, Mermaid, DOT. Local embeddings via HuggingFace.</div>
+    <a class="link" href="https://www.npmjs.com/package/@optave/codegraph" target="_blank">npmjs.com/package/@optave/codegraph</a>
+  </div>
+</div>
+
+<h3>Runtime Layer — Traces, Logs, Observability</h3>
+<div class="ref-grid">
+  <div class="ref-card">
+    <span class="ref-layer" style="color:var(--accent3);">RUNTIME · TRACES</span>
+    <h4>open-telemetry/opentelemetry-collector</h4>
+    <div class="desc">CNCF graduated project. Vendor-neutral telemetry collection for traces, metrics, and logs. Auto-instrumentation for Spring Boot, Express, Django, and 100+ libraries. The standard pipeline for ingesting runtime data.</div>
+    <a class="link" href="https://github.com/open-telemetry/opentelemetry-collector" target="_blank">github.com/open-telemetry/opentelemetry-collector</a>
+  </div>
+  <div class="ref-card">
+    <span class="ref-layer" style="color:var(--accent3);">RUNTIME · KNOWLEDGE GRAPH</span>
+    <h4>Log2Graph (Paper)</h4>
+    <div class="desc">Unifies logs, metrics, and traces into a Neo4j knowledge graph. LLM semantic parser achieves F1=0.91 for entity extraction. Natural language queries grounded in structured telemetry graph. 150GB/day at scale.</div>
+    <a class="link" href="https://thesai.org/Downloads/Volume16No10/Paper_3-From_Logs_to_Knowledge_LLM_Powered_Dynamic_Knowledge_Graphs.pdf" target="_blank">thesai.org — Log2Graph Paper</a>
+  </div>
+  <div class="ref-card">
+    <span class="ref-layer" style="color:var(--accent3);">RUNTIME · LOGS</span>
+    <h4>fluent/fluent-bit</h4>
+    <div class="desc">High-performance log processor and forwarder. Parses, filters, and routes structured logs at scale. Output plugins for Elasticsearch, Kafka, and custom HTTP endpoints (for Neo4j ingestion via custom sink).</div>
+    <a class="link" href="https://github.com/fluent/fluent-bit" target="_blank">github.com/fluent/fluent-bit</a>
+  </div>
+</div>
+
+<h3>Infrastructure Layer — Cloud, IaC, Topology</h3>
+<div class="ref-grid">
+  <div class="ref-card">
+    <span class="ref-layer" style="color:var(--accent4);">INFRA · CLOUD GRAPH</span>
+    <h4>cartography-cncf/cartography</h4>
+    <div class="desc">CNCF project. Consolidates AWS, GCP, Azure, K8s, GitHub, and 20+ data sources into a Neo4j graph. Exposes hidden infrastructure dependencies. Security posture analysis with attack path discovery.</div>
+    <a class="link" href="https://github.com/cartography-cncf/cartography" target="_blank">github.com/cartography-cncf/cartography</a>
+  </div>
+  <div class="ref-card">
+    <span class="ref-layer" style="color:var(--accent4);">INFRA · TEMPORAL GRAPH</span>
+    <h4>Temporal Infrastructure KG (Blog)</h4>
+    <div class="desc">Production Neo4j deployment modeling K8s, AWS, Terraform, and time as connected graph. Reconciles the same resource across Terraform code, Terraform state, and live cloud APIs. Cypher-based temporal traversal.</div>
+    <a class="link" href="https://medium.com/@roxane.fischer_50383/building-a-temporal-infrastructure-knowledge-graph-a-year-of-wrestling-with-neo4j-at-scale-949e989c98a2" target="_blank">medium.com — Temporal Infra KG</a>
+  </div>
+</div>
+
+<h3>Knowledge Layer — Patterns, Docs, Institutional Memory</h3>
+<div class="ref-grid">
+  <div class="ref-card">
+    <span class="ref-layer" style="color:var(--accent2);">KNOWLEDGE · GRAPH BUILDER</span>
+    <h4>neo4j-labs/llm-graph-builder</h4>
+    <div class="desc">Transforms unstructured data (PDFs, docs, web pages, YouTube) into structured Neo4j knowledge graphs using LLMs. Community summarization, parallel retrievers, and multi-model support. Perfect for ingesting Confluence, ADRs, and post-mortems.</div>
+    <a class="link" href="https://github.com/neo4j-labs/llm-graph-builder" target="_blank">github.com/neo4j-labs/llm-graph-builder</a>
+  </div>
+  <div class="ref-card">
+    <span class="ref-layer" style="color:var(--accent2);">KNOWLEDGE · AGENT MEMORY</span>
+    <h4>neo4j-labs/agent-memory</h4>
+    <div class="desc">Graph-native memory for AI agents. Short-term (conversations), long-term (entity extraction), and reasoning traces. OpenTelemetry observability built-in. Integrations with LangChain, Pydantic AI, LlamaIndex, CrewAI.</div>
+    <a class="link" href="https://github.com/neo4j-labs/agent-memory" target="_blank">github.com/neo4j-labs/agent-memory</a>
+  </div>
+</div>
+
+<h3>Query & Agent Layer — MCP, GraphRAG, LLM Integration</h3>
+<div class="ref-grid">
+  <div class="ref-card">
+    <span class="ref-layer" style="color:var(--code);">AGENT · MCP</span>
+    <h4>neo4j-contrib/mcp-neo4j</h4>
+    <div class="desc">Official Neo4j MCP server. Provides read-neo4j-cypher (natural language → Cypher), write-neo4j-cypher, and get-neo4j-schema tools. The bridge between LLM agents and any Neo4j graph including Code Graphs.</div>
+    <a class="link" href="https://github.com/neo4j-contrib/mcp-neo4j" target="_blank">github.com/neo4j-contrib/mcp-neo4j</a>
+  </div>
+  <div class="ref-card">
+    <span class="ref-layer" style="color:var(--code);">AGENT · MULTI-REPO</span>
+    <h4>Moderne / Moddy</h4>
+    <div class="desc">Multi-repo AI agent combining LLMs with deterministic OpenRewrite recipes. LST-powered knowledge graphs for code search by business purpose. Tool-function calling to 5000+ recipes. Commercial, but architecturally instructive.</div>
+    <a class="link" href="https://www.moderne.ai/blog/introducing-moderne-multi-repo-ai-agent-for-transforming-code-at-scale" target="_blank">moderne.ai — Moddy Blog</a>
+  </div>
+  <div class="ref-card">
+    <span class="ref-layer" style="color:var(--code);">AGENT · GRAPHRAG</span>
+    <h4>CODEXGRAPH (NAACL 2025)</h4>
+    <div class="desc">Academic framework: code graph databases as LLM agent interfaces. Primary agent writes natural language queries, translation agent converts to Cypher. Evaluated on CrossCodeEval, SWE-bench, and EvoCodeBench.</div>
+    <a class="link" href="https://aclanthology.org/2025.naacl-long.7.pdf" target="_blank">aclanthology.org — CODEXGRAPH</a>
+  </div>
+  <div class="ref-card">
+    <span class="ref-layer" style="color:var(--code);">AGENT · HYBRID</span>
+    <h4>stevereiner/flexible-graphrag</h4>
+    <div class="desc">Full-stack GraphRAG: 8 graph DBs, 10 vector DBs, OpenTelemetry built-in, MCP server. Multi-source ingestion with hybrid search combining vector + full-text + graph traversal. Docker Compose deployment.</div>
+    <a class="link" href="https://github.com/stevereiner/flexible-graphrag" target="_blank">github.com/stevereiner/flexible-graphrag</a>
+  </div>
+</div>
+
+<!-- ── PRINCIPLE ─────────────────────────────────────── -->
+<div class="principle-box">
+  <p>The <span class="highlight">graph</span> is the context. The <span class="highlight">LLM</span> is the reasoning engine.<br>Together, they form the foundation of truly intelligent software engineering automation.</p>
+</div>
+
+</body>
+</html>

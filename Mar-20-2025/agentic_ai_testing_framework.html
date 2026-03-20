@@ -1,0 +1,927 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Agentic AI Testing Framework — Evaluation & Security Guardrails</title>
+<link href="https://fonts.googleapis.com/css2?family=DM+Serif+Display&family=DM+Sans:wght@300;400;500;600;700&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+<style>
+:root {
+  --bg-deep: #0B0F1A;
+  --bg-card: #111827;
+  --bg-card-alt: #0F172A;
+  --bg-surface: #1E293B;
+  --border-subtle: rgba(148,163,184,0.12);
+  --border-glow: rgba(56,189,248,0.25);
+  --text-primary: #F1F5F9;
+  --text-secondary: #94A3B8;
+  --text-muted: #64748B;
+  --accent-cyan: #38BDF8;
+  --accent-teal: #2DD4BF;
+  --accent-violet: #A78BFA;
+  --accent-amber: #FBBF24;
+  --accent-rose: #FB7185;
+  --accent-emerald: #34D399;
+  --gradient-hero: linear-gradient(135deg, #0B0F1A 0%, #1E1B4B 40%, #0F172A 100%);
+  --gradient-card: linear-gradient(180deg, rgba(30,41,59,0.6), rgba(15,23,42,0.8));
+  --font-display: 'DM Serif Display', Georgia, serif;
+  --font-body: 'DM Sans', system-ui, sans-serif;
+  --font-mono: 'JetBrains Mono', monospace;
+}
+
+*, *::before, *::after { margin: 0; padding: 0; box-sizing: border-box; }
+
+html { scroll-behavior: smooth; }
+
+body {
+  font-family: var(--font-body);
+  background: var(--bg-deep);
+  color: var(--text-primary);
+  line-height: 1.7;
+  font-size: 16px;
+  -webkit-font-smoothing: antialiased;
+}
+
+/* === NOISE OVERLAY === */
+body::before {
+  content: '';
+  position: fixed;
+  inset: 0;
+  background: url("data:image/svg+xml,%3Csvg viewBox='0 0 256 256' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.85' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)' opacity='0.04'/%3E%3C/svg%3E");
+  pointer-events: none;
+  z-index: 1000;
+}
+
+/* === NAVIGATION === */
+nav {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  z-index: 100;
+  background: rgba(11,15,26,0.85);
+  backdrop-filter: blur(20px);
+  border-bottom: 1px solid var(--border-subtle);
+  padding: 0 2rem;
+  height: 64px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
+
+.nav-brand {
+  font-family: var(--font-display);
+  font-size: 1.15rem;
+  color: var(--accent-cyan);
+  letter-spacing: 0.02em;
+}
+
+.nav-links {
+  display: flex;
+  gap: 2rem;
+  list-style: none;
+}
+
+.nav-links a {
+  color: var(--text-secondary);
+  text-decoration: none;
+  font-size: 0.85rem;
+  font-weight: 500;
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+  transition: color 0.3s;
+}
+
+.nav-links a:hover { color: var(--accent-cyan); }
+
+/* === HERO === */
+.hero {
+  min-height: 100vh;
+  background: var(--gradient-hero);
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  text-align: center;
+  padding: 8rem 2rem 4rem;
+  position: relative;
+  overflow: hidden;
+}
+
+.hero::after {
+  content: '';
+  position: absolute;
+  width: 600px;
+  height: 600px;
+  border-radius: 50%;
+  background: radial-gradient(circle, rgba(56,189,248,0.08) 0%, transparent 70%);
+  top: 10%;
+  right: -10%;
+  pointer-events: none;
+}
+
+.hero::before {
+  content: '';
+  position: absolute;
+  width: 500px;
+  height: 500px;
+  border-radius: 50%;
+  background: radial-gradient(circle, rgba(167,139,250,0.06) 0%, transparent 70%);
+  bottom: 5%;
+  left: -5%;
+  pointer-events: none;
+}
+
+.hero-badge {
+  display: inline-block;
+  font-family: var(--font-mono);
+  font-size: 0.75rem;
+  color: var(--accent-teal);
+  background: rgba(45,212,191,0.08);
+  border: 1px solid rgba(45,212,191,0.2);
+  padding: 0.4rem 1rem;
+  border-radius: 100px;
+  margin-bottom: 2rem;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  animation: fadeDown 0.8s ease-out;
+}
+
+.hero h1 {
+  font-family: var(--font-display);
+  font-size: clamp(2.5rem, 6vw, 4.5rem);
+  line-height: 1.1;
+  color: var(--text-primary);
+  max-width: 900px;
+  margin-bottom: 1.5rem;
+  animation: fadeDown 0.8s ease-out 0.15s both;
+}
+
+.hero h1 em {
+  font-style: normal;
+  background: linear-gradient(135deg, var(--accent-cyan), var(--accent-teal));
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+}
+
+.hero-sub {
+  font-size: 1.15rem;
+  color: var(--text-secondary);
+  max-width: 640px;
+  line-height: 1.8;
+  font-weight: 300;
+  animation: fadeDown 0.8s ease-out 0.3s both;
+}
+
+.hero-meta {
+  margin-top: 3rem;
+  display: flex;
+  gap: 2.5rem;
+  animation: fadeDown 0.8s ease-out 0.45s both;
+}
+
+.hero-meta-item {
+  text-align: center;
+}
+
+.hero-meta-item .number {
+  font-family: var(--font-display);
+  font-size: 2.2rem;
+  color: var(--accent-cyan);
+}
+
+.hero-meta-item .label {
+  font-size: 0.75rem;
+  color: var(--text-muted);
+  text-transform: uppercase;
+  letter-spacing: 0.1em;
+  margin-top: 0.2rem;
+}
+
+@keyframes fadeDown {
+  from { opacity: 0; transform: translateY(-16px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+
+/* === SECTIONS === */
+.content {
+  max-width: 1200px;
+  margin: 0 auto;
+  padding: 0 2rem;
+}
+
+section {
+  padding: 6rem 0;
+  border-top: 1px solid var(--border-subtle);
+}
+
+.section-label {
+  font-family: var(--font-mono);
+  font-size: 0.7rem;
+  color: var(--accent-teal);
+  letter-spacing: 0.15em;
+  text-transform: uppercase;
+  margin-bottom: 0.75rem;
+}
+
+.section-title {
+  font-family: var(--font-display);
+  font-size: 2.4rem;
+  color: var(--text-primary);
+  margin-bottom: 1rem;
+}
+
+.section-desc {
+  color: var(--text-secondary);
+  max-width: 700px;
+  font-weight: 300;
+  line-height: 1.8;
+  margin-bottom: 3rem;
+}
+
+/* === CARDS === */
+.card-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+  gap: 1.5rem;
+  margin-top: 2rem;
+}
+
+.card {
+  background: var(--gradient-card);
+  border: 1px solid var(--border-subtle);
+  border-radius: 12px;
+  padding: 2rem;
+  transition: border-color 0.3s, transform 0.3s;
+}
+
+.card:hover {
+  border-color: var(--border-glow);
+  transform: translateY(-2px);
+}
+
+.card-icon {
+  width: 44px;
+  height: 44px;
+  border-radius: 10px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 1.25rem;
+  margin-bottom: 1.25rem;
+}
+
+.card h3 {
+  font-size: 1.1rem;
+  font-weight: 600;
+  margin-bottom: 0.75rem;
+  color: var(--text-primary);
+}
+
+.card p {
+  font-size: 0.9rem;
+  color: var(--text-secondary);
+  line-height: 1.7;
+}
+
+/* === LAYER DIAGRAM === */
+.layer-stack {
+  display: flex;
+  flex-direction: column;
+  gap: 0;
+  margin: 2rem 0;
+  max-width: 700px;
+}
+
+.layer-item {
+  display: flex;
+  align-items: stretch;
+  border: 1px solid var(--border-subtle);
+  border-bottom: none;
+  background: var(--bg-card);
+  transition: background 0.3s;
+}
+
+.layer-item:last-child { border-bottom: 1px solid var(--border-subtle); border-radius: 0 0 10px 10px; }
+.layer-item:first-child { border-radius: 10px 10px 0 0; }
+
+.layer-item:hover { background: var(--bg-surface); }
+
+.layer-num {
+  min-width: 64px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-family: var(--font-display);
+  font-size: 1.6rem;
+  border-right: 1px solid var(--border-subtle);
+}
+
+.layer-content {
+  padding: 1.25rem 1.5rem;
+  flex: 1;
+}
+
+.layer-content h4 {
+  font-size: 1rem;
+  font-weight: 600;
+  margin-bottom: 0.35rem;
+}
+
+.layer-content p {
+  font-size: 0.85rem;
+  color: var(--text-secondary);
+  line-height: 1.6;
+}
+
+/* === OWASP TABLE === */
+.owasp-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+  gap: 1rem;
+  margin: 2rem 0;
+}
+
+.owasp-item {
+  background: var(--bg-card);
+  border: 1px solid var(--border-subtle);
+  border-radius: 10px;
+  padding: 1.25rem 1.5rem;
+  display: flex;
+  gap: 1rem;
+  transition: border-color 0.3s;
+}
+
+.owasp-item:hover { border-color: var(--accent-rose); }
+
+.owasp-id {
+  font-family: var(--font-mono);
+  font-size: 0.72rem;
+  color: var(--accent-rose);
+  background: rgba(251,113,133,0.08);
+  padding: 0.3rem 0.6rem;
+  border-radius: 6px;
+  height: fit-content;
+  white-space: nowrap;
+  font-weight: 500;
+}
+
+.owasp-text h4 { font-size: 0.95rem; font-weight: 600; margin-bottom: 0.3rem; }
+.owasp-text p { font-size: 0.82rem; color: var(--text-secondary); line-height: 1.6; }
+
+/* === DATA TABLE === */
+.data-table {
+  width: 100%;
+  border-collapse: collapse;
+  margin: 2rem 0;
+  font-size: 0.88rem;
+}
+
+.data-table thead th {
+  text-align: left;
+  padding: 0.9rem 1rem;
+  font-size: 0.7rem;
+  font-family: var(--font-mono);
+  color: var(--text-muted);
+  text-transform: uppercase;
+  letter-spacing: 0.1em;
+  border-bottom: 2px solid var(--border-subtle);
+  background: var(--bg-card-alt);
+}
+
+.data-table tbody td {
+  padding: 0.85rem 1rem;
+  border-bottom: 1px solid var(--border-subtle);
+  color: var(--text-secondary);
+  vertical-align: top;
+}
+
+.data-table tbody tr:hover td { background: rgba(30,41,59,0.4); }
+
+.data-table .name-cell {
+  font-weight: 600;
+  color: var(--text-primary);
+  white-space: nowrap;
+}
+
+.tag {
+  display: inline-block;
+  font-family: var(--font-mono);
+  font-size: 0.68rem;
+  padding: 0.2rem 0.5rem;
+  border-radius: 4px;
+  margin-right: 0.3rem;
+  white-space: nowrap;
+}
+
+.tag-oss { background: rgba(45,212,191,0.1); color: var(--accent-teal); }
+.tag-commercial { background: rgba(167,139,250,0.1); color: var(--accent-violet); }
+.tag-cloud { background: rgba(56,189,248,0.1); color: var(--accent-cyan); }
+.tag-gov { background: rgba(251,191,36,0.1); color: var(--accent-amber); }
+
+/* === DEFENSE PLANES === */
+.planes-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 1.5rem;
+  margin: 2rem 0;
+}
+
+.plane-card {
+  border: 1px solid var(--border-subtle);
+  border-radius: 12px;
+  overflow: hidden;
+}
+
+.plane-header {
+  padding: 1rem 1.5rem;
+  font-weight: 600;
+  font-size: 0.95rem;
+  border-bottom: 1px solid var(--border-subtle);
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+}
+
+.plane-header .dot {
+  width: 10px;
+  height: 10px;
+  border-radius: 50%;
+}
+
+.plane-body {
+  padding: 1.25rem 1.5rem;
+  font-size: 0.85rem;
+  color: var(--text-secondary);
+  line-height: 1.8;
+  background: var(--bg-card);
+}
+
+/* === METRICS === */
+.metric-bar {
+  display: flex;
+  align-items: center;
+  gap: 1.25rem;
+  padding: 1rem 0;
+  border-bottom: 1px solid var(--border-subtle);
+}
+
+.metric-bar:last-child { border-bottom: none; }
+
+.metric-label {
+  min-width: 180px;
+  font-weight: 600;
+  font-size: 0.9rem;
+}
+
+.metric-desc {
+  font-size: 0.85rem;
+  color: var(--text-secondary);
+  flex: 1;
+}
+
+.metric-tag {
+  font-family: var(--font-mono);
+  font-size: 0.7rem;
+  padding: 0.2rem 0.6rem;
+  border-radius: 4px;
+  background: rgba(56,189,248,0.08);
+  color: var(--accent-cyan);
+  white-space: nowrap;
+}
+
+/* === FRAMEWORKS LIST === */
+.fw-list {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(340px, 1fr));
+  gap: 1rem;
+  margin: 2rem 0;
+}
+
+.fw-item {
+  display: flex;
+  align-items: flex-start;
+  gap: 1rem;
+  padding: 1.25rem;
+  background: var(--bg-card);
+  border: 1px solid var(--border-subtle);
+  border-radius: 10px;
+  transition: border-color 0.3s;
+}
+
+.fw-item:hover { border-color: var(--border-glow); }
+
+.fw-icon {
+  width: 36px;
+  height: 36px;
+  border-radius: 8px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 0.9rem;
+  flex-shrink: 0;
+}
+
+.fw-item h4 { font-size: 0.95rem; font-weight: 600; margin-bottom: 0.3rem; }
+.fw-item p { font-size: 0.82rem; color: var(--text-secondary); line-height: 1.6; }
+
+/* === PHASE SECTION === */
+.phase-grid {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 1.5rem;
+  margin: 2rem 0;
+}
+
+.phase-card {
+  background: var(--bg-card);
+  border: 1px solid var(--border-subtle);
+  border-radius: 12px;
+  padding: 2rem;
+  position: relative;
+  overflow: hidden;
+}
+
+.phase-card::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  height: 3px;
+}
+
+.phase-card:nth-child(1)::before { background: var(--accent-cyan); }
+.phase-card:nth-child(2)::before { background: var(--accent-teal); }
+.phase-card:nth-child(3)::before { background: var(--accent-violet); }
+
+.phase-num {
+  font-family: var(--font-display);
+  font-size: 2.8rem;
+  line-height: 1;
+  margin-bottom: 0.5rem;
+}
+
+.phase-card:nth-child(1) .phase-num { color: var(--accent-cyan); }
+.phase-card:nth-child(2) .phase-num { color: var(--accent-teal); }
+.phase-card:nth-child(3) .phase-num { color: var(--accent-violet); }
+
+.phase-card h3 {
+  font-size: 1.15rem;
+  font-weight: 600;
+  margin-bottom: 1rem;
+}
+
+.phase-card ul {
+  list-style: none;
+  padding: 0;
+}
+
+.phase-card li {
+  padding: 0.4rem 0;
+  padding-left: 1.2rem;
+  position: relative;
+  font-size: 0.85rem;
+  color: var(--text-secondary);
+  line-height: 1.6;
+}
+
+.phase-card li::before {
+  content: '→';
+  position: absolute;
+  left: 0;
+  color: var(--text-muted);
+}
+
+/* === FOOTER === */
+footer {
+  border-top: 1px solid var(--border-subtle);
+  padding: 3rem 2rem;
+  text-align: center;
+  color: var(--text-muted);
+  font-size: 0.82rem;
+}
+
+footer a { color: var(--accent-cyan); text-decoration: none; }
+footer a:hover { text-decoration: underline; }
+
+/* === RESPONSIVE === */
+@media (max-width: 768px) {
+  .nav-links { display: none; }
+  .hero-meta { flex-direction: column; gap: 1rem; }
+  .planes-grid, .phase-grid { grid-template-columns: 1fr; }
+  .owasp-grid { grid-template-columns: 1fr; }
+  .data-table { font-size: 0.78rem; }
+  .data-table thead th, .data-table tbody td { padding: 0.6rem; }
+}
+</style>
+</head>
+<body>
+
+<nav>
+  <div class="nav-brand">AgenticAI Testing Framework</div>
+  <ul class="nav-links">
+    <li><a href="#evaluation">Evaluation</a></li>
+    <li><a href="#metrics">Metrics</a></li>
+    <li><a href="#benchmarks">Benchmarks</a></li>
+    <li><a href="#security">Security</a></li>
+    <li><a href="#tools">Tools</a></li>
+    <li><a href="#implementation">Implement</a></li>
+  </ul>
+</nav>
+
+<!-- ============ HERO ============ -->
+<div class="hero">
+  <span class="hero-badge">Reference Guide · March 2026</span>
+  <h1>Testing Framework for <em>Agentic AI</em> Evaluation & Security</h1>
+  <p class="hero-sub">A comprehensive reference for evaluating agent reasoning quality and enforcing security guardrails across autonomous AI systems — drawn from academic research, industry frameworks, and production deployments.</p>
+  <div class="hero-meta">
+    <div class="hero-meta-item"><div class="number">50+</div><div class="label">Benchmarks</div></div>
+    <div class="hero-meta-item"><div class="number">10</div><div class="label">OWASP Agentic Risks</div></div>
+    <div class="hero-meta-item"><div class="number">15+</div><div class="label">Eval Platforms</div></div>
+    <div class="hero-meta-item"><div class="number">7</div><div class="label">Security Frameworks</div></div>
+  </div>
+</div>
+
+<div class="content">
+
+<!-- ============ EVALUATION FRAMEWORKS ============ -->
+<section id="evaluation">
+  <div class="section-label">01 — Evaluation Frameworks</div>
+  <h2 class="section-title">Three-Layer Evaluation Model</h2>
+  <p class="section-desc">McKinsey/QuantumBlack (Jan 2026) advocates a three-level model with increasing complexity. Each layer captures failures invisible to the layers below.</p>
+
+  <div class="layer-stack">
+    <div class="layer-item">
+      <div class="layer-num" style="color:var(--accent-cyan);">3</div>
+      <div class="layer-content">
+        <h4>Multi-Agent System Evaluation</h4>
+        <p>Inter-agent communication integrity, cascading failure detection, delegation correctness, and emergent behaviors from agent interactions.</p>
+      </div>
+    </div>
+    <div class="layer-item">
+      <div class="layer-num" style="color:var(--accent-teal);">2</div>
+      <div class="layer-content">
+        <h4>Single Agent Evaluation</h4>
+        <p>Tool selection accuracy, parameter generation, error recovery patterns, and reasoning coherence across multi-step execution.</p>
+      </div>
+    </div>
+    <div class="layer-item">
+      <div class="layer-num" style="color:var(--accent-violet);">1</div>
+      <div class="layer-content">
+        <h4>LLM Evaluation</h4>
+        <p>Factuality, calibration, robustness, and toxicity. Necessary but insufficient — doesn't validate tool use, memory, or multi-step action.</p>
+      </div>
+    </div>
+  </div>
+
+  <h2 class="section-title" style="margin-top:4rem;">Four-Pillar Assessment Framework</h2>
+  <p class="section-desc">Akshathala et al. (arXiv:2512.12791, Dec 2025) — validated in production CloudOps environments at MontyCloud.</p>
+
+  <div class="card-grid">
+    <div class="card">
+      <div class="card-icon" style="background:rgba(56,189,248,0.1);color:var(--accent-cyan);">🧠</div>
+      <h3>LLM Pillar</h3>
+      <p>Reasoning quality, factual accuracy, prompt adherence, hallucination detection, and chain-of-thought coherence.</p>
+    </div>
+    <div class="card">
+      <div class="card-icon" style="background:rgba(45,212,191,0.1);color:var(--accent-teal);">💾</div>
+      <h3>Memory Pillar</h3>
+      <p>Single-hop recall, multi-hop retrieval, temporal reasoning, and open-domain retrieval combining conversational memory with external knowledge bases.</p>
+    </div>
+    <div class="card">
+      <div class="card-icon" style="background:rgba(167,139,250,0.1);color:var(--accent-violet);">🔧</div>
+      <h3>Tools Pillar</h3>
+      <p>Tool selection accuracy, parameter fidelity, invocation sequencing, error handling and recovery, schema compliance.</p>
+    </div>
+    <div class="card">
+      <div class="card-icon" style="background:rgba(251,191,36,0.1);color:var(--accent-amber);">🌐</div>
+      <h3>Environment Pillar</h3>
+      <p>Configurability, guardrails enforcement, security boundaries, fault injection resilience, cost and resource compliance.</p>
+    </div>
+  </div>
+</section>
+
+<!-- ============ METRICS ============ -->
+<section id="metrics">
+  <div class="section-label">02 — Key Metrics</div>
+  <h2 class="section-title">Evaluation Metrics & Techniques</h2>
+  <p class="section-desc">Core metrics for production agent evaluation, spanning task outcomes, tool quality, reasoning integrity, and safety compliance.</p>
+
+  <div style="background:var(--bg-card); border:1px solid var(--border-subtle); border-radius:12px; padding:1.5rem 2rem;">
+    <div class="metric-bar">
+      <div class="metric-label">Task Success</div>
+      <div class="metric-desc">Task Success Rate (TSR), Goal Completion Rate — whether the agent accomplished its objective</div>
+      <div class="metric-tag">Outcome</div>
+    </div>
+    <div class="metric-bar">
+      <div class="metric-label">Tool Quality</div>
+      <div class="metric-desc">Tool Selection Accuracy, Parameter Fidelity, Call Sequence Correctness</div>
+      <div class="metric-tag">Execution</div>
+    </div>
+    <div class="metric-bar">
+      <div class="metric-label">Reasoning Coherence</div>
+      <div class="metric-desc">Trajectory Analysis, Step Consistency, Goal-Drift Score (Arike et al., AAAI/ACM AIES 2025)</div>
+      <div class="metric-tag">Process</div>
+    </div>
+    <div class="metric-bar">
+      <div class="metric-label">Cost Efficiency</div>
+      <div class="metric-desc">Token Usage, Latency, Redundant LLM Calls, API Cost per Task</div>
+      <div class="metric-tag">Operations</div>
+    </div>
+    <div class="metric-bar">
+      <div class="metric-label">Groundedness</div>
+      <div class="metric-desc">Faithfulness Score, Hallucination Rate, Source Attribution Accuracy</div>
+      <div class="metric-tag">Accuracy</div>
+    </div>
+    <div class="metric-bar">
+      <div class="metric-label">Safety & Compliance</div>
+      <div class="metric-desc">Harm Reduction Index, Guardrail Trigger Rate, Policy Violation Count</div>
+      <div class="metric-tag">Safety</div>
+    </div>
+  </div>
+
+  <div class="card-grid" style="margin-top:2.5rem;">
+    <div class="card">
+      <h3>LLM-as-a-Judge</h3>
+      <p>A separate LLM scores outputs against rubrics for factual accuracy, reasoning quality, and usefulness. NVIDIA/Lakera found 76.8% agreement with human labels. Used by StackAI, Maxim AI, LangSmith.</p>
+    </div>
+    <div class="card">
+      <h3>Trajectory Analysis</h3>
+      <p>Examines each intermediate step in the observe-reason-act-reflect loop. Catches unsafe paths, unnecessary tools, and data exposure in intermediate steps that outcome-only metrics miss.</p>
+    </div>
+    <div class="card">
+      <h3>Human-in-the-Loop</h3>
+      <p>Expert trace review for high-impact failures. A/B testing comparing versions on task success plus human-labeled helpfulness and clarity. Essential for qualitative dimensions.</p>
+    </div>
+  </div>
+</section>
+
+<!-- ============ BENCHMARKS ============ -->
+<section id="benchmarks">
+  <div class="section-label">03 — Benchmarks</div>
+  <h2 class="section-title">Agent Evaluation Benchmarks</h2>
+  <p class="section-desc">50+ benchmarks exist (Phil Schmid, Hugging Face). These are the most widely adopted for production evaluation.</p>
+
+  <table class="data-table">
+    <thead>
+      <tr><th>Benchmark</th><th>Focus Area</th><th>Reference</th></tr>
+    </thead>
+    <tbody>
+      <tr><td class="name-cell">AgentBench</td><td>Cross-domain: 8 environments (OS, web, DB, knowledge graphs). Reasoning quality and multi-turn consistency.</td><td>Liu et al., 2023</td></tr>
+      <tr><td class="name-cell">GAIA</td><td>General AI assistant — multi-step reasoning + tool use. Best agents ~45% on hardest tasks.</td><td>Mialon et al., 2023</td></tr>
+      <tr><td class="name-cell">WebArena</td><td>812 tasks across e-commerce, forums, code dev, CMS. Functional correctness evaluation.</td><td>Zhou et al., 2023</td></tr>
+      <tr><td class="name-cell">SWE-bench</td><td>Real GitHub issues resolved end-to-end. Coding, debugging, repository navigation.</td><td>Jimenez et al., 2023</td></tr>
+      <tr><td class="name-cell">ToolBench</td><td>Tool usage accuracy across thousands of real-world APIs.</td><td>Qin et al., 2023</td></tr>
+      <tr><td class="name-cell">ToolEmu</td><td>36 high-stakes tools, 144 test cases. LM-based safety evaluator quantifies risk.</td><td>Ruan et al., 2023</td></tr>
+      <tr><td class="name-cell">AgentHarm</td><td>Safety evaluation — measures harmfulness of LLM agents under adversarial conditions.</td><td>Andriushchenko et al., 2025</td></tr>
+      <tr><td class="name-cell">OSWorld</td><td>369 OS interaction tasks — file management, application control, desktop workflows.</td><td>Xie et al., 2024</td></tr>
+      <tr><td class="name-cell">TheAgentCompany</td><td>Enterprise-focused — simulated company environments for business workflow automation.</td><td>Xu et al., 2024</td></tr>
+    </tbody>
+  </table>
+</section>
+
+<!-- ============ SECURITY ============ -->
+<section id="security">
+  <div class="section-label">04 — Security Guardrails</div>
+  <h2 class="section-title">OWASP Top 10 for Agentic Applications</h2>
+  <p class="section-desc">Released December 2025. Built by 100+ security researchers. Reviewed by NIST and European Commission representatives. The industry's primary agentic security taxonomy.</p>
+
+  <div class="owasp-grid">
+    <div class="owasp-item"><div class="owasp-id">ASI01</div><div class="owasp-text"><h4>Agent Goal Hijack</h4><p>Attackers redirect agent objectives via instructions, tool outputs, or external content.</p></div></div>
+    <div class="owasp-item"><div class="owasp-id">ASI02</div><div class="owasp-text"><h4>Tool Misuse & Exploitation</h4><p>Agents misuse legitimate tools due to prompt injection or unsafe delegation.</p></div></div>
+    <div class="owasp-item"><div class="owasp-id">ASI03</div><div class="owasp-text"><h4>Identity & Privilege Abuse</h4><p>Exploiting inherited credentials, delegated permissions, or agent-to-agent trust.</p></div></div>
+    <div class="owasp-item"><div class="owasp-id">ASI04</div><div class="owasp-text"><h4>Supply Chain Vulnerabilities</h4><p>Malicious tools, model descriptors, or MCP servers compromise execution.</p></div></div>
+    <div class="owasp-item"><div class="owasp-id">ASI05</div><div class="owasp-text"><h4>Unexpected Code Execution</h4><p>Agents generate or execute attacker-controlled code in production.</p></div></div>
+    <div class="owasp-item"><div class="owasp-id">ASI06</div><div class="owasp-text"><h4>Memory & Context Poisoning</h4><p>Persistent corruption of agent memory or RAG stores for flawed decisions.</p></div></div>
+    <div class="owasp-item"><div class="owasp-id">ASI07</div><div class="owasp-text"><h4>Inter-Agent Communication</h4><p>Compromised messaging enables cascading manipulation across MAS.</p></div></div>
+    <div class="owasp-item"><div class="owasp-id">ASI08</div><div class="owasp-text"><h4>Cascading Failures</h4><p>Single-point failures propagate through interconnected agent systems.</p></div></div>
+    <div class="owasp-item"><div class="owasp-id">ASI09</div><div class="owasp-text"><h4>Human-Agent Trust Exploitation</h4><p>Abuse of human tendency to trust agent outputs without verification.</p></div></div>
+    <div class="owasp-item"><div class="owasp-id">ASI10</div><div class="owasp-text"><h4>Rogue Agents</h4><p>Compromised or misaligned agents act as insider threats in production.</p></div></div>
+  </div>
+
+  <h2 class="section-title" style="margin-top:4rem;">Defense-in-Depth: Four Planes</h2>
+  <p class="section-desc">Production guardrails architecture recommended by Skywork AI, Authority Partners, and MIT Technology Review (2025–2026).</p>
+
+  <div class="planes-grid">
+    <div class="plane-card">
+      <div class="plane-header"><span class="dot" style="background:var(--accent-cyan)"></span>Execution Plane</div>
+      <div class="plane-body">Agents in gVisor/GKE Sandbox. Code-exec in Firecracker microVMs. WASI for plugin scoping. Network egress allowlists.</div>
+    </div>
+    <div class="plane-card">
+      <div class="plane-header"><span class="dot" style="background:var(--accent-teal)"></span>Data / Memory Plane</div>
+      <div class="plane-body">Vector stores on private subnets. PII redaction on ingestion and output. Scheduled memory TTLs and purges.</div>
+    </div>
+    <div class="plane-card">
+      <div class="plane-header"><span class="dot" style="background:var(--accent-violet)"></span>Observability Plane</div>
+      <div class="plane-body">OpenTelemetry GenAI spans. SIEM aggregation. SOAR automations for quarantine/revoke.</div>
+    </div>
+    <div class="plane-card">
+      <div class="plane-header"><span class="dot" style="background:var(--accent-amber)"></span>Assurance Plane</div>
+      <div class="plane-body">Sigstore/Cosign verification. SLSA attestations + SBOMs in CI/CD. Red-teaming cadence. EU AI Act / NIST mappings.</div>
+    </div>
+  </div>
+
+  <h2 class="section-title" style="margin-top:4rem;">Governance & Regulatory Frameworks</h2>
+  <div class="fw-list">
+    <div class="fw-item"><div class="fw-icon" style="background:rgba(56,189,248,0.1);color:var(--accent-cyan);">📋</div><div><h4>NIST AI RMF 1.0</h4><p>Govern → Map → Measure → Manage lifecycle. Mapped to Azure Foundry Agent Service by Microsoft.</p></div></div>
+    <div class="fw-item"><div class="fw-icon" style="background:rgba(251,113,133,0.1);color:var(--accent-rose);">🛡️</div><div><h4>OWASP ASI Taxonomy</h4><p>Threats & Mitigations v1.1, Multi-Agent Threat Modeling Guide, Secure MCP Server Guides.</p></div></div>
+    <div class="fw-item"><div class="fw-icon" style="background:rgba(167,139,250,0.1);color:var(--accent-violet);">🔬</div><div><h4>MAESTRO (Feb 2025)</h4><p>Six analytical layers for agentic AI — from foundation model to orchestration vulnerabilities.</p></div></div>
+    <div class="fw-item"><div class="fw-icon" style="background:rgba(45,212,191,0.1);color:var(--accent-teal);">🏢</div><div><h4>Forrester AEGIS</h4><p>Six security domains: GRC, IAM, Data, AppSec, Infra, SecOps. Includes "Agent on a Page" template.</p></div></div>
+    <div class="fw-item"><div class="fw-icon" style="background:rgba(251,191,36,0.1);color:var(--accent-amber);">☁️</div><div><h4>AWS Scoping Matrix</h4><p>Four agentic architecture scopes by autonomy level, mapping security controls per scope.</p></div></div>
+    <div class="fw-item"><div class="fw-icon" style="background:rgba(52,211,153,0.1);color:var(--accent-emerald);">⚖️</div><div><h4>EU AI Act + ISO 42001</h4><p>High-risk AI compliance, model documentation, bias controls. Enforcement began 2025.</p></div></div>
+  </div>
+</section>
+
+<!-- ============ TOOLS ============ -->
+<section id="tools">
+  <div class="section-label">05 — Tools & Platforms</div>
+  <h2 class="section-title">Evaluation Platforms</h2>
+  <p class="section-desc">Leading platforms for agent evaluation, observability, and security testing — from open-source tracing to enterprise guardrails.</p>
+
+  <table class="data-table">
+    <thead>
+      <tr><th>Platform</th><th>Type</th><th>Key Capabilities</th><th>Best For</th></tr>
+    </thead>
+    <tbody>
+      <tr><td class="name-cell">LangSmith</td><td><span class="tag tag-commercial">Commercial</span></td><td>Agent tracing, tool call visualization, evaluation pipelines. Near-zero overhead.</td><td>LangChain workflows</td></tr>
+      <tr><td class="name-cell">Langfuse</td><td><span class="tag tag-oss">OSS</span></td><td>Tracing, prompt versioning, custom metrics, self-hosting.</td><td>Regulated environments</td></tr>
+      <tr><td class="name-cell">Arize Phoenix</td><td><span class="tag tag-oss">OSS</span></td><td>ML + agent observability, evaluation, drift detection. Used by European banks.</td><td>Production monitoring</td></tr>
+      <tr><td class="name-cell">Maxim AI</td><td><span class="tag tag-commercial">Commercial</span></td><td>Multi-turn simulation, comprehensive eval, RBAC, SSO.</td><td>Enterprise lifecycle</td></tr>
+      <tr><td class="name-cell">DeepEval</td><td><span class="tag tag-oss">OSS</span></td><td>Agent-specific eval metrics, dataset management.</td><td>Quick opinionated setup</td></tr>
+      <tr><td class="name-cell">RAGAS</td><td><span class="tag tag-oss">OSS</span></td><td>RAG eval extending to agent metrics: tool accuracy, reasoning coherence.</td><td>RAG-heavy pipelines</td></tr>
+      <tr><td class="name-cell">Galileo</td><td><span class="tag tag-commercial">Commercial</span></td><td>Agentic eval with leaderboards, groundedness scoring.</td><td>Model selection</td></tr>
+      <tr><td class="name-cell">UK AISI Inspect</td><td><span class="tag tag-gov">Government</span></td><td>LLM evaluation framework from UK AI Safety Institute.</td><td>Safety-focused eval</td></tr>
+      <tr><td class="name-cell">Bedrock AgentCore</td><td><span class="tag tag-cloud">AWS</span></td><td>Systematic agent evaluation integrated with AWS agent services.</td><td>AWS-native agents</td></tr>
+      <tr><td class="name-cell">Azure AI Red Team</td><td><span class="tag tag-cloud">Azure</span></td><td>Adversarial attack simulation: confused deputy, privilege escalation.</td><td>Pre-deployment testing</td></tr>
+    </tbody>
+  </table>
+
+  <h2 class="section-title" style="margin-top:4rem;">Security Guardrail Products</h2>
+  <table class="data-table">
+    <thead>
+      <tr><th>Product</th><th>Type</th><th>Capabilities</th></tr>
+    </thead>
+    <tbody>
+      <tr><td class="name-cell">Superagent</td><td><span class="tag tag-oss">OSS</span></td><td>Safety Agent as policy enforcement layer. Declarative policies evaluated in real-time on prompts, tool calls, responses.</td></tr>
+      <tr><td class="name-cell">Agno Guardrails</td><td><span class="tag tag-oss">OSS</span></td><td>PII leak, prompt injection, jailbreak protection. Five categories: appropriateness, hallucination, regulatory, alignment, validation.</td></tr>
+      <tr><td class="name-cell">PENSAR</td><td><span class="tag tag-commercial">Commercial</span></td><td>SAST-style findings aligned with OWASP Agentic AI taxonomy. Monitors Excessive Agency in development.</td></tr>
+      <tr><td class="name-cell">SPLX.AI Radar</td><td><span class="tag tag-commercial">Commercial</span></td><td>OWASP LLM Top 10 + Agentic taxonomy. Governance alignment across code, config, live systems.</td></tr>
+      <tr><td class="name-cell">Koi Security</td><td><span class="tag tag-commercial">Commercial</span></td><td>Supply chain gateway for agent packages. Risk scoring per MCP/tool. Centralized kill switch. Drift detection.</td></tr>
+      <tr><td class="name-cell">ActiveFence</td><td><span class="tag tag-commercial">Commercial</span></td><td>Real-time guardrails + auto red teaming. Compliance mapped to OWASP, NIST, MITRE, MAESTRO.</td></tr>
+    </tbody>
+  </table>
+</section>
+
+<!-- ============ IMPLEMENTATION ============ -->
+<section id="implementation">
+  <div class="section-label">06 — Implementation</div>
+  <h2 class="section-title">Building Your Framework: Three Phases</h2>
+  <p class="section-desc">Evaluation-led development across the full SDLC — embed evaluation from day one with mandatory gates, regression alerts, and continuous monitoring.</p>
+
+  <div class="phase-grid">
+    <div class="phase-card">
+      <div class="phase-num">01</div>
+      <h3>Plan</h3>
+      <ul>
+        <li>Document agents using "Agent on a Page" template</li>
+        <li>Classify risk with AWS Scoping Matrix (1–4)</li>
+        <li>Select metrics per risk level from 4-pillar framework</li>
+        <li>Threat model with OWASP Multi-Agent Guide</li>
+        <li>Curate golden datasets with adversarial cases</li>
+      </ul>
+    </div>
+    <div class="phase-card">
+      <div class="phase-num">02</div>
+      <h3>Build</h3>
+      <ul>
+        <li>CI/CD gates blocking on TSR/faithfulness thresholds</li>
+        <li>LLM-as-a-Judge + trajectory analysis pipeline</li>
+        <li>Defense-in-depth guardrails across 4 planes</li>
+        <li>Deterministic controls over probabilistic LLM checks</li>
+        <li>Red team with NVIDIA Probes at each workflow node</li>
+      </ul>
+    </div>
+    <div class="phase-card">
+      <div class="phase-num">03</div>
+      <h3>Operate</h3>
+      <ul>
+        <li>Scheduled evals on production test sets</li>
+        <li>Track metric scores + drift over time</li>
+        <li>OpenTelemetry → SIEM → SOAR quarantine</li>
+        <li>Expert trace review for high-impact failures</li>
+        <li>Iterative red teaming from OWASP incident roundups</li>
+      </ul>
+    </div>
+  </div>
+</section>
+
+</div>
+
+<footer>
+  <p>Agentic AI Testing Framework Reference Guide · March 2026</p>
+  <p style="margin-top:0.5rem;">Sources: <a href="https://genai.owasp.org">OWASP GenAI</a> · <a href="https://arxiv.org/abs/2512.12791">arXiv:2512.12791</a> · <a href="https://www.nist.gov/itl/ai-risk-management-framework">NIST AI RMF</a> · <a href="https://aws.amazon.com/blogs/security/the-agentic-ai-security-scoping-matrix/">AWS Security</a> · <a href="https://medium.com/quantumblack/evaluations-for-the-agentic-world-c3c150f0dd5a">QuantumBlack</a></p>
+</footer>
+
+</body>
+</html>
