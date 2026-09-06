@@ -1,0 +1,1477 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Link Index — GPB A&amp;E Offsite Research</title>
+<meta name="color-scheme" content="light dark">
+<style>
+*,*::before,*::after{box-sizing:border-box}
+:root{
+  --bg:#fbfbfa; --surface:#fff; --text:#1c1e21; --muted:#5f6570; --faint:#8b919b;
+  --line:#e4e6ea; --line-soft:#eef0f3; --accent:#2f5fd0; --accent-soft:#eaf0fd;
+  --code-bg:#f4f5f7; --mark:#fff6cc;
+  --sans:-apple-system,BlinkMacSystemFont,"Segoe UI",Inter,Helvetica,Arial,sans-serif;
+  --mono:ui-monospace,SFMono-Regular,"SF Mono",Menlo,Consolas,monospace;
+}
+@media (prefers-color-scheme:dark){
+  :root{
+    --bg:#14161a; --surface:#1a1d22; --text:#e3e6ea; --muted:#9aa1ac; --faint:#6f7681;
+    --line:#2c3037; --line-soft:#23262c; --accent:#7fa9ff; --accent-soft:#1e2634;
+    --code-bg:#22262c; --mark:#4a3f14;
+  }
+}
+html{-webkit-text-size-adjust:100%}
+body{margin:0;background:var(--bg);color:var(--text);
+  font:400 17px/1.7 var(--sans);
+  font-feature-settings:"kern","liga";-webkit-font-smoothing:antialiased}
+
+/* ---------- shell ---------- */
+.page{max-width:80rem;margin:0 auto;padding:0 1.5rem 6rem;
+  display:grid;grid-template-columns:minmax(0,1fr);gap:0 3.5rem}
+@media (min-width:64rem){
+  .page{grid-template-columns:16rem minmax(0,1fr);padding-top:1rem}
+  .masthead{grid-column:1/-1}
+}
+
+/* ---------- masthead ---------- */
+.masthead{padding:4rem 0 2rem;border-bottom:1px solid var(--line);margin-bottom:2.5rem}
+.back{display:inline-block;margin-bottom:1.1rem;font-size:.83rem;color:var(--muted);
+  text-decoration:none}
+.back::before{content:"\2190";margin-right:.4rem}
+.back:hover{color:var(--accent)}
+.back + .eyebrow{margin-left:.75rem}
+.eyebrow{display:inline-flex;align-items:center;gap:.5rem;
+  font-size:.72rem;font-weight:600;letter-spacing:.09em;text-transform:uppercase;
+  color:var(--accent);background:var(--accent-soft);
+  padding:.3rem .6rem;border-radius:999px;margin-bottom:1.1rem}
+.masthead h1{margin:0;font-size:clamp(1.9rem,4.4vw,3rem);line-height:1.14;
+  font-weight:680;letter-spacing:-.022em;max-width:22ch}
+.subtitle{margin:.85rem 0 0;font-size:1.1rem;line-height:1.5;color:var(--muted);max-width:60ch;font-weight:400}
+.meta{margin:1.6rem 0 0;padding:0;list-style:none;display:flex;flex-wrap:wrap;gap:.5rem 1.5rem;
+  font-size:.85rem;color:var(--faint)}
+.meta strong{color:var(--muted);font-weight:600}
+
+/* ---------- toc ---------- */
+.toc{font-size:.875rem;line-height:1.45}
+@media (min-width:64rem){
+  .toc{position:sticky;top:1.5rem;align-self:start;max-height:calc(100vh - 3rem);
+    overflow-y:auto;padding-right:.5rem;scrollbar-width:thin}
+}
+@media (max-width:63.99rem){
+  .toc{background:var(--surface);border:1px solid var(--line);border-radius:12px;
+    padding:.4rem 1.1rem 1.1rem;margin-bottom:2.5rem}
+  .toc-title{cursor:pointer}
+}
+.toc-title{font-size:.72rem;font-weight:650;letter-spacing:.09em;text-transform:uppercase;
+  color:var(--faint);margin:0 0 .9rem}
+.toc ol{list-style:none;margin:0;padding:0}
+.toc li{margin:0}
+.toc a{display:block;padding:.32rem 0 .32rem .8rem;color:var(--muted);text-decoration:none;
+  border-left:2px solid var(--line-soft);transition:color .12s,border-color .12s}
+.toc a:hover{color:var(--accent);border-left-color:var(--accent)}
+.toc .lv3 a{padding-left:1.6rem;font-size:.83rem;color:var(--faint)}
+
+/* ---------- prose ---------- */
+.prose{max-width:44rem;min-width:0}
+.prose > *:first-child{margin-top:0}
+.prose h1,.prose h2,.prose h3,.prose h4{line-height:1.25;font-weight:650;letter-spacing:-.014em;scroll-margin-top:1.5rem}
+.prose h1{font-size:1.75rem;margin:3.6rem 0 1rem;padding-bottom:.55rem;border-bottom:1px solid var(--line)}
+.prose h2{font-size:1.35rem;margin:2.8rem 0 .85rem}
+.prose h3{font-size:1.08rem;margin:2.1rem 0 .6rem}
+.prose h4{font-size:.98rem;margin:1.7rem 0 .5rem;color:var(--muted)}
+.prose p{margin:0 0 1.15rem}
+.prose a{color:var(--accent);text-decoration:none;border-bottom:1px solid color-mix(in srgb,var(--accent) 32%,transparent)}
+.prose a:hover{border-bottom-color:var(--accent)}
+.prose a[href^="http"]{overflow-wrap:anywhere}
+.prose td a{word-break:break-word}
+.prose strong{font-weight:640;color:var(--text)}
+.prose ul,.prose ol{margin:0 0 1.15rem;padding-left:1.35rem}
+.prose li{margin:.3rem 0}
+.prose li::marker{color:var(--faint)}
+.prose li > ul,.prose li > ol{margin:.3rem 0}
+.prose blockquote{margin:1.6rem 0;padding:.1rem 0 .1rem 1.25rem;
+  border-left:3px solid var(--accent);color:var(--muted)}
+.prose blockquote p:last-child{margin-bottom:0}
+.prose hr{border:0;height:1px;background:var(--line);margin:3rem 0}
+.prose img{max-width:100%;height:auto;border-radius:8px}
+.prose code{font-family:var(--mono);font-size:.875em;background:var(--code-bg);
+  padding:.15em .4em;border-radius:5px;border:1px solid var(--line-soft)}
+.prose pre{background:var(--code-bg);border:1px solid var(--line);border-radius:10px;
+  padding:1rem 1.15rem;overflow-x:auto;margin:0 0 1.4rem;font-size:.88rem;line-height:1.6}
+.prose pre code{background:none;border:0;padding:0;font-size:inherit}
+
+/* ---------- tables ---------- */
+.table-wrap{overflow-x:auto;margin:0 0 1.6rem;border:1px solid var(--line);
+  border-radius:10px;background:var(--surface)}
+.prose table{border-collapse:collapse;width:100%;font-size:.9rem;line-height:1.55}
+.prose th,.prose td{padding:.62rem .85rem;text-align:left;vertical-align:top;
+  border-bottom:1px solid var(--line-soft)}
+.prose th{background:var(--code-bg);font-weight:640;font-size:.78rem;
+  letter-spacing:.04em;text-transform:uppercase;color:var(--muted);white-space:nowrap}
+.prose tbody tr:last-child td{border-bottom:0}
+.prose tbody tr:hover td{background:var(--line-soft)}
+
+@media (min-width:64rem){
+  .table-wrap,.prose pre{width:min(56rem,calc(100vw - 22rem))}
+}
+
+/* ---------- footer ---------- */
+.colophon{grid-column:1/-1;margin-top:4rem;padding-top:1.5rem;border-top:1px solid var(--line);
+  font-size:.8rem;color:var(--faint);display:flex;flex-wrap:wrap;gap:.4rem 1.25rem}
+
+/* ---------- print ---------- */
+@media print{
+  :root{--bg:#fff;--surface:#fff;--text:#000;--muted:#333;--line:#ccc}
+  body{font-size:11pt}
+  .toc,.colophon{display:none}
+  .page{display:block;max-width:none;padding:0}
+  .prose{max-width:none}
+  .prose h1,.prose h2{break-after:avoid}
+  .table-wrap,.prose pre,.prose blockquote{break-inside:avoid}
+  .prose a{color:#000;border:0}
+}
+</style>
+</head>
+<body>
+<div class="page">
+  <header class="masthead">
+    <a class="back" href="index.html">All documents</a>
+    <span class="eyebrow">Working notes</span>
+    <h1>Link Index — GPB A&amp;E Offsite Research</h1>
+    
+    <ul class="meta"><li><strong>Source</strong> GPB-Offsite-Link-Index.md</li><li><strong>Length</strong> 1,771 words</li></ul>
+  </header>
+  <nav class="toc" aria-label="Contents"><p class="toc-title">Contents</p><ol><li class="lv2"><a href="#1-architectural-observability-agentic-modernisation">1. Architectural observability &amp; agentic modernisation</a></li>
+<li class="lv2"><a href="#2-event-catalogue-schemas-eda">2. Event catalogue, schemas, EDA</a></li>
+<li class="lv2"><a href="#3-platform-idp">3. Platform / IDP</a></li>
+<li class="lv2"><a href="#4-delivery-cicd-agents-in-pipelines">4. Delivery, CI/CD, agents in pipelines</a></li>
+<li class="lv2"><a href="#5-testing-recordreplay-test-data">5. Testing, record/replay, test data</a></li>
+<li class="lv2"><a href="#6-ai-code-review">6. AI code review</a></li>
+<li class="lv2"><a href="#7-supply-chain-sbom-remediation">7. Supply chain, SBOM, remediation</a></li>
+<li class="lv2"><a href="#8-reliability-chaos-ai-sre">8. Reliability, chaos, AI SRE</a></li>
+<li class="lv2"><a href="#9-finops">9. FinOps</a></li>
+<li class="lv2"><a href="#10-data-catalogs-contracts">10. Data, catalogs, contracts</a></li>
+<li class="lv2"><a href="#11-multi-agent-orchestration">11. Multi-agent orchestration</a></li>
+<li class="lv2"><a href="#12-agent-skills-governance">12. Agent &amp; skills governance</a></li>
+<li class="lv2"><a href="#13-agentic-sdlc-platforms-app-builders-context-engines">13. Agentic SDLC platforms, app builders, context engines</a></li>
+<li class="lv2"><a href="#14-the-four-lists-to-bookmark-instead-of-this-document">14. The four lists to bookmark instead of this document</a></li></ol></nav>
+  <main class="prose">
+<p>Consolidated links for everything referenced across <code>GPB-AE-Offsite-Notes.md</code>, <code>GPB-Offsite-Agentic-Landscape.md</code> and <code>GPB-Offsite-AI-Vendor-Directory.md</code>.</p>
+<p><strong>Legend</strong></p>
+<ul>
+<li>✅ = URL confirmed during research</li>
+<li>⚠️ = root domain given from prior knowledge; confirm before putting in a deck or a procurement doc</li>
+<li>Vendor pages are marketing; the analyst/comparison links are included where they were the actual source of a claim</li>
+</ul>
+<hr />
+<h2 id="1-architectural-observability-agentic-modernisation">1. Architectural observability &amp; agentic modernisation</h2>
+<div class="table-wrap"><table>
+<thead>
+<tr>
+<th>Item</th>
+<th>Link</th>
+<th></th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>vFunction</td>
+<td><a href="https://vfunction.com/" target="_blank" rel="noopener noreferrer">https://vfunction.com/</a></td>
+<td>✅</td>
+</tr>
+<tr>
+<td>vFunction — &ldquo;The next phase of architectural modernization: Agents&rdquo; (v4.5 agent)</td>
+<td><a href="https://vfunction.com/blog/architectural-modernization-agents-2026/" target="_blank" rel="noopener noreferrer">https://vfunction.com/blog/architectural-modernization-agents-2026/</a></td>
+<td>✅</td>
+</tr>
+<tr>
+<td>vFunction — architectural observability for distributed apps (drift, custom rules, OTel)</td>
+<td><a href="https://www.businesswire.com/news/home/20240513597136/en/vFunction-Expands-AI-Driven-Architectural-Observability-Platform-to-Solve-for-Technical-Debt-in-Distributed-Application-Architectures" target="_blank" rel="noopener noreferrer">https://www.businesswire.com/news/home/20240513597136/en/vFunction-Expands-AI-Driven-Architectural-Observability-Platform-to-Solve-for-Technical-Debt-in-Distributed-Application-Architectures</a></td>
+<td>✅</td>
+</tr>
+<tr>
+<td>vFunction — Architectural Observability Manager (domains, cross-domain pollution, Gartner 80% stat)</td>
+<td><a href="https://tfir.io/vfunction-launches-architectural-observability-manager-to-address-architectural-technical-debt/" target="_blank" rel="noopener noreferrer">https://tfir.io/vfunction-launches-architectural-observability-manager-to-address-architectural-technical-debt/</a></td>
+<td>✅</td>
+</tr>
+<tr>
+<td>Analyst view — &ldquo;vFunction Brings Architectural Context to Agentic Modernization&rdquo;</td>
+<td><a href="https://www.efficientlyconnected.com/vfunction-brings-architectural-context-to-agentic-modernization/" target="_blank" rel="noopener noreferrer">https://www.efficientlyconnected.com/vfunction-brings-architectural-context-to-agentic-modernization/</a></td>
+<td>✅</td>
+</tr>
+<tr>
+<td>Moderne</td>
+<td><a href="https://moderne.ai/" target="_blank" rel="noopener noreferrer">https://moderne.ai/</a></td>
+<td>✅</td>
+</tr>
+<tr>
+<td>Moderne — OpenRewrite / LST determinism</td>
+<td><a href="https://moderne.ai/openrewrite" target="_blank" rel="noopener noreferrer">https://moderne.ai/openrewrite</a></td>
+<td>✅</td>
+</tr>
+<tr>
+<td>Moderne — &ldquo;Agentic Coding Can&rsquo;t Close the Remediation Gap&rdquo; (<strong>read first</strong>)</td>
+<td><a href="https://moderne.ai/blog/agentic-coding-mythos-remediation-gap" target="_blank" rel="noopener noreferrer">https://moderne.ai/blog/agentic-coding-mythos-remediation-gap</a></td>
+<td>✅</td>
+</tr>
+<tr>
+<td>OpenRewrite (OSS)</td>
+<td><a href="https://github.com/openrewrite/rewrite" target="_blank" rel="noopener noreferrer">https://github.com/openrewrite/rewrite</a> · <a href="https://docs.openrewrite.org/" target="_blank" rel="noopener noreferrer">https://docs.openrewrite.org/</a></td>
+<td>⚠️</td>
+</tr>
+<tr>
+<td>CAST Software</td>
+<td><a href="https://www.castsoftware.com/" target="_blank" rel="noopener noreferrer">https://www.castsoftware.com/</a></td>
+<td>⚠️</td>
+</tr>
+<tr>
+<td>CodeScene</td>
+<td><a href="https://codescene.com/" target="_blank" rel="noopener noreferrer">https://codescene.com/</a></td>
+<td>⚠️</td>
+</tr>
+<tr>
+<td>IcePanel</td>
+<td><a href="https://icepanel.io/" target="_blank" rel="noopener noreferrer">https://icepanel.io/</a></td>
+<td>⚠️</td>
+</tr>
+<tr>
+<td>Structurizr</td>
+<td><a href="https://structurizr.com/" target="_blank" rel="noopener noreferrer">https://structurizr.com/</a></td>
+<td>⚠️</td>
+</tr>
+<tr>
+<td>Mechanical Orchard</td>
+<td><a href="https://www.mechanical-orchard.com/" target="_blank" rel="noopener noreferrer">https://www.mechanical-orchard.com/</a></td>
+<td>⚠️</td>
+</tr>
+<tr>
+<td>Blitzy</td>
+<td><a href="https://blitzy.com/" target="_blank" rel="noopener noreferrer">https://blitzy.com/</a></td>
+<td>⚠️</td>
+</tr>
+</tbody>
+</table></div>
+<hr />
+<h2 id="2-event-catalogue-schemas-eda">2. Event catalogue, schemas, EDA</h2>
+<div class="table-wrap"><table>
+<thead>
+<tr>
+<th>Item</th>
+<th>Link</th>
+<th></th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>EventCatalog</td>
+<td><a href="https://www.eventcatalog.dev/" target="_blank" rel="noopener noreferrer">https://www.eventcatalog.dev/</a></td>
+<td>✅</td>
+</tr>
+<tr>
+<td>EventCatalog — MCP server docs</td>
+<td><a href="https://www.eventcatalog.dev/docs/development/ask-your-architecture/mcp-server/introduction" target="_blank" rel="noopener noreferrer">https://www.eventcatalog.dev/docs/development/ask-your-architecture/mcp-server/introduction</a></td>
+<td>✅</td>
+</tr>
+<tr>
+<td>EventCatalog — Agents overview</td>
+<td><a href="https://www.eventcatalog.dev/docs/development/ask-your-architecture/agents/overview" target="_blank" rel="noopener noreferrer">https://www.eventcatalog.dev/docs/development/ask-your-architecture/agents/overview</a></td>
+<td>✅</td>
+</tr>
+<tr>
+<td>EventCatalog — bundled docs for coding agents (3.35.1)</td>
+<td><a href="https://eventcatalog.dev/blog-2/bundled-docs-for-coding-agents" target="_blank" rel="noopener noreferrer">https://eventcatalog.dev/blog-2/bundled-docs-for-coding-agents</a></td>
+<td>✅</td>
+</tr>
+<tr>
+<td>EventCatalog — Editor</td>
+<td><a href="https://www.eventcatalog.dev/docs/editor/overview" target="_blank" rel="noopener noreferrer">https://www.eventcatalog.dev/docs/editor/overview</a></td>
+<td>✅</td>
+</tr>
+<tr>
+<td>EventCatalog — adding services (frontmatter format)</td>
+<td><a href="https://eventcatalog.dev/docs/development/guides/services/adding-services" target="_blank" rel="noopener noreferrer">https://eventcatalog.dev/docs/development/guides/services/adding-services</a></td>
+<td>✅</td>
+</tr>
+<tr>
+<td>EventCatalog core repo</td>
+<td><a href="https://github.com/event-catalog/eventcatalog" target="_blank" rel="noopener noreferrer">https://github.com/event-catalog/eventcatalog</a></td>
+<td>✅</td>
+</tr>
+<tr>
+<td>All EventCatalog repos (agents, skills, mcp-server, generators, linter, backstage plugin, flowmart)</td>
+<td><a href="https://github.com/orgs/event-catalog/repositories" target="_blank" rel="noopener noreferrer">https://github.com/orgs/event-catalog/repositories</a></td>
+<td>✅</td>
+</tr>
+<tr>
+<td>Backstage plugin</td>
+<td><a href="https://github.com/event-catalog/backstage-plugin-eventcatalog" target="_blank" rel="noopener noreferrer">https://github.com/event-catalog/backstage-plugin-eventcatalog</a></td>
+<td>✅</td>
+</tr>
+<tr>
+<td>CloudEvents</td>
+<td><a href="https://cloudevents.io/" target="_blank" rel="noopener noreferrer">https://cloudevents.io/</a></td>
+<td>⚠️</td>
+</tr>
+<tr>
+<td>AsyncAPI</td>
+<td><a href="https://www.asyncapi.com/" target="_blank" rel="noopener noreferrer">https://www.asyncapi.com/</a></td>
+<td>⚠️</td>
+</tr>
+<tr>
+<td>Buf (breaking-change CI gates)</td>
+<td><a href="https://buf.build/" target="_blank" rel="noopener noreferrer">https://buf.build/</a> · <a href="https://github.com/bufbuild/buf" target="_blank" rel="noopener noreferrer">https://github.com/bufbuild/buf</a></td>
+<td>⚠️</td>
+</tr>
+<tr>
+<td>Microcks (spec-driven mocks + contract tests, CNCF)</td>
+<td><a href="https://microcks.io/" target="_blank" rel="noopener noreferrer">https://microcks.io/</a></td>
+<td>⚠️</td>
+</tr>
+<tr>
+<td>Transactional Outbox pattern</td>
+<td><a href="https://microservices.io/patterns/data/transactional-outbox.html" target="_blank" rel="noopener noreferrer">https://microservices.io/patterns/data/transactional-outbox.html</a></td>
+<td>⚠️</td>
+</tr>
+<tr>
+<td>Anti-corruption layer</td>
+<td><a href="https://learn.microsoft.com/azure/architecture/patterns/anti-corruption-layer" target="_blank" rel="noopener noreferrer">https://learn.microsoft.com/azure/architecture/patterns/anti-corruption-layer</a></td>
+<td>⚠️</td>
+</tr>
+<tr>
+<td>Strangler Fig</td>
+<td><a href="https://martinfowler.com/bliki/StranglerFigApplication.html" target="_blank" rel="noopener noreferrer">https://martinfowler.com/bliki/StranglerFigApplication.html</a></td>
+<td>⚠️</td>
+</tr>
+</tbody>
+</table></div>
+<hr />
+<h2 id="3-platform-idp">3. Platform / IDP</h2>
+<div class="table-wrap"><table>
+<thead>
+<tr>
+<th>Item</th>
+<th>Link</th>
+<th></th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Port — agentic engineering platform announcement</td>
+<td><a href="https://www.port.io/blog/port-agentic-engineering-platform" target="_blank" rel="noopener noreferrer">https://www.port.io/blog/port-agentic-engineering-platform</a></td>
+<td>✅</td>
+</tr>
+<tr>
+<td>IDP field comparison (Backstage/Port/Cortex/Humanitec)</td>
+<td><a href="https://northflank.com/blog/top-internal-developer-portals" target="_blank" rel="noopener noreferrer">https://northflank.com/blog/top-internal-developer-portals</a></td>
+<td>✅</td>
+</tr>
+<tr>
+<td>Platform Engineering University — Agentic Development Platforms course</td>
+<td><a href="https://university.platformengineering.org/agentic-development-platforms-october-2026" target="_blank" rel="noopener noreferrer">https://university.platformengineering.org/agentic-development-platforms-october-2026</a></td>
+<td>✅</td>
+</tr>
+<tr>
+<td>CNOE <code>ai-platform-engineering</code> (multi-agent platform engineering reference)</td>
+<td><a href="https://github.com/cnoe-io/ai-platform-engineering" target="_blank" rel="noopener noreferrer">https://github.com/cnoe-io/ai-platform-engineering</a></td>
+<td>⚠️ (seen via a fork: <a href="https://github.com/Analect/ai-platform-engineering" target="_blank" rel="noopener noreferrer">https://github.com/Analect/ai-platform-engineering</a> ✅)</td>
+</tr>
+<tr>
+<td>Cortex</td>
+<td><a href="https://www.cortex.io/" target="_blank" rel="noopener noreferrer">https://www.cortex.io/</a></td>
+<td>⚠️</td>
+</tr>
+<tr>
+<td>OpsLevel</td>
+<td><a href="https://www.opslevel.com/" target="_blank" rel="noopener noreferrer">https://www.opslevel.com/</a></td>
+<td>⚠️</td>
+</tr>
+<tr>
+<td>Roadie</td>
+<td><a href="https://roadie.io/" target="_blank" rel="noopener noreferrer">https://roadie.io/</a></td>
+<td>⚠️</td>
+</tr>
+<tr>
+<td>Humanitec</td>
+<td><a href="https://humanitec.com/" target="_blank" rel="noopener noreferrer">https://humanitec.com/</a></td>
+<td>⚠️</td>
+</tr>
+<tr>
+<td>Kratix</td>
+<td><a href="https://kratix.io/" target="_blank" rel="noopener noreferrer">https://kratix.io/</a></td>
+<td>⚠️</td>
+</tr>
+<tr>
+<td>Backstage</td>
+<td><a href="https://backstage.io/" target="_blank" rel="noopener noreferrer">https://backstage.io/</a></td>
+<td>⚠️</td>
+</tr>
+<tr>
+<td>Score</td>
+<td><a href="https://score.dev/" target="_blank" rel="noopener noreferrer">https://score.dev/</a></td>
+<td>⚠️</td>
+</tr>
+<tr>
+<td>Crossplane</td>
+<td><a href="https://www.crossplane.io/" target="_blank" rel="noopener noreferrer">https://www.crossplane.io/</a></td>
+<td>⚠️</td>
+</tr>
+<tr>
+<td>DuploCloud — agentic DevOps with approval workflows</td>
+<td><a href="https://duplocloud.com/blog/agentic-devops/" target="_blank" rel="noopener noreferrer">https://duplocloud.com/blog/agentic-devops/</a></td>
+<td>✅</td>
+</tr>
+<tr>
+<td>Agentic platform engineering / self-service infra pattern</td>
+<td><a href="https://devopsboys.com/blog/agentic-platform-engineering-self-service-infra-2026" target="_blank" rel="noopener noreferrer">https://devopsboys.com/blog/agentic-platform-engineering-self-service-infra-2026</a></td>
+<td>✅</td>
+</tr>
+<tr>
+<td>CNCF Platforms White Paper</td>
+<td><a href="https://tag-app-delivery.cncf.io/whitepapers/platforms/" target="_blank" rel="noopener noreferrer">https://tag-app-delivery.cncf.io/whitepapers/platforms/</a></td>
+<td>⚠️</td>
+</tr>
+</tbody>
+</table></div>
+<hr />
+<h2 id="4-delivery-cicd-agents-in-pipelines">4. Delivery, CI/CD, agents in pipelines</h2>
+<div class="table-wrap"><table>
+<thead>
+<tr>
+<th>Item</th>
+<th>Link</th>
+<th></th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Harness — Autonomous Worker Agents + Agent Marketplace GA (30 Jun 2026)</td>
+<td><a href="https://letsdatascience.com/news/harness-adds-autonomous-ai-agents-for-devops-automation-e27b029c" target="_blank" rel="noopener noreferrer">https://letsdatascience.com/news/harness-adds-autonomous-ai-agents-for-devops-automation-e27b029c</a></td>
+<td>✅</td>
+</tr>
+<tr>
+<td>Harness — agents as first-class artefacts, AI Asset Catalog, AgentTrace</td>
+<td><a href="https://devops.com/harness-extends-devops-reach-to-the-realm-of-ai-agents/" target="_blank" rel="noopener noreferrer">https://devops.com/harness-extends-devops-reach-to-the-realm-of-ai-agents/</a></td>
+<td>✅</td>
+</tr>
+<tr>
+<td>Harness Agent DLC (evals for probabilistic agents)</td>
+<td><a href="https://www.techtarget.com/searchitoperations/news/366646195/Harness-Agent-DLC-targets-AI-agent-development-gaps" target="_blank" rel="noopener noreferrer">https://www.techtarget.com/searchitoperations/news/366646195/Harness-Agent-DLC-targets-AI-agent-development-gaps</a></td>
+<td>✅</td>
+</tr>
+<tr>
+<td>Harness — AI deployment / CI-CD for agents</td>
+<td><a href="https://www.harness.io/blog/ai-deployment-in-production-orchestrate-llms-rag-agents" target="_blank" rel="noopener noreferrer">https://www.harness.io/blog/ai-deployment-in-production-orchestrate-llms-rag-agents</a></td>
+<td>✅</td>
+</tr>
+<tr>
+<td>Harness AI Code Agent — independent review (what it is vs isn&rsquo;t)</td>
+<td><a href="https://www.verdent.ai/guides/harness-ai-code-agent-review-2026" target="_blank" rel="noopener noreferrer">https://www.verdent.ai/guides/harness-ai-code-agent-review-2026</a></td>
+<td>✅</td>
+</tr>
+<tr>
+<td>Harness IDP docs</td>
+<td><a href="https://developer.harness.io/docs/internal-developer-portal/" target="_blank" rel="noopener noreferrer">https://developer.harness.io/docs/internal-developer-portal/</a></td>
+<td>⚠️</td>
+</tr>
+<tr>
+<td>DevOps agent landscape 2026 (GitHub Agentic Workflows, DORA findings)</td>
+<td><a href="https://www.thecodew.com/2026/08/devops-watch-ai-agents-rewriting-software-delivery-pipeline.html" target="_blank" rel="noopener noreferrer">https://www.thecodew.com/2026/08/devops-watch-ai-agents-rewriting-software-delivery-pipeline.html</a></td>
+<td>✅</td>
+</tr>
+<tr>
+<td>Kargo (promotion/progression history)</td>
+<td><a href="https://kargo.io/" target="_blank" rel="noopener noreferrer">https://kargo.io/</a> · <a href="https://github.com/akuity/kargo" target="_blank" rel="noopener noreferrer">https://github.com/akuity/kargo</a></td>
+<td>⚠️</td>
+</tr>
+<tr>
+<td>Argo Rollouts</td>
+<td><a href="https://argo-rollouts.readthedocs.io/" target="_blank" rel="noopener noreferrer">https://argo-rollouts.readthedocs.io/</a></td>
+<td>⚠️</td>
+</tr>
+<tr>
+<td>Dagger</td>
+<td><a href="https://dagger.io/" target="_blank" rel="noopener noreferrer">https://dagger.io/</a></td>
+<td>⚠️</td>
+</tr>
+<tr>
+<td>Signadot (request-level preview isolation)</td>
+<td><a href="https://www.signadot.com/" target="_blank" rel="noopener noreferrer">https://www.signadot.com/</a></td>
+<td>⚠️</td>
+</tr>
+<tr>
+<td>Uffizzi</td>
+<td><a href="https://www.uffizzi.com/" target="_blank" rel="noopener noreferrer">https://www.uffizzi.com/</a></td>
+<td>⚠️</td>
+</tr>
+<tr>
+<td>SLSA</td>
+<td><a href="https://slsa.dev/" target="_blank" rel="noopener noreferrer">https://slsa.dev/</a></td>
+<td>⚠️</td>
+</tr>
+<tr>
+<td>Sigstore</td>
+<td><a href="https://www.sigstore.dev/" target="_blank" rel="noopener noreferrer">https://www.sigstore.dev/</a></td>
+<td>⚠️</td>
+</tr>
+<tr>
+<td>Trunk-Based Development</td>
+<td><a href="https://trunkbaseddevelopment.com/" target="_blank" rel="noopener noreferrer">https://trunkbaseddevelopment.com/</a></td>
+<td>⚠️</td>
+</tr>
+<tr>
+<td>DORA</td>
+<td><a href="https://dora.dev/" target="_blank" rel="noopener noreferrer">https://dora.dev/</a></td>
+<td>⚠️</td>
+</tr>
+</tbody>
+</table></div>
+<hr />
+<h2 id="5-testing-recordreplay-test-data">5. Testing, record/replay, test data</h2>
+<div class="table-wrap"><table>
+<thead>
+<tr>
+<th>Item</th>
+<th>Link</th>
+<th></th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Keploy</td>
+<td><a href="https://keploy.io/" target="_blank" rel="noopener noreferrer">https://keploy.io/</a></td>
+<td>✅</td>
+</tr>
+<tr>
+<td>Keploy repo</td>
+<td><a href="https://github.com/keploy/keploy" target="_blank" rel="noopener noreferrer">https://github.com/keploy/keploy</a></td>
+<td>✅</td>
+</tr>
+<tr>
+<td>Keploy — record &amp; replay architecture (eBPF vs proxy vs VCR)</td>
+<td><a href="https://keploy.io/record-replay-testing" target="_blank" rel="noopener noreferrer">https://keploy.io/record-replay-testing</a></td>
+<td>✅</td>
+</tr>
+<tr>
+<td>Keploy — integration testing vs Testcontainers</td>
+<td><a href="https://keploy.io/integration-testing" target="_blank" rel="noopener noreferrer">https://keploy.io/integration-testing</a></td>
+<td>✅</td>
+</tr>
+<tr>
+<td>Keploy vs Speedscale</td>
+<td><a href="https://keploy.io/compare/speedscale" target="_blank" rel="noopener noreferrer">https://keploy.io/compare/speedscale</a></td>
+<td>✅</td>
+</tr>
+<tr>
+<td>Tusk Drift</td>
+<td><a href="https://www.usetusk.ai/tusk-drift" target="_blank" rel="noopener noreferrer">https://www.usetusk.ai/tusk-drift</a></td>
+<td>✅</td>
+</tr>
+<tr>
+<td>Tusk CLI repo</td>
+<td><a href="https://github.com/Use-Tusk/tusk-cli" target="_blank" rel="noopener noreferrer">https://github.com/Use-Tusk/tusk-cli</a></td>
+<td>✅</td>
+</tr>
+<tr>
+<td>AI testing tools by job (spec-driven vs traffic vs self-healing vs eval)</td>
+<td><a href="https://totalshiftleft.ai/blog/ai-testing-tools-2026" target="_blank" rel="noopener noreferrer">https://totalshiftleft.ai/blog/ai-testing-tools-2026</a></td>
+<td>✅</td>
+</tr>
+<tr>
+<td>awesome-ai-testing (curated index)</td>
+<td><a href="https://github.com/tugkanboz/awesome-ai-testing" target="_blank" rel="noopener noreferrer">https://github.com/tugkanboz/awesome-ai-testing</a></td>
+<td>✅</td>
+</tr>
+<tr>
+<td>Playwright AI ecosystem — MCP, agents, self-healing</td>
+<td><a href="https://testdino.com/blog/playwright-ai-ecosystem" target="_blank" rel="noopener noreferrer">https://testdino.com/blog/playwright-ai-ecosystem</a></td>
+<td>✅</td>
+</tr>
+<tr>
+<td>Playwright Test Agents architecture (Planner/Generator/Healer)</td>
+<td><a href="https://testquality.com/playwright-test-agents-mcp-architecture-2026/" target="_blank" rel="noopener noreferrer">https://testquality.com/playwright-test-agents-mcp-architecture-2026/</a></td>
+<td>✅</td>
+</tr>
+<tr>
+<td>Playwright agent teams (functional + security + a11y + perf on one flow)</td>
+<td><a href="https://bug0.com/blog/playwright-test-agents" target="_blank" rel="noopener noreferrer">https://bug0.com/blog/playwright-test-agents</a></td>
+<td>✅</td>
+</tr>
+<tr>
+<td>Playwright self-healing internals</td>
+<td><a href="https://dev.to/majdizlitni/playwright-agents-the-architecture-of-self-healing-2b97" target="_blank" rel="noopener noreferrer">https://dev.to/majdizlitni/playwright-agents-the-architecture-of-self-healing-2b97</a></td>
+<td>✅</td>
+</tr>
+<tr>
+<td>Agentic AI testing with MCP (reference architecture)</td>
+<td><a href="https://softwaretestpilot.com/blog/ai-in-testing/agentic-ai-testing-with-mcp" target="_blank" rel="noopener noreferrer">https://softwaretestpilot.com/blog/ai-in-testing/agentic-ai-testing-with-mcp</a></td>
+<td>✅</td>
+</tr>
+<tr>
+<td>AI QA tool comparison (incl. Octomind cautionary note)</td>
+<td><a href="https://devtoollab.com/blog/best-ai-qa-autonomous-testing-tools" target="_blank" rel="noopener noreferrer">https://devtoollab.com/blog/best-ai-qa-autonomous-testing-tools</a></td>
+<td>✅</td>
+</tr>
+<tr>
+<td>13 best AI testing tools (Momentic limits, Katalon)</td>
+<td><a href="https://qa.tech/blog/the-13-best-ai-testing-tools-in-2026" target="_blank" rel="noopener noreferrer">https://qa.tech/blog/the-13-best-ai-testing-tools-in-2026</a></td>
+<td>✅</td>
+</tr>
+<tr>
+<td>AI browser automation comparison (Stagehand, Browser-Use, Skyvern)</td>
+<td><a href="https://gist.github.com/kevinmichaelchen/9d77b8a681238cc45297dff969686175" target="_blank" rel="noopener noreferrer">https://gist.github.com/kevinmichaelchen/9d77b8a681238cc45297dff969686175</a></td>
+<td>✅</td>
+</tr>
+<tr>
+<td>Playwright</td>
+<td><a href="https://playwright.dev/" target="_blank" rel="noopener noreferrer">https://playwright.dev/</a></td>
+<td>⚠️</td>
+</tr>
+<tr>
+<td>Momentic</td>
+<td><a href="https://momentic.ai/" target="_blank" rel="noopener noreferrer">https://momentic.ai/</a></td>
+<td>⚠️</td>
+</tr>
+<tr>
+<td>mabl</td>
+<td><a href="https://www.mabl.com/" target="_blank" rel="noopener noreferrer">https://www.mabl.com/</a></td>
+<td>⚠️</td>
+</tr>
+<tr>
+<td>Checksum</td>
+<td><a href="https://checksum.ai/" target="_blank" rel="noopener noreferrer">https://checksum.ai/</a></td>
+<td>⚠️</td>
+</tr>
+<tr>
+<td>Antithesis</td>
+<td><a href="https://antithesis.com/" target="_blank" rel="noopener noreferrer">https://antithesis.com/</a></td>
+<td>⚠️</td>
+</tr>
+<tr>
+<td>SDV (synthetic data, referential integrity)</td>
+<td><a href="https://sdv.dev/" target="_blank" rel="noopener noreferrer">https://sdv.dev/</a> · <a href="https://github.com/sdv-dev/SDV" target="_blank" rel="noopener noreferrer">https://github.com/sdv-dev/SDV</a></td>
+<td>⚠️</td>
+</tr>
+<tr>
+<td><a href="https://Tonic.ai" target="_blank" rel="noopener noreferrer">Tonic.ai</a></td>
+<td><a href="https://www.tonic.ai/" target="_blank" rel="noopener noreferrer">https://www.tonic.ai/</a></td>
+<td>⚠️</td>
+</tr>
+<tr>
+<td>Gretel</td>
+<td><a href="https://gretel.ai/" target="_blank" rel="noopener noreferrer">https://gretel.ai/</a></td>
+<td>⚠️</td>
+</tr>
+<tr>
+<td>WireMock</td>
+<td><a href="https://wiremock.org/" target="_blank" rel="noopener noreferrer">https://wiremock.org/</a></td>
+<td>⚠️</td>
+</tr>
+<tr>
+<td>Testcontainers</td>
+<td><a href="https://testcontainers.com/" target="_blank" rel="noopener noreferrer">https://testcontainers.com/</a></td>
+<td>⚠️</td>
+</tr>
+<tr>
+<td>Pact (contract testing)</td>
+<td><a href="https://pact.io/" target="_blank" rel="noopener noreferrer">https://pact.io/</a></td>
+<td>⚠️</td>
+</tr>
+</tbody>
+</table></div>
+<hr />
+<h2 id="6-ai-code-review">6. AI code review</h2>
+<div class="table-wrap"><table>
+<thead>
+<tr>
+<th>Item</th>
+<th>Link</th>
+<th></th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Greptile — best code review tools comparison</td>
+<td><a href="https://www.greptile.com/content-library/best-ai-code-review-tools" target="_blank" rel="noopener noreferrer">https://www.greptile.com/content-library/best-ai-code-review-tools</a></td>
+<td>✅</td>
+</tr>
+<tr>
+<td>Macroscope — 118-bug benchmark, GitHub tools ranked</td>
+<td><a href="https://macroscope.com/content/best-ai-code-review-tools-github-2026" target="_blank" rel="noopener noreferrer">https://macroscope.com/content/best-ai-code-review-tools-github-2026</a></td>
+<td>✅</td>
+</tr>
+<tr>
+<td>Macroscope — Greptile alternatives (detection/pricing table)</td>
+<td><a href="https://macroscope.com/content/best-greptile-alternatives-ai-code-review" target="_blank" rel="noopener noreferrer">https://macroscope.com/content/best-greptile-alternatives-ai-code-review</a></td>
+<td>✅</td>
+</tr>
+<tr>
+<td>Enterprise filter: cross-repo, rules layer, air-gap, Enterprise Server</td>
+<td><a href="https://hackernoon.com/best-ai-code-review-tools-for-github-2026" target="_blank" rel="noopener noreferrer">https://hackernoon.com/best-ai-code-review-tools-for-github-2026</a></td>
+<td>✅</td>
+</tr>
+<tr>
+<td>CodeRabbit vs Greptile vs Qodo (Veracode 45% + Faros 91%/154% stats)</td>
+<td><a href="https://tech-insider.org/coderabbit-vs-greptile-vs-qodo-2026/" target="_blank" rel="noopener noreferrer">https://tech-insider.org/coderabbit-vs-greptile-vs-qodo-2026/</a></td>
+<td>✅</td>
+</tr>
+<tr>
+<td>SAST-vs-AI-review reproducibility trade-off; platform coverage matrix</td>
+<td><a href="https://techsy.io/en/blog/best-ai-code-review-tools" target="_blank" rel="noopener noreferrer">https://techsy.io/en/blog/best-ai-code-review-tools</a></td>
+<td>✅</td>
+</tr>
+<tr>
+<td>Manus — code review comparison</td>
+<td><a href="https://manus.im/blog/best-ai-tools-for-code-review" target="_blank" rel="noopener noreferrer">https://manus.im/blog/best-ai-tools-for-code-review</a></td>
+<td>✅</td>
+</tr>
+<tr>
+<td>Tool list with vendor links (CodeRabbit, Qodo, Greptile, Kodus, PR-Agent)</td>
+<td><a href="https://onehorizon.ai/blog/ai-powered-code-review-tools" target="_blank" rel="noopener noreferrer">https://onehorizon.ai/blog/ai-powered-code-review-tools</a></td>
+<td>✅</td>
+</tr>
+<tr>
+<td>Qodo</td>
+<td><a href="https://www.qodo.ai/" target="_blank" rel="noopener noreferrer">https://www.qodo.ai/</a></td>
+<td>✅</td>
+</tr>
+<tr>
+<td>CodeRabbit</td>
+<td><a href="https://coderabbit.ai/" target="_blank" rel="noopener noreferrer">https://coderabbit.ai/</a></td>
+<td>✅</td>
+</tr>
+<tr>
+<td>Greptile</td>
+<td><a href="https://www.greptile.com/" target="_blank" rel="noopener noreferrer">https://www.greptile.com/</a></td>
+<td>✅</td>
+</tr>
+<tr>
+<td>Cursor BugBot</td>
+<td><a href="https://cursor.com/bugbot" target="_blank" rel="noopener noreferrer">https://cursor.com/bugbot</a></td>
+<td>✅</td>
+</tr>
+<tr>
+<td>Kodus (OSS)</td>
+<td><a href="https://kodus.io/" target="_blank" rel="noopener noreferrer">https://kodus.io/</a></td>
+<td>✅</td>
+</tr>
+<tr>
+<td>PR-Agent (OSS)</td>
+<td><a href="https://github.com/Codium-ai/pr-agent" target="_blank" rel="noopener noreferrer">https://github.com/Codium-ai/pr-agent</a></td>
+<td>✅</td>
+</tr>
+<tr>
+<td>SonarQube</td>
+<td><a href="https://www.sonarsource.com/" target="_blank" rel="noopener noreferrer">https://www.sonarsource.com/</a></td>
+<td>⚠️</td>
+</tr>
+</tbody>
+</table></div>
+<hr />
+<h2 id="7-supply-chain-sbom-remediation">7. Supply chain, SBOM, remediation</h2>
+<div class="table-wrap"><table>
+<thead>
+<tr>
+<th>Item</th>
+<th>Link</th>
+<th></th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Endor Labs — agentic AppSec &amp; AURI agents (SCA Remediation, evidence-in-PR, open Agent Kit)</td>
+<td><a href="https://www.endorlabs.com/learn/agentic-appsec-and-agentic-remediation-is-finally-here" target="_blank" rel="noopener noreferrer">https://www.endorlabs.com/learn/agentic-appsec-and-agentic-remediation-is-finally-here</a></td>
+<td>✅</td>
+</tr>
+<tr>
+<td>Endor Labs agents — independent write-up (2.8× faster, 92% fewer tokens)</td>
+<td><a href="https://blog.ogwilliam.com/post/endor-labs-ai-agents-appsec-remediation" target="_blank" rel="noopener noreferrer">https://blog.ogwilliam.com/post/endor-labs-ai-agents-appsec-remediation</a></td>
+<td>✅</td>
+</tr>
+<tr>
+<td>SAST landscape 2026 (Corgea, Endor, ASPM layers, agentic patterns)</td>
+<td><a href="https://corgea.com/learn/best-sast-tools" target="_blank" rel="noopener noreferrer">https://corgea.com/learn/best-sast-tools</a></td>
+<td>✅</td>
+</tr>
+<tr>
+<td>AI agent workflows for legacy Java (OpenRewrite + Agent Morpheus)</td>
+<td><a href="https://www.augmentcode.com/guides/11-ai-agent-workflows-for-legacy-java-apps" target="_blank" rel="noopener noreferrer">https://www.augmentcode.com/guides/11-ai-agent-workflows-for-legacy-java-apps</a></td>
+<td>✅</td>
+</tr>
+<tr>
+<td>AI-assisted Java upgrades — hybrid OpenRewrite + LLM approach</td>
+<td><a href="https://sri-chalam.medium.com/ai-assisted-java-upgrades-a-hybrid-approach-with-ai-instructions-and-openrewrite-669dc89d39b3" target="_blank" rel="noopener noreferrer">https://sri-chalam.medium.com/ai-assisted-java-upgrades-a-hybrid-approach-with-ai-instructions-and-openrewrite-669dc89d39b3</a></td>
+<td>✅</td>
+</tr>
+<tr>
+<td>Endor Labs</td>
+<td><a href="https://www.endorlabs.com/" target="_blank" rel="noopener noreferrer">https://www.endorlabs.com/</a></td>
+<td>✅</td>
+</tr>
+<tr>
+<td>Corgea</td>
+<td><a href="https://corgea.com/" target="_blank" rel="noopener noreferrer">https://corgea.com/</a></td>
+<td>✅</td>
+</tr>
+<tr>
+<td>CycloneDX</td>
+<td><a href="https://cyclonedx.org/" target="_blank" rel="noopener noreferrer">https://cyclonedx.org/</a></td>
+<td>⚠️</td>
+</tr>
+<tr>
+<td>Syft / Grype</td>
+<td><a href="https://github.com/anchore/syft" target="_blank" rel="noopener noreferrer">https://github.com/anchore/syft</a> · <a href="https://github.com/anchore/grype" target="_blank" rel="noopener noreferrer">https://github.com/anchore/grype</a></td>
+<td>⚠️</td>
+</tr>
+<tr>
+<td>Renovate</td>
+<td><a href="https://docs.renovatebot.com/" target="_blank" rel="noopener noreferrer">https://docs.renovatebot.com/</a></td>
+<td>⚠️</td>
+</tr>
+<tr>
+<td>OpenSSF Scorecard</td>
+<td><a href="https://securityscorecards.dev/" target="_blank" rel="noopener noreferrer">https://securityscorecards.dev/</a></td>
+<td>⚠️</td>
+</tr>
+<tr>
+<td>EPSS</td>
+<td><a href="https://www.first.org/epss/" target="_blank" rel="noopener noreferrer">https://www.first.org/epss/</a></td>
+<td>⚠️</td>
+</tr>
+<tr>
+<td>CISA KEV</td>
+<td><a href="https://www.cisa.gov/known-exploited-vulnerabilities-catalog" target="_blank" rel="noopener noreferrer">https://www.cisa.gov/known-exploited-vulnerabilities-catalog</a></td>
+<td>⚠️</td>
+</tr>
+<tr>
+<td>NIST SSDF</td>
+<td><a href="https://csrc.nist.gov/Projects/ssdf" target="_blank" rel="noopener noreferrer">https://csrc.nist.gov/Projects/ssdf</a></td>
+<td>⚠️</td>
+</tr>
+</tbody>
+</table></div>
+<hr />
+<h2 id="8-reliability-chaos-ai-sre">8. Reliability, chaos, AI SRE</h2>
+<div class="table-wrap"><table>
+<thead>
+<tr>
+<th>Item</th>
+<th>Link</th>
+<th></th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>awesome-ai-sre (100+ tools — <strong>the fastest way to scan the field</strong>)</td>
+<td><a href="https://github.com/agamm/awesome-ai-sre" target="_blank" rel="noopener noreferrer">https://github.com/agamm/awesome-ai-sre</a></td>
+<td>✅</td>
+</tr>
+<tr>
+<td>AI SRE lanes incl. sovereign/self-hosted option</td>
+<td><a href="https://prommer.net/en/tech/guides/best-ai-sre-tools-2026/" target="_blank" rel="noopener noreferrer">https://prommer.net/en/tech/guides/best-ai-sre-tools-2026/</a></td>
+<td>✅</td>
+</tr>
+<tr>
+<td>AI SRE architectural camps (telemetry vs graph vs agentic)</td>
+<td><a href="https://www.anyshift.io/blog/top-10-ai-sre-tools-2026-comparison" target="_blank" rel="noopener noreferrer">https://www.anyshift.io/blog/top-10-ai-sre-tools-2026-comparison</a></td>
+<td>✅</td>
+</tr>
+<tr>
+<td>AI SRE field guide (10 tools, autonomy controls)</td>
+<td><a href="https://www.cloudthinker.io/blogs/best-ai-sre-tools-2026" target="_blank" rel="noopener noreferrer">https://www.cloudthinker.io/blogs/best-ai-sre-tools-2026</a></td>
+<td>✅</td>
+</tr>
+<tr>
+<td>&ldquo;Investigate autonomously, remediate under supervision&rdquo;</td>
+<td><a href="https://nerdleveltech.com/ai-sre-agents-autonomous-incident-remediation" target="_blank" rel="noopener noreferrer">https://nerdleveltech.com/ai-sre-agents-autonomous-incident-remediation</a></td>
+<td>✅</td>
+</tr>
+<tr>
+<td>AI SRE taxonomy (agentic investigation vs AIOps vs postmortem gen)</td>
+<td><a href="https://www.aurorasre.ai/blog/top-ai-sre-tools-2026" target="_blank" rel="noopener noreferrer">https://www.aurorasre.ai/blog/top-ai-sre-tools-2026</a></td>
+<td>✅</td>
+</tr>
+<tr>
+<td>Cleric</td>
+<td><a href="https://cleric.ai/" target="_blank" rel="noopener noreferrer">https://cleric.ai/</a></td>
+<td>✅</td>
+</tr>
+<tr>
+<td>Cleric — State of AI SRE report</td>
+<td><a href="https://cleric.ai/resources/reports/the-state-of-ai-sre" target="_blank" rel="noopener noreferrer">https://cleric.ai/resources/reports/the-state-of-ai-sre</a></td>
+<td>✅</td>
+</tr>
+<tr>
+<td>Metoro</td>
+<td><a href="https://metoro.io/" target="_blank" rel="noopener noreferrer">https://metoro.io/</a></td>
+<td>✅</td>
+</tr>
+<tr>
+<td>Metoro — Cleric alternatives (read-only overlay vs native context)</td>
+<td><a href="https://metoro.io/comparisons/ai-sre/cleric-ai-alternatives" target="_blank" rel="noopener noreferrer">https://metoro.io/comparisons/ai-sre/cleric-ai-alternatives</a></td>
+<td>✅</td>
+</tr>
+<tr>
+<td>Metoro — Traversal alternatives</td>
+<td><a href="https://metoro.io/comparisons/ai-sre/traversal-ai-alternatives" target="_blank" rel="noopener noreferrer">https://metoro.io/comparisons/ai-sre/traversal-ai-alternatives</a></td>
+<td>✅</td>
+</tr>
+<tr>
+<td>Sherlocks AI</td>
+<td><a href="https://www.sherlocks.ai/blog/top-ai-sre-tools-in-2026" target="_blank" rel="noopener noreferrer">https://www.sherlocks.ai/blog/top-ai-sre-tools-in-2026</a></td>
+<td>✅</td>
+</tr>
+<tr>
+<td>Resolve AI</td>
+<td><a href="https://resolve.ai/" target="_blank" rel="noopener noreferrer">https://resolve.ai/</a></td>
+<td>⚠️</td>
+</tr>
+<tr>
+<td>Traversal</td>
+<td><a href="https://traversal.com/" target="_blank" rel="noopener noreferrer">https://traversal.com/</a></td>
+<td>⚠️</td>
+</tr>
+<tr>
+<td>Anyshift</td>
+<td><a href="https://www.anyshift.io/" target="_blank" rel="noopener noreferrer">https://www.anyshift.io/</a></td>
+<td>✅</td>
+</tr>
+<tr>
+<td>HolmesGPT (OSS)</td>
+<td><a href="https://github.com/robusta-dev/holmesgpt" target="_blank" rel="noopener noreferrer">https://github.com/robusta-dev/holmesgpt</a></td>
+<td>⚠️</td>
+</tr>
+<tr>
+<td>K8sGPT (OSS)</td>
+<td><a href="https://k8sgpt.ai/" target="_blank" rel="noopener noreferrer">https://k8sgpt.ai/</a></td>
+<td>⚠️</td>
+</tr>
+<tr>
+<td>Chaos engineering tools — Gartner Peer Insights</td>
+<td><a href="https://www.gartner.com/reviews/market/chaos-engineering-tools" target="_blank" rel="noopener noreferrer">https://www.gartner.com/reviews/market/chaos-engineering-tools</a></td>
+<td>✅</td>
+</tr>
+<tr>
+<td>10 best chaos engineering tools 2026</td>
+<td><a href="https://thectoclub.com/tools/best-chaos-engineering-tools/" target="_blank" rel="noopener noreferrer">https://thectoclub.com/tools/best-chaos-engineering-tools/</a></td>
+<td>✅</td>
+</tr>
+<tr>
+<td>Autonomous chaos — agent proposes, human approves, existing tooling executes</td>
+<td><a href="https://devopsboys.com/blog/autonomous-chaos-engineering-experiment-designer-2026" target="_blank" rel="noopener noreferrer">https://devopsboys.com/blog/autonomous-chaos-engineering-experiment-designer-2026</a></td>
+<td>✅</td>
+</tr>
+<tr>
+<td>Chaos engineering&rsquo;s blind spot for agentic AI</td>
+<td><a href="https://dzone.com/articles/chaos-engineering-blind-spot-agentic-ai" target="_blank" rel="noopener noreferrer">https://dzone.com/articles/chaos-engineering-blind-spot-agentic-ai</a></td>
+<td>✅</td>
+</tr>
+<tr>
+<td>AI + SRE + chaos: adoption reality check</td>
+<td><a href="https://dzone.com/articles/ai-sre-itops-chaos" target="_blank" rel="noopener noreferrer">https://dzone.com/articles/ai-sre-itops-chaos</a></td>
+<td>✅</td>
+</tr>
+<tr>
+<td>Agentic chaos / fault injection for agents</td>
+<td><a href="https://rightbrain.ai/resources/agentic-chaos/" target="_blank" rel="noopener noreferrer">https://rightbrain.ai/resources/agentic-chaos/</a></td>
+<td>✅</td>
+</tr>
+<tr>
+<td>agent-chaos (OSS — fault injection for agent tool calls)</td>
+<td><a href="https://github.com/deepankarm/agent-chaos" target="_blank" rel="noopener noreferrer">https://github.com/deepankarm/agent-chaos</a></td>
+<td>✅</td>
+</tr>
+<tr>
+<td>AWS FIS</td>
+<td><a href="https://aws.amazon.com/fis/" target="_blank" rel="noopener noreferrer">https://aws.amazon.com/fis/</a></td>
+<td>⚠️</td>
+</tr>
+<tr>
+<td>Chaos Mesh / LitmusChaos / Chaos Toolkit</td>
+<td><a href="https://chaos-mesh.org/" target="_blank" rel="noopener noreferrer">https://chaos-mesh.org/</a> · <a href="https://litmuschaos.io/" target="_blank" rel="noopener noreferrer">https://litmuschaos.io/</a> · <a href="https://chaostoolkit.org/" target="_blank" rel="noopener noreferrer">https://chaostoolkit.org/</a></td>
+<td>⚠️</td>
+</tr>
+<tr>
+<td>Steadybit / Gremlin</td>
+<td><a href="https://steadybit.com/" target="_blank" rel="noopener noreferrer">https://steadybit.com/</a> · <a href="https://www.gremlin.com/" target="_blank" rel="noopener noreferrer">https://www.gremlin.com/</a></td>
+<td>⚠️</td>
+</tr>
+<tr>
+<td>Principles of Chaos</td>
+<td><a href="https://principlesofchaos.org/" target="_blank" rel="noopener noreferrer">https://principlesofchaos.org/</a></td>
+<td>⚠️</td>
+</tr>
+</tbody>
+</table></div>
+<hr />
+<h2 id="9-finops">9. FinOps</h2>
+<div class="table-wrap"><table>
+<thead>
+<tr>
+<th>Item</th>
+<th>Link</th>
+<th></th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Sedai — FinOps tools for engineering leaders (autonomous SLO-aware optimisation)</td>
+<td><a href="https://sedai.io/blog/top-finops-tools-for-engineering-leaders" target="_blank" rel="noopener noreferrer">https://sedai.io/blog/top-finops-tools-for-engineering-leaders</a></td>
+<td>✅</td>
+</tr>
+<tr>
+<td>Sedai — 18 FinOps platforms with honest limitation lines</td>
+<td><a href="https://sedai.io/blog/18-essential-finops-platforms-and-tools" target="_blank" rel="noopener noreferrer">https://sedai.io/blog/18-essential-finops-platforms-and-tools</a></td>
+<td>✅</td>
+</tr>
+<tr>
+<td>Sedai — AWS FinOps tools</td>
+<td><a href="https://sedai.io/blog/aws-finops-tools-cost-management" target="_blank" rel="noopener noreferrer">https://sedai.io/blog/aws-finops-tools-cost-management</a></td>
+<td>✅</td>
+</tr>
+<tr>
+<td>Sedai — AI agent cost optimisation (Cast AI scope limits, token economics)</td>
+<td><a href="https://sedai.io/blog/top-ai-agent-cost-optimization-tools" target="_blank" rel="noopener noreferrer">https://sedai.io/blog/top-ai-agent-cost-optimization-tools</a></td>
+<td>✅</td>
+</tr>
+<tr>
+<td>Sedai — cloud cost optimisation practices</td>
+<td><a href="https://sedai.io/blog/cloud-cost-management-and-optimization-best-practices" target="_blank" rel="noopener noreferrer">https://sedai.io/blog/cloud-cost-management-and-optimization-best-practices</a></td>
+<td>✅</td>
+</tr>
+<tr>
+<td>AI agents for FinOps compared (Clara, <a href="https://Cloudgov.ai" target="_blank" rel="noopener noreferrer">Cloudgov.ai</a>, Akira, Mavvrik)</td>
+<td><a href="https://amnic.com/blogs/top-ai-agent-tools-for-finops" target="_blank" rel="noopener noreferrer">https://amnic.com/blogs/top-ai-agent-tools-for-finops</a></td>
+<td>✅</td>
+</tr>
+<tr>
+<td>Best AI agents for FinOps — mechanisms and definitions</td>
+<td><a href="https://www.usage.ai/blogs/finops/tools/best-ai-agents-for-finops/" target="_blank" rel="noopener noreferrer">https://www.usage.ai/blogs/finops/tools/best-ai-agents-for-finops/</a></td>
+<td>✅</td>
+</tr>
+<tr>
+<td>AI agents for cloud optimisation — hype vs reality (genuinely agentic vs not)</td>
+<td><a href="https://kaloscloud.io/blog/ai-agents-for-cloud-optimization" target="_blank" rel="noopener noreferrer">https://kaloscloud.io/blog/ai-agents-for-cloud-optimization</a></td>
+<td>✅</td>
+</tr>
+<tr>
+<td>State of FinOps 2026 analysis (98% manage AI spend, $83bn surveyed)</td>
+<td><a href="https://imsnucleii.com/blogs/autonomous-ai-cloud-architecture-finops/" target="_blank" rel="noopener noreferrer">https://imsnucleii.com/blogs/autonomous-ai-cloud-architecture-finops/</a></td>
+<td>✅</td>
+</tr>
+<tr>
+<td>Sedai</td>
+<td><a href="https://sedai.io/" target="_blank" rel="noopener noreferrer">https://sedai.io/</a></td>
+<td>✅</td>
+</tr>
+<tr>
+<td>Cast AI</td>
+<td><a href="https://cast.ai/" target="_blank" rel="noopener noreferrer">https://cast.ai/</a></td>
+<td>⚠️</td>
+</tr>
+<tr>
+<td>nOps</td>
+<td><a href="https://www.nops.io/" target="_blank" rel="noopener noreferrer">https://www.nops.io/</a></td>
+<td>⚠️</td>
+</tr>
+<tr>
+<td>ProsperOps</td>
+<td><a href="https://www.prosperops.com/" target="_blank" rel="noopener noreferrer">https://www.prosperops.com/</a></td>
+<td>⚠️</td>
+</tr>
+<tr>
+<td>Vantage</td>
+<td><a href="https://www.vantage.sh/" target="_blank" rel="noopener noreferrer">https://www.vantage.sh/</a></td>
+<td>⚠️</td>
+</tr>
+<tr>
+<td>FinOps Foundation framework</td>
+<td><a href="https://www.finops.org/framework/" target="_blank" rel="noopener noreferrer">https://www.finops.org/framework/</a></td>
+<td>⚠️</td>
+</tr>
+</tbody>
+</table></div>
+<hr />
+<h2 id="10-data-catalogs-contracts">10. Data, catalogs, contracts</h2>
+<div class="table-wrap"><table>
+<thead>
+<tr>
+<th>Item</th>
+<th>Link</th>
+<th></th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Best data catalogs for AI agents (native MCP compared)</td>
+<td><a href="https://marmotdata.io/resources/data-catalogs-for-ai-agents/" target="_blank" rel="noopener noreferrer">https://marmotdata.io/resources/data-catalogs-for-ai-agents/</a></td>
+<td>✅</td>
+</tr>
+<tr>
+<td>Data context platforms buyer&rsquo;s guide</td>
+<td><a href="https://www.dqlabs.ai/blog/best-data-context-platforms-in-2026-a-practitioners-buyer-guide/" target="_blank" rel="noopener noreferrer">https://www.dqlabs.ai/blog/best-data-context-platforms-in-2026-a-practitioners-buyer-guide/</a></td>
+<td>✅</td>
+</tr>
+<tr>
+<td>Data catalog buyer&rsquo;s guide 2026</td>
+<td><a href="https://www.dqlabs.ai/blog/best-data-catalog-tools-in-2026-a-practitioners-buyer-guide/" target="_blank" rel="noopener noreferrer">https://www.dqlabs.ai/blog/best-data-catalog-tools-in-2026-a-practitioners-buyer-guide/</a></td>
+<td>✅</td>
+</tr>
+<tr>
+<td>Atlan — Collibra alternatives / AI governance</td>
+<td><a href="https://atlan.com/collibra-alternatives-enterprise-data-governance/" target="_blank" rel="noopener noreferrer">https://atlan.com/collibra-alternatives-enterprise-data-governance/</a></td>
+<td>✅</td>
+</tr>
+<tr>
+<td>Atlan — AI agents in data management</td>
+<td><a href="https://atlan.com/know/ai-agent-in-data-management/" target="_blank" rel="noopener noreferrer">https://atlan.com/know/ai-agent-in-data-management/</a></td>
+<td>✅</td>
+</tr>
+<tr>
+<td>Agentic data governance — governance <em>by</em> vs <em>of</em> agents</td>
+<td><a href="https://www.ovaledge.com/blog/agentic-data-governance" target="_blank" rel="noopener noreferrer">https://www.ovaledge.com/blog/agentic-data-governance</a></td>
+<td>✅</td>
+</tr>
+<tr>
+<td>Data product management for AI agents (metadata as operational infrastructure)</td>
+<td><a href="https://promethium.ai/guides/data-product-management-for-ai-agents/" target="_blank" rel="noopener noreferrer">https://promethium.ai/guides/data-product-management-for-ai-agents/</a></td>
+<td>✅</td>
+</tr>
+<tr>
+<td>AI data engineering — six-layer agent-native reference stack</td>
+<td><a href="https://dataworkers.io/resources/ai-data-engineering-complete-guide/" target="_blank" rel="noopener noreferrer">https://dataworkers.io/resources/ai-data-engineering-complete-guide/</a></td>
+<td>✅</td>
+</tr>
+<tr>
+<td>Platform-independent data catalog / lineage + MCP direction</td>
+<td><a href="https://www.kai-waehner.de/blog/2026/05/18/beyond-enterprise-data-lineage-the-case-for-a-platform-independent-data-catalog/" target="_blank" rel="noopener noreferrer">https://www.kai-waehner.de/blog/2026/05/18/beyond-enterprise-data-lineage-the-case-for-a-platform-independent-data-catalog/</a></td>
+<td>✅</td>
+</tr>
+<tr>
+<td>OpenMetadata</td>
+<td><a href="https://open-metadata.org/" target="_blank" rel="noopener noreferrer">https://open-metadata.org/</a></td>
+<td>⚠️</td>
+</tr>
+<tr>
+<td>DataHub</td>
+<td><a href="https://datahubproject.io/" target="_blank" rel="noopener noreferrer">https://datahubproject.io/</a></td>
+<td>⚠️</td>
+</tr>
+<tr>
+<td>Marmot</td>
+<td><a href="https://marmotdata.io/" target="_blank" rel="noopener noreferrer">https://marmotdata.io/</a></td>
+<td>✅</td>
+</tr>
+<tr>
+<td>Bitol — ODCS / ODPS</td>
+<td><a href="https://bitol.io/" target="_blank" rel="noopener noreferrer">https://bitol.io/</a></td>
+<td>⚠️</td>
+</tr>
+<tr>
+<td>datacontract-cli</td>
+<td><a href="https://github.com/datacontract/datacontract-cli" target="_blank" rel="noopener noreferrer">https://github.com/datacontract/datacontract-cli</a></td>
+<td>⚠️</td>
+</tr>
+<tr>
+<td>OpenLineage / Marquez</td>
+<td><a href="https://openlineage.io/" target="_blank" rel="noopener noreferrer">https://openlineage.io/</a> · <a href="https://marquezproject.ai/" target="_blank" rel="noopener noreferrer">https://marquezproject.ai/</a></td>
+<td>⚠️</td>
+</tr>
+<tr>
+<td>Great Expectations / Soda</td>
+<td><a href="https://greatexpectations.io/" target="_blank" rel="noopener noreferrer">https://greatexpectations.io/</a> · <a href="https://www.soda.io/" target="_blank" rel="noopener noreferrer">https://www.soda.io/</a></td>
+<td>⚠️</td>
+</tr>
+<tr>
+<td>Data Mesh principles</td>
+<td><a href="https://martinfowler.com/articles/data-mesh-principles.html" target="_blank" rel="noopener noreferrer">https://martinfowler.com/articles/data-mesh-principles.html</a></td>
+<td>⚠️</td>
+</tr>
+<tr>
+<td>FIBO</td>
+<td><a href="https://spec.edmcouncil.org/fibo/" target="_blank" rel="noopener noreferrer">https://spec.edmcouncil.org/fibo/</a></td>
+<td>⚠️</td>
+</tr>
+<tr>
+<td>BCBS 239</td>
+<td><a href="https://www.bis.org/publ/bcbs239.htm" target="_blank" rel="noopener noreferrer">https://www.bis.org/publ/bcbs239.htm</a></td>
+<td>⚠️</td>
+</tr>
+<tr>
+<td>FR Y-14 forms</td>
+<td><a href="https://www.federalreserve.gov/apps/reportingforms/" target="_blank" rel="noopener noreferrer">https://www.federalreserve.gov/apps/reportingforms/</a></td>
+<td>⚠️</td>
+</tr>
+</tbody>
+</table></div>
+<hr />
+<h2 id="11-multi-agent-orchestration">11. Multi-agent orchestration</h2>
+<div class="table-wrap"><table>
+<thead>
+<tr>
+<th>Item</th>
+<th>Link</th>
+<th></th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>awesome-agent-orchestrators (<strong>live index — check before building</strong>)</td>
+<td><a href="https://github.com/andyrewlee/awesome-agent-orchestrators" target="_blank" rel="noopener noreferrer">https://github.com/andyrewlee/awesome-agent-orchestrators</a></td>
+<td>✅</td>
+</tr>
+<tr>
+<td>Open-source agent orchestrators reviewed (incl. Vibe Kanban shutdown note)</td>
+<td><a href="https://www.augmentcode.com/tools/open-source-agent-orchestrators" target="_blank" rel="noopener noreferrer">https://www.augmentcode.com/tools/open-source-agent-orchestrators</a></td>
+<td>✅</td>
+</tr>
+<tr>
+<td>The Code Agent Orchestra — the three-tier framing</td>
+<td><a href="https://addyosmani.com/blog/code-agent-orchestra/" target="_blank" rel="noopener noreferrer">https://addyosmani.com/blog/code-agent-orchestra/</a></td>
+<td>✅</td>
+</tr>
+<tr>
+<td>AI coding trends 2026 (Conductor, Vibe Kanban)</td>
+<td><a href="https://beyond.addy.ie/2026-trends/" target="_blank" rel="noopener noreferrer">https://beyond.addy.ie/2026-trends/</a></td>
+<td>✅</td>
+</tr>
+<tr>
+<td>Gastown</td>
+<td><a href="https://github.com/gastownhall/gastown" target="_blank" rel="noopener noreferrer">https://github.com/gastownhall/gastown</a></td>
+<td>✅</td>
+</tr>
+<tr>
+<td>Welcome to Gas Town (beads, convoys, GUPP)</td>
+<td><a href="https://steve-yegge.medium.com/welcome-to-gas-town-4f25ee16dd04" target="_blank" rel="noopener noreferrer">https://steve-yegge.medium.com/welcome-to-gas-town-4f25ee16dd04</a></td>
+<td>✅</td>
+</tr>
+<tr>
+<td>Beads</td>
+<td><a href="https://github.com/steveyegge/beads" target="_blank" rel="noopener noreferrer">https://github.com/steveyegge/beads</a> · <a href="https://github.com/gastownhall/beads" target="_blank" rel="noopener noreferrer">https://github.com/gastownhall/beads</a></td>
+<td>✅</td>
+</tr>
+<tr>
+<td>Gastown analyst summary (v1.x, Kilo hosted, honest assessment)</td>
+<td><a href="https://rywalker.com/research/gastown" target="_blank" rel="noopener noreferrer">https://rywalker.com/research/gastown</a></td>
+<td>✅</td>
+</tr>
+<tr>
+<td>Gastown setup guide</td>
+<td><a href="https://shinzo.ai/blog/how-to-use-gastown" target="_blank" rel="noopener noreferrer">https://shinzo.ai/blog/how-to-use-gastown</a></td>
+<td>✅</td>
+</tr>
+<tr>
+<td>AgentFactory (open-source software factory)</td>
+<td><a href="https://github.com/LiteTrackerApp/agentfactory" target="_blank" rel="noopener noreferrer">https://github.com/LiteTrackerApp/agentfactory</a></td>
+<td>✅</td>
+</tr>
+<tr>
+<td>Bernstein (deterministic orchestrator, signed lineage, air-gap)</td>
+<td><a href="https://bernstein.run" target="_blank" rel="noopener noreferrer">https://bernstein.run</a></td>
+<td>✅</td>
+</tr>
+<tr>
+<td>git-worktrees topic (Bernstein, Cezar and others)</td>
+<td><a href="https://github.com/topics/git-worktrees" target="_blank" rel="noopener noreferrer">https://github.com/topics/git-worktrees</a></td>
+<td>✅</td>
+</tr>
+<tr>
+<td>MCP Agent Mail / beads_rust context</td>
+<td><a href="https://github.com/Dicklesworthstone/beads_rust" target="_blank" rel="noopener noreferrer">https://github.com/Dicklesworthstone/beads_rust</a></td>
+<td>✅</td>
+</tr>
+<tr>
+<td>Vibe Kanban</td>
+<td><a href="https://github.com/BloopAI/vibe-kanban" target="_blank" rel="noopener noreferrer">https://github.com/BloopAI/vibe-kanban</a></td>
+<td>⚠️</td>
+</tr>
+<tr>
+<td>Claude Squad</td>
+<td><a href="https://github.com/smtg-ai/claude-squad" target="_blank" rel="noopener noreferrer">https://github.com/smtg-ai/claude-squad</a></td>
+<td>⚠️</td>
+</tr>
+</tbody>
+</table></div>
+<hr />
+<h2 id="12-agent-skills-governance">12. Agent &amp; skills governance</h2>
+<div class="table-wrap"><table>
+<thead>
+<tr>
+<th>Item</th>
+<th>Link</th>
+<th></th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Anthropic — Skills for enterprise (governance, registry, role bundles)</td>
+<td><a href="https://platform.claude.com/docs/en/agents-and-tools/agent-skills/enterprise" target="_blank" rel="noopener noreferrer">https://platform.claude.com/docs/en/agents-and-tools/agent-skills/enterprise</a></td>
+<td>✅</td>
+</tr>
+<tr>
+<td>Anthropic — create and distribute a plugin marketplace (<code>strict</code>, URL sources, headersHelper)</td>
+<td><a href="https://code.claude.com/docs/en/plugin-marketplaces" target="_blank" rel="noopener noreferrer">https://code.claude.com/docs/en/plugin-marketplaces</a></td>
+<td>✅</td>
+</tr>
+<tr>
+<td>Anthropic — manage plugins for your organization (private sources, GitHub App)</td>
+<td><a href="https://support.claude.com/en/articles/13837433-manage-plugins-for-your-organization" target="_blank" rel="noopener noreferrer">https://support.claude.com/en/articles/13837433-manage-plugins-for-your-organization</a></td>
+<td>✅</td>
+</tr>
+<tr>
+<td>Enterprise marketplace governance (<code>strictKnownMarketplaces</code>, two-repo split, no plugin signing)</td>
+<td><a href="https://www.mpt.solutions/your-claude-plugin-marketplace-needs-more-than-a-git-repo/" target="_blank" rel="noopener noreferrer">https://www.mpt.solutions/your-claude-plugin-marketplace-needs-more-than-a-git-repo/</a></td>
+<td>✅</td>
+</tr>
+<tr>
+<td>Registry-first marketplace pattern (generated manifest, SHA pins)</td>
+<td><a href="https://github.com/avivsinai/skills-marketplace" target="_blank" rel="noopener noreferrer">https://github.com/avivsinai/skills-marketplace</a></td>
+<td>✅</td>
+</tr>
+<tr>
+<td>DataDog — per-repo marketplace enablement + <code>permissions.deny</code> filtering</td>
+<td><a href="https://github.com/DataDog/system-tests/pull/6420" target="_blank" rel="noopener noreferrer">https://github.com/DataDog/system-tests/pull/6420</a></td>
+<td>✅</td>
+</tr>
+<tr>
+<td>LiteLLM as a Claude Code plugin registry</td>
+<td><a href="https://docs.litellm.ai/docs/tutorials/claude_code_plugin_marketplace" target="_blank" rel="noopener noreferrer">https://docs.litellm.ai/docs/tutorials/claude_code_plugin_marketplace</a></td>
+<td>✅</td>
+</tr>
+<tr>
+<td>claude-plugins / skills-installer + registry</td>
+<td><a href="https://github.com/Kamalnrf/claude-plugins" target="_blank" rel="noopener noreferrer">https://github.com/Kamalnrf/claude-plugins</a></td>
+<td>✅</td>
+</tr>
+<tr>
+<td>Smithery (cross-client skills/MCP registry)</td>
+<td><a href="https://smithery.ai/" target="_blank" rel="noopener noreferrer">https://smithery.ai/</a></td>
+<td>✅</td>
+</tr>
+<tr>
+<td>MCP</td>
+<td><a href="https://modelcontextprotocol.io/" target="_blank" rel="noopener noreferrer">https://modelcontextprotocol.io/</a></td>
+<td>⚠️</td>
+</tr>
+<tr>
+<td>OWASP GenAI / agentic security</td>
+<td><a href="https://genai.owasp.org/" target="_blank" rel="noopener noreferrer">https://genai.owasp.org/</a></td>
+<td>⚠️</td>
+</tr>
+</tbody>
+</table></div>
+<hr />
+<h2 id="13-agentic-sdlc-platforms-app-builders-context-engines">13. Agentic SDLC platforms, app builders, context engines</h2>
+<div class="table-wrap"><table>
+<thead>
+<tr>
+<th>Item</th>
+<th>Link</th>
+<th></th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Augment Code</td>
+<td><a href="https://www.augmentcode.com/" target="_blank" rel="noopener noreferrer">https://www.augmentcode.com/</a></td>
+<td>✅</td>
+</tr>
+<tr>
+<td>Augment — Context Engine (retrieval over prompt weight; Terminal Bench claim)</td>
+<td><a href="https://www.augmentcode.com/context-engine" target="_blank" rel="noopener noreferrer">https://www.augmentcode.com/context-engine</a></td>
+<td>✅</td>
+</tr>
+<tr>
+<td>Augment — Cosmos Experts (context failure modes, CLAUDE.md limits)</td>
+<td><a href="https://www.augmentcode.com/guides/cosmos-experts" target="_blank" rel="noopener noreferrer">https://www.augmentcode.com/guides/cosmos-experts</a></td>
+<td>✅</td>
+</tr>
+<tr>
+<td>Augment — Codex vs Cosmos (session context vs persistent org knowledge)</td>
+<td><a href="https://www.augmentcode.com/tools/openai-codex-vs-augment-cosmos" target="_blank" rel="noopener noreferrer">https://www.augmentcode.com/tools/openai-codex-vs-augment-cosmos</a></td>
+<td>✅</td>
+</tr>
+<tr>
+<td>Augment — feature availability matrix (Auggie CLI, IDEs)</td>
+<td><a href="https://docs.augmentcode.com/feature-availability" target="_blank" rel="noopener noreferrer">https://docs.augmentcode.com/feature-availability</a></td>
+<td>✅</td>
+</tr>
+<tr>
+<td>Augment — company/funding profile</td>
+<td><a href="https://ai.engineer/orgs/augment-code" target="_blank" rel="noopener noreferrer">https://ai.engineer/orgs/augment-code</a></td>
+<td>✅</td>
+</tr>
+<tr>
+<td>Replit Enterprise (micro-VMs, audit logs, bulk vulnerability action)</td>
+<td><a href="https://replit.com/enterprise" target="_blank" rel="noopener noreferrer">https://replit.com/enterprise</a></td>
+<td>✅</td>
+</tr>
+<tr>
+<td>Replit — Lovable alternatives (Agent 4 positioning)</td>
+<td><a href="https://replit.com/discover/lovable-alternatives" target="_blank" rel="noopener noreferrer">https://replit.com/discover/lovable-alternatives</a></td>
+<td>✅</td>
+</tr>
+<tr>
+<td>Replit Agent 3 — where the handoff to production tooling sits</td>
+<td><a href="https://www.digitalapplied.com/blog/replit-agent-3-browser-full-stack-coding-guide" target="_blank" rel="noopener noreferrer">https://www.digitalapplied.com/blog/replit-agent-3-browser-full-stack-coding-guide</a></td>
+<td>✅</td>
+</tr>
+<tr>
+<td>Lovable — AIUC-1 certification for coding agents</td>
+<td><a href="https://lovable.dev/blog/setting-the-standard-for-agentic-development" target="_blank" rel="noopener noreferrer">https://lovable.dev/blog/setting-the-standard-for-agentic-development</a></td>
+<td>✅</td>
+</tr>
+<tr>
+<td>Lovable — honest review incl. the 80% problem</td>
+<td><a href="https://www.aibuilderclub.com/blog/lovable-ai-review-2026" target="_blank" rel="noopener noreferrer">https://www.aibuilderclub.com/blog/lovable-ai-review-2026</a></td>
+<td>✅</td>
+</tr>
+<tr>
+<td>Lovable alternatives for internal tools (code ownership vs governance)</td>
+<td><a href="https://monday.com/blog/vibe-coding/lovable-alternatives/" target="_blank" rel="noopener noreferrer">https://monday.com/blog/vibe-coding/lovable-alternatives/</a></td>
+<td>✅</td>
+</tr>
+<tr>
+<td>Devin / Cognition</td>
+<td><a href="https://devin.ai/" target="_blank" rel="noopener noreferrer">https://devin.ai/</a></td>
+<td>⚠️</td>
+</tr>
+<tr>
+<td>Factory</td>
+<td><a href="https://factory.ai/" target="_blank" rel="noopener noreferrer">https://factory.ai/</a></td>
+<td>⚠️</td>
+</tr>
+<tr>
+<td>Sourcegraph Amp</td>
+<td><a href="https://ampcode.com/" target="_blank" rel="noopener noreferrer">https://ampcode.com/</a></td>
+<td>⚠️</td>
+</tr>
+<tr>
+<td>Tessl</td>
+<td><a href="https://tessl.io/" target="_blank" rel="noopener noreferrer">https://tessl.io/</a></td>
+<td>⚠️</td>
+</tr>
+<tr>
+<td>Manus</td>
+<td><a href="https://manus.im/" target="_blank" rel="noopener noreferrer">https://manus.im/</a></td>
+<td>✅</td>
+</tr>
+</tbody>
+</table></div>
+<hr />
+<h2 id="14-the-four-lists-to-bookmark-instead-of-this-document">14. The four lists to bookmark instead of this document</h2>
+<p>This field turns over roughly quarterly. Rather than maintaining the tables above, track these:</p>
+<ol>
+<li><strong>Agent orchestrators</strong> — <a href="https://github.com/andyrewlee/awesome-agent-orchestrators" target="_blank" rel="noopener noreferrer">https://github.com/andyrewlee/awesome-agent-orchestrators</a></li>
+<li><strong>AI SRE</strong> — <a href="https://github.com/agamm/awesome-ai-sre" target="_blank" rel="noopener noreferrer">https://github.com/agamm/awesome-ai-sre</a></li>
+<li><strong>AI testing</strong> — <a href="https://github.com/tugkanboz/awesome-ai-testing" target="_blank" rel="noopener noreferrer">https://github.com/tugkanboz/awesome-ai-testing</a></li>
+<li><strong>EventCatalog org</strong> — <a href="https://github.com/orgs/event-catalog/repositories" target="_blank" rel="noopener noreferrer">https://github.com/orgs/event-catalog/repositories</a></li>
+</ol>
+  </main>
+  <footer class="colophon">
+    <span>Link Index — GPB A&amp;E Offsite Research</span>
+    <span>Converted from GPB-Offsite-Link-Index.md</span>
+  </footer>
+</div>
+</body>
+</html>

@@ -1,0 +1,857 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Architecture as a Product - Implementation Plan</title>
+<style>
+:root {
+  --bg: #F8F6F1;
+  --bg-dark: #141422;
+  --bg-card: #FFFFFF;
+  --bg-code: #1E1E32;
+  --gold: #B8860B;
+  --gold-l: #D4A843;
+  --blue: #2C5F8A;
+  --blue-l: #3A7BC8;
+  --teal: #1A8A7D;
+  --red: #C0392B;
+  --purple: #6C3483;
+  --orange: #E67E22;
+  --green: #27AE60;
+  --txt: #1A1A2E;
+  --txt2: #4A4A6A;
+  --txt3: #8A8AA0;
+  --bdr: #E8E4DC;
+  --sh: 0 2px 16px rgba(0,0,0,0.06);
+  --sh-lg: 0 8px 32px rgba(0,0,0,0.1);
+}
+*{margin:0;padding:0;box-sizing:border-box;}
+html{scroll-behavior:smooth;scroll-padding-top:72px;}
+body{font-family:'Inter',-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif;background:var(--bg);color:var(--txt);line-height:1.6;overflow-x:hidden;}
+
+/* Scroll animations */
+.reveal{opacity:0;transform:translateY(32px);transition:opacity .7s ease,transform .7s ease;}
+.reveal.visible{opacity:1;transform:translateY(0);}
+.reveal-left{opacity:0;transform:translateX(-40px);transition:opacity .6s ease,transform .6s ease;}
+.reveal-left.visible{opacity:1;transform:translateX(0);}
+.reveal-right{opacity:0;transform:translateX(40px);transition:opacity .6s ease,transform .6s ease;}
+.reveal-right.visible{opacity:1;transform:translateX(0);}
+.reveal-scale{opacity:0;transform:scale(.92);transition:opacity .6s ease,transform .6s ease;}
+.reveal-scale.visible{opacity:1;transform:scale(1);}
+.stagger>*{opacity:0;transform:translateY(24px);transition:opacity .5s ease,transform .5s ease;}
+.stagger.visible>*:nth-child(1){opacity:1;transform:translateY(0);transition-delay:.05s;}
+.stagger.visible>*:nth-child(2){opacity:1;transform:translateY(0);transition-delay:.12s;}
+.stagger.visible>*:nth-child(3){opacity:1;transform:translateY(0);transition-delay:.19s;}
+.stagger.visible>*:nth-child(4){opacity:1;transform:translateY(0);transition-delay:.26s;}
+.stagger.visible>*:nth-child(5){opacity:1;transform:translateY(0);transition-delay:.33s;}
+.stagger.visible>*:nth-child(6){opacity:1;transform:translateY(0);transition-delay:.40s;}
+.stagger.visible>*:nth-child(7){opacity:1;transform:translateY(0);transition-delay:.47s;}
+.stagger.visible>*:nth-child(8){opacity:1;transform:translateY(0);transition-delay:.54s;}
+.stagger.visible>*:nth-child(9){opacity:1;transform:translateY(0);transition-delay:.61s;}
+.stagger.visible>*:nth-child(10){opacity:1;transform:translateY(0);transition-delay:.68s;}
+.stagger.visible>*:nth-child(11){opacity:1;transform:translateY(0);transition-delay:.75s;}
+.stagger.visible>*:nth-child(12){opacity:1;transform:translateY(0);transition-delay:.82s;}
+
+/* Top nav */
+.topnav{position:fixed;top:0;left:0;right:0;height:64px;background:rgba(20,20,34,.92);backdrop-filter:blur(16px);-webkit-backdrop-filter:blur(16px);z-index:1000;display:flex;align-items:center;justify-content:space-between;padding:0 32px;border-bottom:1px solid rgba(255,255,255,.06);transition:transform .3s ease;}
+.topnav.hidden{transform:translateY(-100%);}
+.topnav .logo{font-size:15px;font-weight:700;color:#fff;letter-spacing:-.3px;}
+.topnav .logo span{color:var(--gold-l);font-weight:800;}
+.topnav-links{display:flex;gap:4px;}
+.topnav-links a{color:rgba(255,255,255,.55);text-decoration:none;font-size:12px;font-weight:500;padding:6px 12px;border-radius:6px;transition:all .2s;white-space:nowrap;}
+.topnav-links a:hover,.topnav-links a.active{color:#fff;background:rgba(255,255,255,.08);}
+.scroll-progress{position:fixed;top:64px;left:0;height:2px;background:linear-gradient(90deg,var(--gold),var(--blue),var(--teal));z-index:1001;transition:width .15s linear;}
+
+/* Hero */
+.hero{min-height:100vh;display:flex;flex-direction:column;justify-content:center;align-items:center;text-align:center;padding:120px 32px 80px;background:var(--bg-dark);position:relative;overflow:hidden;}
+.hero::before{content:'';position:absolute;top:-50%;left:-50%;width:200%;height:200%;background:radial-gradient(ellipse at 30% 50%,rgba(184,134,11,.08) 0%,transparent 50%),radial-gradient(ellipse at 70% 30%,rgba(44,95,138,.06) 0%,transparent 50%);animation:heroGlow 12s ease-in-out infinite alternate;}
+@keyframes heroGlow{0%{transform:translateX(-5%) translateY(-3%);}100%{transform:translateX(5%) translateY(3%);}}
+.hero *{position:relative;z-index:1;}
+.hero-tag{display:inline-block;background:rgba(184,134,11,.15);border:1px solid rgba(184,134,11,.3);color:var(--gold-l);padding:6px 20px;border-radius:24px;font-size:12px;font-weight:600;letter-spacing:2.5px;text-transform:uppercase;margin-bottom:32px;}
+.hero h1{font-size:clamp(36px,6vw,64px);font-weight:900;color:#fff;letter-spacing:-2px;line-height:1.1;max-width:900px;margin-bottom:20px;}
+.hero h1 em{font-style:normal;background:linear-gradient(135deg,var(--gold-l),var(--gold));-webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text;}
+.hero-sub{font-size:clamp(16px,2vw,20px);color:rgba(255,255,255,.45);font-weight:300;max-width:680px;line-height:1.7;margin-bottom:48px;}
+.hero-authors{display:flex;gap:32px;flex-wrap:wrap;justify-content:center;}
+.hero-author{text-align:center;}
+.hero-author .role{font-size:11px;color:rgba(255,255,255,.3);letter-spacing:1px;text-transform:uppercase;margin-bottom:4px;}
+.hero-author .name{font-size:15px;font-weight:600;color:var(--gold-l);}
+.hero-stats{display:flex;gap:20px;margin-top:56px;flex-wrap:wrap;justify-content:center;}
+.hero-stat{background:rgba(255,255,255,.04);border:1px solid rgba(255,255,255,.08);border-radius:12px;padding:20px 28px;text-align:center;min-width:120px;transition:transform .3s,border-color .3s;cursor:default;}
+.hero-stat:hover{transform:translateY(-4px);border-color:rgba(184,134,11,.3);}
+.hero-stat .num{font-size:32px;font-weight:900;color:#fff;}
+.hero-stat .label{font-size:11px;color:rgba(255,255,255,.4);font-weight:500;margin-top:2px;}
+.hero-scroll{position:absolute;bottom:32px;left:50%;transform:translateX(-50%);color:rgba(255,255,255,.2);font-size:12px;letter-spacing:2px;text-transform:uppercase;animation:bounce 2s infinite;}
+@keyframes bounce{0%,100%{transform:translateX(-50%) translateY(0);}50%{transform:translateX(-50%) translateY(8px);}}
+
+/* Sections */
+section{padding:100px 0;}
+.container{max-width:1200px;margin:0 auto;padding:0 32px;}
+
+/* Section headers */
+.sec-label{font-size:12px;font-weight:700;letter-spacing:3px;text-transform:uppercase;color:var(--gold);margin-bottom:12px;}
+.sec-title{font-size:clamp(28px,4vw,42px);font-weight:900;letter-spacing:-1px;color:var(--txt);margin-bottom:12px;line-height:1.15;}
+.sec-desc{font-size:16px;color:var(--txt2);max-width:640px;line-height:1.7;margin-bottom:40px;}
+
+/* Dark sections */
+.dark-sec{background:var(--bg-dark);color:#fff;}
+.dark-sec .sec-title{color:#fff;}
+.dark-sec .sec-desc{color:rgba(255,255,255,.5);}
+
+/* Cards */
+.card{background:var(--bg-card);border:1px solid var(--bdr);border-radius:14px;padding:28px;box-shadow:var(--sh);transition:transform .3s,box-shadow .3s;}
+.card:hover{transform:translateY(-4px);box-shadow:var(--sh-lg);}
+.card-top{border-top:3px solid var(--gold);}
+.card-top-blue{border-top:3px solid var(--blue);}
+.card-top-teal{border-top:3px solid var(--teal);}
+.card-top-red{border-top:3px solid var(--red);}
+.card-top-purple{border-top:3px solid var(--purple);}
+.card-top-orange{border-top:3px solid var(--orange);}
+.card h4{font-size:15px;font-weight:700;margin-bottom:8px;color:var(--txt);}
+.card p,.card li{font-size:13px;color:var(--txt2);line-height:1.65;}
+.card ul{list-style:none;padding:0;}
+.card ul li{padding:4px 0 4px 18px;position:relative;}
+.card ul li::before{content:'';position:absolute;left:0;top:12px;width:6px;height:6px;border-radius:50%;background:var(--gold);}
+
+/* Grids */
+.g2{display:grid;grid-template-columns:1fr 1fr;gap:24px;}
+.g3{display:grid;grid-template-columns:repeat(3,1fr);gap:24px;}
+.g4{display:grid;grid-template-columns:repeat(4,1fr);gap:20px;}
+.g5{display:grid;grid-template-columns:repeat(5,1fr);gap:16px;}
+@media(max-width:900px){.g2,.g3,.g4,.g5{grid-template-columns:1fr;}}
+@media(min-width:901px) and (max-width:1100px){.g3{grid-template-columns:1fr 1fr;}.g4,.g5{grid-template-columns:1fr 1fr;}}
+
+/* Quotes */
+.quote-block{background:var(--bg-dark);border-radius:16px;padding:36px 40px;margin:32px 0;position:relative;overflow:hidden;}
+.quote-block::before{content:'\201C';position:absolute;top:0;left:16px;font-size:80px;color:rgba(184,134,11,.15);line-height:1;}
+.quote-block p{font-size:18px;font-weight:500;color:#fff;font-style:italic;line-height:1.6;position:relative;z-index:1;}
+.quote-block .attr{font-size:12px;color:rgba(255,255,255,.35);font-style:normal;font-weight:400;margin-top:10px;}
+.quote-sm{background:var(--bg-dark);border-radius:10px;padding:20px 24px;margin:12px 0;}
+.quote-sm p{font-size:14px;font-weight:500;color:#fff;font-style:italic;line-height:1.5;}
+
+/* Principles */
+.principle-item{display:flex;gap:16px;align-items:flex-start;padding:16px 0;border-bottom:1px solid var(--bdr);}
+.principle-item:last-child{border-bottom:none;}
+.principle-num{width:36px;height:36px;border-radius:10px;background:linear-gradient(135deg,var(--gold),var(--gold-l));color:#fff;display:flex;align-items:center;justify-content:center;font-size:14px;font-weight:800;flex-shrink:0;}
+.principle-num.blue{background:linear-gradient(135deg,var(--blue),var(--blue-l));}
+.principle-body h5{font-size:14px;font-weight:700;color:var(--txt);margin-bottom:2px;}
+.principle-body p{font-size:12px;color:var(--txt3);}
+
+/* Badges */
+.badge{display:inline-block;padding:3px 10px;border-radius:4px;font-size:11px;font-weight:700;letter-spacing:.5px;}
+.b-gold{background:rgba(184,134,11,.1);color:var(--gold);}
+.b-blue{background:rgba(44,95,138,.1);color:var(--blue);}
+.b-teal{background:rgba(26,138,125,.1);color:var(--teal);}
+.b-red{background:rgba(192,57,43,.1);color:var(--red);}
+.b-purple{background:rgba(108,52,131,.1);color:var(--purple);}
+.b-new{background:rgba(26,138,125,.12);color:var(--teal);border:1px solid rgba(26,138,125,.25);}
+
+/* Workstream headers */
+.ws-header{display:flex;align-items:center;gap:16px;margin-bottom:24px;flex-wrap:wrap;}
+.ws-num{background:var(--blue);color:#fff;padding:6px 14px;border-radius:6px;font-size:12px;font-weight:800;letter-spacing:1px;text-transform:uppercase;}
+.ws-title{font-size:clamp(22px,3vw,32px);font-weight:900;letter-spacing:-.5px;color:var(--txt);}
+.ws-obj{font-size:14px;color:var(--txt2);margin-bottom:28px;max-width:800px;line-height:1.7;padding-left:2px;border-left:3px solid var(--gold);padding:8px 0 8px 16px;background:rgba(184,134,11,.03);border-radius:0 8px 8px 0;}
+
+/* Phase timeline */
+.phases{display:flex;gap:2px;margin:24px 0;}
+.phase{flex:1;padding:20px;background:var(--bg-card);border:1px solid var(--bdr);border-radius:0;transition:transform .3s,box-shadow .3s;}
+.phase:first-child{border-radius:12px 0 0 12px;}
+.phase:last-child{border-radius:0 12px 12px 0;}
+.phase:hover{transform:translateY(-3px);box-shadow:var(--sh-lg);z-index:1;}
+.phase-label{font-size:10px;font-weight:800;color:var(--blue);letter-spacing:1.5px;text-transform:uppercase;margin-bottom:6px;}
+.phase-name{font-size:14px;font-weight:700;color:var(--txt);margin-bottom:4px;}
+.phase-time{font-size:11px;color:var(--txt3);font-weight:500;margin-bottom:8px;}
+.phase-desc{font-size:12px;color:var(--txt2);line-height:1.6;}
+@media(max-width:900px){.phases{flex-direction:column;gap:8px;}.phase,.phase:first-child,.phase:last-child{border-radius:12px;}}
+
+/* Metrics */
+.metrics{display:flex;gap:16px;margin:24px 0;flex-wrap:wrap;}
+.metric{flex:1;min-width:140px;background:linear-gradient(135deg,var(--gold),var(--gold-l));border-radius:12px;padding:20px;text-align:center;color:#fff;transition:transform .3s;}
+.metric:hover{transform:scale(1.03);}
+.metric .val{font-size:32px;font-weight:900;}
+.metric .lbl{font-size:11px;font-weight:500;opacity:.8;margin-top:2px;}
+.metric.m-blue{background:linear-gradient(135deg,var(--blue),var(--blue-l));}
+.metric.m-teal{background:linear-gradient(135deg,var(--teal),var(--green));}
+
+/* Layer stack */
+.layer-stack{display:flex;flex-direction:column;gap:6px;margin:32px 0;}
+.layer-row{display:grid;grid-template-columns:120px 1fr 180px;align-items:center;padding:18px 24px;border-radius:10px;color:#fff;gap:20px;transition:transform .3s;}
+.layer-row:hover{transform:translateX(6px);}
+.layer-row .ln{font-size:13px;font-weight:800;}
+.layer-row .ld{font-size:14px;font-weight:600;}
+.layer-row .lw{font-size:11px;opacity:.65;text-align:right;}
+.l5{background:linear-gradient(90deg,#6C3483,#8E44AD);}
+.l4{background:linear-gradient(90deg,#2C5F8A,#3A7BC8);}
+.l3{background:linear-gradient(90deg,#1A8A7D,#27AE60);}
+.l2{background:linear-gradient(90deg,#B8860B,#D4A843);}
+.l1{background:linear-gradient(90deg,#6B7280,#9CA3AF);}
+@media(max-width:700px){.layer-row{grid-template-columns:1fr;text-align:center;gap:4px;}.layer-row .lw{text-align:center;}}
+
+/* Comparison */
+.vs{display:grid;grid-template-columns:1fr 56px 1fr;gap:0;align-items:start;margin:32px 0;}
+.vs-arrow{display:flex;align-items:center;justify-content:center;font-size:24px;font-weight:900;color:var(--gold);padding-top:48px;}
+.vs-side{padding:28px;border-radius:14px;background:var(--bg-card);border:1px solid var(--bdr);}
+.vs-side.before{border-top:3px solid var(--red);}
+.vs-side.after{border-top:3px solid var(--teal);}
+.vs-side h4{font-size:15px;font-weight:700;margin-bottom:14px;}
+.vs-side.before h4{color:var(--red);}
+.vs-side.after h4{color:var(--teal);}
+.vs-side ul{list-style:none;padding:0;}
+.vs-side ul li{font-size:13px;color:var(--txt2);padding:5px 0 5px 18px;position:relative;line-height:1.5;}
+.vs-side.before ul li::before{content:'';position:absolute;left:0;top:12px;width:8px;height:2px;background:var(--red);}
+.vs-side.after ul li::before{content:'';position:absolute;left:0;top:12px;width:8px;height:2px;background:var(--teal);}
+@media(max-width:700px){.vs{grid-template-columns:1fr;gap:16px;}.vs-arrow{padding:0;font-size:20px;}}
+
+/* Tables */
+.table-wrap{overflow-x:auto;margin:20px 0;border-radius:12px;border:1px solid var(--bdr);}
+table{width:100%;border-collapse:collapse;font-size:13px;}
+th{background:var(--bg-dark);color:#fff;padding:12px 16px;text-align:left;font-weight:600;font-size:11px;letter-spacing:.5px;text-transform:uppercase;}
+td{padding:12px 16px;border-bottom:1px solid var(--bdr);color:var(--txt2);vertical-align:top;line-height:1.5;}
+tr:hover td{background:rgba(184,134,11,.03);}
+td strong{color:var(--txt);}
+
+/* Vertical cards */
+.v-card{background:var(--bg-card);border:1px solid var(--bdr);border-radius:12px;padding:20px;text-align:center;transition:transform .3s,box-shadow .3s;}
+.v-card:hover{transform:translateY(-4px);box-shadow:var(--sh-lg);}
+.v-card .v-icon{width:48px;height:48px;border-radius:12px;margin:0 auto 12px;display:flex;align-items:center;justify-content:center;font-size:22px;}
+.v-card h5{font-size:14px;font-weight:700;color:var(--txt);margin-bottom:6px;}
+.v-card .v-lead{font-size:12px;color:var(--blue);font-weight:600;margin-bottom:6px;}
+.v-card .v-data{font-size:11px;color:var(--txt3);line-height:1.5;}
+
+/* Flow */
+.flow{display:flex;align-items:center;gap:8px;flex-wrap:wrap;margin:16px 0;}
+.flow-step{background:var(--bg-card);border:1px solid var(--bdr);border-radius:8px;padding:8px 16px;font-size:12px;font-weight:600;color:var(--txt);white-space:nowrap;transition:transform .2s;}
+.flow-step:hover{transform:scale(1.04);}
+.flow-step.hl{background:var(--blue);color:#fff;border-color:var(--blue);}
+.flow-arr{color:var(--txt3);font-size:16px;}
+
+/* Env stack */
+.env-layer{padding:12px 20px;border-radius:8px;color:#fff;font-size:13px;font-weight:600;margin-bottom:4px;display:flex;justify-content:space-between;transition:transform .3s;}
+.env-layer:hover{transform:translateX(8px);}
+.env-layer span{font-weight:400;opacity:.7;font-size:12px;}
+
+/* Roadmap waves */
+.wave-block{border-left:3px solid var(--gold);padding:0 0 0 24px;margin-bottom:32px;position:relative;}
+.wave-block::before{content:'';position:absolute;left:-7px;top:0;width:12px;height:12px;border-radius:50%;background:var(--gold);}
+.wave-block.w-blue{border-left-color:var(--blue);}.wave-block.w-blue::before{background:var(--blue);}
+.wave-block.w-teal{border-left-color:var(--teal);}.wave-block.w-teal::before{background:var(--teal);}
+.wave-block.w-purple{border-left-color:var(--purple);}.wave-block.w-purple::before{background:var(--purple);}
+.wave-head{display:flex;align-items:baseline;gap:12px;margin-bottom:12px;}
+.wave-head h4{font-size:20px;font-weight:800;color:var(--txt);}
+.wave-head .wave-time{font-size:13px;color:var(--txt3);font-weight:500;}
+.wave-items{display:grid;grid-template-columns:1fr 1fr;gap:4px 20px;}
+.wave-items li{font-size:13px;color:var(--txt2);padding:4px 0 4px 20px;position:relative;line-height:1.55;}
+.wave-items li::before{content:'';position:absolute;left:0;top:10px;width:10px;height:10px;border:2px solid var(--gold);border-radius:3px;}
+.wave-block.w-blue .wave-items li::before{border-color:var(--blue);}
+.wave-block.w-teal .wave-items li::before{border-color:var(--teal);}
+.wave-block.w-purple .wave-items li::before{border-color:var(--purple);}
+@media(max-width:700px){.wave-items{grid-template-columns:1fr;}}
+
+/* Quote gallery */
+.quote-gallery{display:grid;grid-template-columns:repeat(3,1fr);gap:16px;margin:32px 0;}
+.quote-gallery .qg-item{background:var(--bg-dark);border-radius:12px;padding:24px;transition:transform .3s;}
+.quote-gallery .qg-item:hover{transform:translateY(-4px);}
+.quote-gallery .qg-item p{font-size:14px;color:#fff;font-style:italic;line-height:1.6;}
+.quote-gallery .qg-item .qg-cat{font-size:10px;color:var(--gold-l);font-weight:700;letter-spacing:1.5px;text-transform:uppercase;margin-bottom:8px;font-style:normal;}
+@media(max-width:900px){.quote-gallery{grid-template-columns:1fr;}}
+
+/* Code */
+.code-block{background:var(--bg-code);border-radius:10px;padding:20px 24px;margin:12px 0;overflow-x:auto;}
+.code-block code{color:var(--gold-l);font-size:13px;font-family:'SF Mono',Consolas,monospace;white-space:pre;line-height:1.8;}
+
+/* Separator */
+.sep{height:1px;background:var(--bdr);margin:0;}
+
+/* Back to top */
+.btt{position:fixed;bottom:24px;right:24px;width:44px;height:44px;border-radius:50%;background:var(--bg-dark);color:#fff;border:1px solid rgba(255,255,255,.1);display:flex;align-items:center;justify-content:center;font-size:18px;cursor:pointer;opacity:0;transform:translateY(12px);transition:all .3s;z-index:999;}
+.btt.show{opacity:1;transform:translateY(0);}
+.btt:hover{background:var(--gold);}
+
+/* Divider section */
+.divider-sec{padding:80px 32px;background:linear-gradient(135deg,var(--bg-dark) 0%,#222244 100%);text-align:center;position:relative;overflow:hidden;}
+.divider-sec::before{content:'';position:absolute;inset:0;background:radial-gradient(ellipse at center,rgba(184,134,11,.06),transparent 70%);}
+.divider-sec *{position:relative;}
+.divider-sec .sec-label{color:var(--gold-l);}
+.divider-sec .sec-title{color:#fff;font-size:clamp(28px,5vw,48px);}
+.divider-sec .sec-desc{color:rgba(255,255,255,.45);margin:0 auto;}
+
+/* Interactive tabs */
+.tabs{display:flex;gap:4px;margin-bottom:24px;flex-wrap:wrap;}
+.tab-btn{padding:8px 18px;border-radius:8px;border:1px solid var(--bdr);background:var(--bg-card);font-size:12px;font-weight:600;color:var(--txt2);cursor:pointer;transition:all .2s;font-family:inherit;}
+.tab-btn:hover{border-color:var(--gold);color:var(--gold);}
+.tab-btn.active{background:var(--bg-dark);color:#fff;border-color:var(--bg-dark);}
+.tab-panel{display:none;animation:fadeUp .4s ease;}
+.tab-panel.active{display:block;}
+@keyframes fadeUp{from{opacity:0;transform:translateY(12px);}to{opacity:1;transform:translateY(0);}}
+
+/* Footer */
+footer{background:var(--bg-dark);color:rgba(255,255,255,.4);text-align:center;padding:40px 32px;font-size:13px;}
+footer strong{color:var(--gold-l);}
+</style>
+</head>
+<body>
+
+<!-- Top Navigation -->
+<nav class="topnav" id="topnav">
+  <div class="logo"><span>Architecture</span> as a Product</div>
+  <div class="topnav-links" id="navLinks">
+    <a href="#vision">Vision</a>
+    <a href="#principles">Principles</a>
+    <a href="#workstreams">Workstreams</a>
+    <a href="#framework">Framework</a>
+    <a href="#roadmap">Roadmap</a>
+    <a href="#quotes">Quotes</a>
+  </div>
+</nav>
+<div class="scroll-progress" id="scrollProgress"></div>
+
+<!-- Hero -->
+<section class="hero" id="hero">
+  <div class="hero-tag">GPB A&amp;E Offsite 2026</div>
+  <h1>Architecture as a <em>Product</em></h1>
+  <div class="hero-sub">A unified implementation plan merging platform architecture, data architecture, and AI-native delivery into one executable strategy.</div>
+  <div class="hero-stats">
+    <div class="hero-stat"><div class="num">7</div><div class="label">Workstreams</div></div>
+    <div class="hero-stat"><div class="num">12</div><div class="label">Principles</div></div>
+    <div class="hero-stat"><div class="num">5</div><div class="label">Service Verticals</div></div>
+    <div class="hero-stat"><div class="num">4</div><div class="label">Execution Waves</div></div>
+    <div class="hero-stat"><div class="num">5</div><div class="label">AI-for-Data Layers</div></div>
+  </div>
+  <div class="hero-scroll">Scroll to explore &#8595;</div>
+</section>
+
+<!-- ========== VISION ========== -->
+<section id="vision">
+  <div class="container">
+    <div class="sec-label reveal">The Combined Vision</div>
+    <div class="sec-title reveal">Where We Are &amp; Where We're Going</div>
+    <div class="sec-desc reveal">GPB must resolve the fundamental tension between functional domains (organized by human workflow) and data domains (organized by data itself) -- while simultaneously building the platform that makes architecture consumable.</div>
+
+    <div class="vs reveal">
+      <div class="vs-side before">
+        <h4>Current State</h4>
+        <ul>
+          <li><strong>Bespoke solutions</strong> -- project mindset, duplication</li>
+          <li><strong>Pipeline sprawl</strong> -- custom HA, manual envs, idle infra</li>
+          <li><strong>Standards as documents</strong> -- inconsistent interpretation</li>
+          <li><strong>Functional domains by org chart</strong> -- 20+ areas, hundreds of systems</li>
+          <li><strong>Data &amp; functional architectures misaligned</strong></li>
+          <li><strong>1,110 datasets but not harmonized</strong> into products</li>
+          <li><strong>Reliability assumed</strong>, not proven</li>
+          <li><strong>SBOMs stop at awareness</strong> -- no automated action</li>
+          <li><strong>AI agents can't operate</strong> -- no semantic layer</li>
+        </ul>
+      </div>
+      <div class="vs-arrow">&#8594;</div>
+      <div class="vs-side after">
+        <h4>Target State</h4>
+        <ul>
+          <li><strong>Platform mindset</strong> -- solve once, reuse always</li>
+          <li><strong>Automated governance</strong> -- policy-as-code</li>
+          <li><strong>Capabilities as code</strong> -- not documents</li>
+          <li><strong>Unified vertical ownership</strong> -- 5 verticals, data-first</li>
+          <li><strong>AI-ready Data Products</strong> -- governed, self-describing</li>
+          <li><strong>Semantic layer</strong> -- glossary, ontology, skills catalog</li>
+          <li><strong>Reliability proven</strong> under stress via chaos engineering</li>
+          <li><strong>Self-correcting systems</strong> -- detect &amp; fix autonomously</li>
+          <li><strong>Human + AI agents</strong> -- same delivery interface</li>
+        </ul>
+      </div>
+    </div>
+
+    <div class="quote-block reveal">
+      <p>The functional domain map is like a city built neighborhood by neighborhood, each with its own water supply, electrical grid, and road system. It works -- until you need a highway or a regional power grid.</p>
+    </div>
+  </div>
+</section>
+
+<div class="sep"></div>
+
+<!-- ========== PRINCIPLES ========== -->
+<section id="principles">
+  <div class="container">
+    <div class="sec-label reveal">Foundation</div>
+    <div class="sec-title reveal">12 Core Operating Principles</div>
+    <div class="sec-desc reveal">A unified set spanning platform architecture, data architecture, and AI-native operations.</div>
+
+    <div class="g2">
+      <div class="card card-top reveal-left">
+        <h4 style="color:var(--gold);font-size:12px;letter-spacing:2px;text-transform:uppercase;margin-bottom:16px;">Platform &amp; Architecture</h4>
+        <div class="principle-item"><div class="principle-num">1</div><div class="principle-body"><h5>Solve Hard Problems Once</h5><p>Encapsulate complexity for reuse</p></div></div>
+        <div class="principle-item"><div class="principle-num">2</div><div class="principle-body"><h5>Platforms Beat Standards</h5><p>Embed standards in tools, not just docs</p></div></div>
+        <div class="principle-item"><div class="principle-num">3</div><div class="principle-body"><h5>Adoption is the Only Metric</h5><p>Focus on usage and value, not compliance</p></div></div>
+        <div class="principle-item"><div class="principle-num">4</div><div class="principle-body"><h5>Federated Leadership + Central Vision</h5><p>Define what centrally, how locally</p></div></div>
+        <div class="principle-item"><div class="principle-num">5</div><div class="principle-body"><h5>Automate Governance</h5><p>Code as the enforcer, not people</p></div></div>
+        <div class="principle-item"><div class="principle-num">6</div><div class="principle-body"><h5>Reliability is Proven, Not Assumed</h5><p>Chaos engineering validates what we design</p></div></div>
+        <div class="principle-item"><div class="principle-num">7</div><div class="principle-body"><h5>Self-Correcting Systems</h5><p>If the system detects the problem, it should fix it</p></div></div>
+      </div>
+      <div class="card card-top-blue reveal-right">
+        <h4 style="color:var(--blue);font-size:12px;letter-spacing:2px;text-transform:uppercase;margin-bottom:16px;">Data &amp; AI-Native</h4>
+        <div class="principle-item"><div class="principle-num blue">8</div><div class="principle-body"><h5>Data-First Thinking</h5><p>Which data products does the agent consume?</p></div></div>
+        <div class="principle-item"><div class="principle-num blue">9</div><div class="principle-body"><h5>Unified Vertical Ownership</h5><p>5 GPB Service Verticals with "the quad"</p></div></div>
+        <div class="principle-item"><div class="principle-num blue">10</div><div class="principle-body"><h5>AI-Ready Data Products</h5><p>Self-describing, governed by data contracts</p></div></div>
+        <div class="principle-item"><div class="principle-num blue">11</div><div class="principle-body"><h5>Semantic Layer as Intelligence Fabric</h5><p>Business glossary, ontology, skills catalog</p></div></div>
+        <div class="principle-item"><div class="principle-num blue">12</div><div class="principle-body"><h5>Architect Role Convergence</h5><p>Functional + Data = AI-Native Enterprise Architect</p></div></div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ========== WORKSTREAMS DIVIDER ========== -->
+<div class="divider-sec" id="workstreams">
+  <div class="sec-label">Implementation</div>
+  <div class="sec-title">7 Workstreams</div>
+  <div class="sec-desc">A unified execution strategy across platform, data, delivery, reliability, and organizational transformation.</div>
+</div>
+
+<!-- WS1: Pattern Catalog -->
+<section id="ws1">
+  <div class="container">
+    <div class="ws-header reveal"><span class="ws-num">WS 1</span><span class="ws-title">Pattern Catalog &amp; Consumable Architecture</span></div>
+    <div class="ws-obj reveal">Build a self-service catalog of executable architecture patterns that teams select instead of designing from scratch. Each pattern now includes data domain alignment.</div>
+
+    <div class="phases stagger">
+      <div class="phase">
+        <div class="phase-label">Phase 1A</div>
+        <div class="phase-name">Define Pattern Library</div>
+        <div class="phase-time">Months 1-3</div>
+        <div class="phase-desc">6 core patterns: Stateless Service, Event Processor, Workflow Engine, Batch Processing, API Service, Streaming Ingestion. Each encodes infra, deployment, observability, security + <strong>data domain alignment</strong>.</div>
+      </div>
+      <div class="phase">
+        <div class="phase-label">Phase 1B</div>
+        <div class="phase-name">Build Catalog UI</div>
+        <div class="phase-time">Months 2-4</div>
+        <div class="phase-desc">Engineers browse and select patterns. Cards show I/O, infra, compliance, <strong>data domain mapping, required data products, semantic layer integration</strong>. Selection triggers automated provisioning.</div>
+      </div>
+      <div class="phase">
+        <div class="phase-label">Phase 1C</div>
+        <div class="phase-name">Automated Enforcement</div>
+        <div class="phase-time">Months 3-6</div>
+        <div class="phase-desc">Replace review boards with pattern constraints. Policy-as-code in CI. Standards check: Ownership &gt; Schema &gt; Version. Non-compliant artifacts quarantined, not published.</div>
+      </div>
+    </div>
+
+    <div class="metrics reveal">
+      <div class="metric"><div class="val">&gt;80%</div><div class="lbl">Adoption for new services</div></div>
+      <div class="metric m-blue"><div class="val">6</div><div class="lbl">Core patterns at launch</div></div>
+      <div class="metric m-teal"><div class="val">0</div><div class="lbl">Manual setup for standard patterns</div></div>
+    </div>
+  </div>
+</section>
+
+<div class="sep"></div>
+
+<!-- WS2: Events & Semantic -->
+<section id="ws2">
+  <div class="container">
+    <div class="ws-header reveal"><span class="ws-num">WS 2</span><span class="ws-title">Event-Driven Architecture &amp; Semantic Integration</span></div>
+    <div class="ws-obj reveal">Rewire integration to event-driven semantics, separating business facts from system behavior -- and build the semantic layer that enables AI agents to reason across data domains.</div>
+
+    <div class="g2">
+      <div class="reveal-left">
+        <h3 style="font-size:16px;font-weight:700;margin-bottom:16px;">Event Taxonomy</h3>
+        <div class="card card-top" style="margin-bottom:12px;"><h4>Roman Events (Business Facts)</h4><p>Durable, immutable records: <code>party.created</code>, <code>account.opened</code>, <code>relationship.established</code>. Each vertical owns its facts.</p></div>
+        <div class="card card-top-blue" style="margin-bottom:16px;"><h4>Canonical Events (System Behavior)</h4><p>Reactions enabling interoperability: <code>client-profile-synchronized</code>, <code>onboarding-screening-requested</code></p></div>
+        <h3 style="font-size:16px;font-weight:700;margin-bottom:12px;">Control Plane Components</h3>
+        <div class="card">
+          <ul>
+            <li><strong>Source Repo Definitions</strong> -- schemas, ownership, versions in Git</li>
+            <li><strong>CI Validation Skill</strong> -- validates, registers, quarantines</li>
+            <li><strong>EventCatalog</strong> -- discoverability &amp; governance</li>
+            <li><strong>Governance Engine</strong> -- policy evaluation &amp; enforcement</li>
+          </ul>
+        </div>
+      </div>
+      <div class="reveal-right">
+        <h3 style="font-size:16px;font-weight:700;margin-bottom:16px;">Semantic Layer &amp; Knowledge Bases <span class="badge b-new">NEW</span></h3>
+        <div class="card card-top-teal" style="margin-bottom:12px;"><h4>Business Glossary</h4><p>Single authoritative definitions for "client", "account", "position" across all 5 verticals.</p></div>
+        <div class="card card-top-teal" style="margin-bottom:12px;"><h4>Metadata + Ontology</h4><p>Provenance, quality scores, access controls. Machine-readable domain model for agent navigation.</p></div>
+        <div class="card card-top-teal" style="margin-bottom:12px;"><h4>Skills/Tools Catalog</h4><p>Typed, permissioned: inputs/outputs, entitlements, risk tags, versioning, ownership.</p></div>
+        <div class="card card-top-teal"><h4>Unstructured Knowledge Layer</h4><p>Vectorized policies, documents, rules, decision history. Skill playbooks made RAG-accessible.</p></div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<div class="sep"></div>
+
+<!-- WS3: Composable Environments -->
+<section id="ws3">
+  <div class="container">
+    <div class="ws-header reveal"><span class="ws-num">WS 3</span><span class="ws-title">Composable Cloud Environments</span></div>
+    <div class="ws-obj reveal">Move from handcrafted, team-specific environments to composable, standardized environment assembly -- with replay-driven cost reduction.</div>
+
+    <div class="g2">
+      <div class="reveal-left">
+        <h3 style="font-size:16px;font-weight:700;margin-bottom:16px;">Environment Composition Model</h3>
+        <div class="env-layer" style="background:#6C3483;">1. Application Pattern <span>what type of workload</span></div>
+        <div class="env-layer" style="background:#2C5F8A;">2. Environment Profile <span>dev, staging, production</span></div>
+        <div class="env-layer" style="background:#1A8A7D;">3. Resilience Profile <span>Standard to Mission Critical</span></div>
+        <div class="env-layer" style="background:#B8860B;">4. Deployment Strategy <span>canary, blue/green, rolling</span></div>
+        <div class="env-layer" style="background:#1A1A2E;">5. Running Environment <span>provisioned infrastructure</span></div>
+        <p style="font-size:12px;color:var(--txt3);margin-top:12px;">Same inputs always produce same outcomes. Environment-as-Code generates VPC, CI/CD, IAM, Observability.</p>
+      </div>
+      <div class="reveal-right">
+        <h3 style="font-size:16px;font-weight:700;margin-bottom:16px;">Replay-Driven Reduction <span class="badge b-new">NEW</span></h3>
+        <div class="card card-top-teal" style="margin-bottom:12px;"><h4>Phase 1: Record</h4><p>Capture real production behavior. Convert into reusable test artifacts in a Central Behavioral Asset Repository.</p></div>
+        <div class="card card-top-teal" style="margin-bottom:12px;"><h4>Phase 2: Replay</h4><p>Replace always-on dependent systems with lightweight replay proxies. Only the system-under-test is active.</p></div>
+        <div class="card card-top-teal"><h4>Cloud Cost Transformation</h4><p>From topology-driven (persistent infra, high cost) to usage-driven (ephemeral, on-demand, cost aligned to usage).</p></div>
+        <div class="quote-sm"><p>We don't need environments to validate systems. We need behavior.</p></div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<div class="sep"></div>
+
+<!-- WS4: Delivery -->
+<section id="ws4">
+  <div class="container">
+    <div class="ws-header reveal"><span class="ws-num">WS 4</span><span class="ws-title">AI-Native Software Delivery Platform</span></div>
+    <div class="ws-obj reveal">Rethink CI/CD from pipelines-per-team to a platform-owned delivery control plane that supports human and AI agent velocity.</div>
+
+    <h3 class="reveal" style="font-size:16px;font-weight:700;margin-bottom:12px;">Core: Decouple Integration from Release</h3>
+    <div class="flow reveal">
+      <div class="flow-step">Merge = Integration Event</div><div class="flow-arr">&#8594;</div>
+      <div class="flow-step">Candidate Build = Platform Decision</div><div class="flow-arr">&#8594;</div>
+      <div class="flow-step hl">Release = Artifact Promotion</div>
+    </div>
+
+    <div class="g2" style="margin-top:28px;">
+      <div class="reveal-left">
+        <h3 style="font-size:16px;font-weight:700;margin-bottom:12px;">Enterprise Delivery Broker</h3>
+        <div class="card">
+          <ul>
+            <li><strong>Accepts input</strong> from Git, CLI, and AI Agents</li>
+            <li><strong>App Metadata Catalog</strong> -- class, runtime, env model, compliance</li>
+            <li><strong>Merge Queue</strong> -- trunk admission, compatibility validation</li>
+            <li><strong>Candidate Cut Policy</strong> -- time-window batching, thresholds</li>
+            <li><strong>Release Set + Artifact Lineage</strong> -- immutable, SBOM-tracked</li>
+          </ul>
+        </div>
+        <h3 style="font-size:16px;font-weight:700;margin:20px 0 12px;">Intent-Driven Delivery</h3>
+        <div class="code-block"><code>runtime: java21
+service: advisor-portal
+deploy:
+  environment: dev
+  strategy: blue-green</code></div>
+      </div>
+      <div class="reveal-right">
+        <h3 style="font-size:16px;font-weight:700;margin-bottom:12px;">AI-Native Delivery Flow</h3>
+        <div class="card card-top-purple" style="margin-bottom:10px;padding:16px;"><h4 style="font-size:13px;">Preview <span style="font-weight:400;color:var(--txt3);"> -- Feature Speed</span></h4><p>Isolated validation, ephemeral environments, agent + human feedback</p></div>
+        <div class="card card-top-blue" style="margin-bottom:10px;padding:16px;"><h4 style="font-size:13px;">Integrate <span style="font-weight:400;color:var(--txt3);"> -- Integration Speed</span></h4><p>Controlled trunk admission, incremental verification</p></div>
+        <div class="card card-top" style="margin-bottom:10px;padding:16px;"><h4 style="font-size:13px;">Release Set <span style="font-weight:400;color:var(--txt3);"> -- Decision Layer</span></h4><p>Grouped change intent, policy-driven candidate cut</p></div>
+        <div class="card card-top-teal" style="padding:16px;"><h4 style="font-size:13px;">Artifact + Promotion <span style="font-weight:400;color:var(--txt3);"> -- Release Speed</span></h4><p>Build once, promote many, immutable lineage</p></div>
+
+        <h3 style="font-size:16px;font-weight:700;margin:20px 0 12px;">SBOM Autonomous Remediation <span class="badge b-new">NEW</span></h3>
+        <div class="card card-top-teal">
+          <ul>
+            <li><strong>SBOM as Trigger</strong> -- Detection &gt; Policy &gt; Automated Action</li>
+            <li><strong>Policy Engine</strong> -- no critical CVEs, runtime N-1, license check</li>
+            <li><strong>Remediation Loop</strong> -- SBOM &gt; Policy &gt; Agent &gt; PR &gt; CI &gt; Verified</li>
+            <li><strong>Autonomy Inside Guardrails</strong> -- auto-fix within boundaries</li>
+          </ul>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<div class="sep"></div>
+
+<!-- WS5: Reliability -->
+<section id="ws5">
+  <div class="container">
+    <div class="ws-header reveal"><span class="ws-num">WS 5</span><span class="ws-title">Reliability by Design + Chaos Engineering</span></div>
+    <div class="ws-obj reveal">Embed resilience as a declared, enforced platform property -- and prove it works through continuous chaos engineering.</div>
+
+    <div class="g2">
+      <div class="reveal-left">
+        <h3 style="font-size:16px;font-weight:700;margin-bottom:16px;">Reliability Tiers</h3>
+        <div class="table-wrap">
+          <table>
+            <tr><th>Tier</th><th>Model</th><th>RTO/RPO</th><th>Cost</th></tr>
+            <tr><td><strong>Standard</strong></td><td>Single-region, multi-AZ</td><td>Moderate / Low</td><td>$</td></tr>
+            <tr><td><strong>Enhanced</strong></td><td>Multi-region active/passive</td><td>Low / Near-Zero</td><td>$$</td></tr>
+            <tr><td><strong>Critical</strong></td><td>Multi-region active/active</td><td>Near-Zero / Zero</td><td>$$$</td></tr>
+            <tr><td><strong>Mission Critical</strong></td><td>Multi-region + advanced</td><td>Zero / Zero</td><td>$$$$</td></tr>
+          </table>
+        </div>
+        <p style="font-size:12px;color:var(--txt3);margin-top:10px;">Platform enforces: declare "Critical" = get multi-region active/active. No partial resilience. No manual bypass.</p>
+      </div>
+      <div class="reveal-right">
+        <h3 style="font-size:16px;font-weight:700;margin-bottom:16px;">Chaos Engineering as Platform Capability <span class="badge b-new">NEW</span></h3>
+        <div class="g2" style="grid-template-columns:1fr 1fr;gap:8px;margin-bottom:14px;">
+          <div class="card" style="padding:14px;text-align:center;"><div style="font-size:22px;">&#9201;</div><div style="font-size:12px;font-weight:600;margin-top:4px;">Latency Injection</div></div>
+          <div class="card" style="padding:14px;text-align:center;"><div style="font-size:22px;">&#9888;&#65039;</div><div style="font-size:12px;font-weight:600;margin-top:4px;">Service Kill</div></div>
+          <div class="card" style="padding:14px;text-align:center;"><div style="font-size:22px;">&#128268;</div><div style="font-size:12px;font-weight:600;margin-top:4px;">Network Drop</div></div>
+          <div class="card" style="padding:14px;text-align:center;"><div style="font-size:22px;">&#128279;</div><div style="font-size:12px;font-weight:600;margin-top:4px;">Dep. Failure</div></div>
+        </div>
+        <div class="card card-top-teal">
+          <h4>Continuous Validation</h4>
+          <ul>
+            <li>From annual Game Days to <strong>chaos in CI/CD + pre-release + production</strong></li>
+            <li>Scenario-based: hypothesis, fault injection, observation, validation</li>
+            <li>Invariants: API &gt; 99%, Latency &lt; 50ms, UX baseline met</li>
+          </ul>
+        </div>
+      </div>
+    </div>
+    <div class="quote-block reveal"><p>Designed &#8800; Proven. Reliability is what we can demonstrate under stress.</p></div>
+  </div>
+</section>
+
+<div class="sep"></div>
+
+<!-- WS6: Data Products -->
+<section id="ws6">
+  <div class="container">
+    <div class="ws-header reveal"><span class="ws-num" style="background:var(--teal);">WS 6</span><span class="ws-title">Data Products &amp; AI-Ready Foundation</span><span class="badge b-new" style="margin-left:8px;">NEW WORKSTREAM</span></div>
+    <div class="ws-obj reveal">Transform raw datasets into governed, AI-ready Data Products aligned to the 5 GPB Service Verticals, enabling AI agents to consume data directly.</div>
+
+    <h3 class="reveal" style="font-size:16px;font-weight:700;margin-bottom:16px;">5 GPB Service Verticals with "The Quad" Leadership</h3>
+    <div class="g5 stagger" style="margin-bottom:32px;">
+      <div class="v-card" style="border-top:3px solid var(--blue);"><div class="v-icon" style="background:rgba(44,95,138,.1);">&#128100;</div><h5>Client Lifecycle</h5><div class="v-lead">Kristine Pfeiler</div><div class="v-data">Party &amp; Account, KYC, Document</div></div>
+      <div class="v-card" style="border-top:3px solid var(--teal);"><div class="v-icon" style="background:rgba(26,138,125,.1);">&#128200;</div><h5>Investment</h5><div class="v-lead">Gerard Hoban</div><div class="v-data">Instrument, Position, Transaction, Portfolio, Fees</div></div>
+      <div class="v-card" style="border-top:3px solid var(--purple);"><div class="v-icon" style="background:rgba(108,52,131,.1);">&#127974;</div><h5>Credit</h5><div class="v-lead">Amy Summerfield</div><div class="v-data">Collateral, Mortgage, Facility, Loan</div></div>
+      <div class="v-card" style="border-top:3px solid var(--orange);"><div class="v-icon" style="background:rgba(230,126,34,.1);">&#128161;</div><h5>Content &amp; Wealth Insights</h5><div class="v-lead">TBD</div><div class="v-data">Insights, Interactions, Campaigns, Pipeline</div></div>
+      <div class="v-card" style="border-top:3px solid var(--gold);"><div class="v-icon" style="background:rgba(184,134,11,.1);">&#128179;</div><h5>Banking &amp; Payments</h5><div class="v-lead">TBD</div><div class="v-data">Asset Movement, ACH, Payments</div></div>
+    </div>
+
+    <div class="g2">
+      <div class="reveal-left">
+        <h3 style="font-size:16px;font-weight:700;margin-bottom:12px;">Strategic Data Provisioning</h3>
+        <div class="g2" style="grid-template-columns:1fr 1fr;gap:10px;">
+          <div class="card" style="padding:16px;"><h4 style="color:var(--blue);font-size:13px;">Provision New</h4><p>Make reusable Data Products available for consumers</p></div>
+          <div class="card" style="padding:16px;"><h4 style="color:var(--teal);font-size:13px;">Trace &amp; Uplift</h4><p>Establish lineage and provenance, keep evergreen</p></div>
+          <div class="card" style="padding:16px;"><h4 style="color:var(--orange);font-size:13px;">Resolve DQ</h4><p>Fix root causes, uplift controls going forward</p></div>
+          <div class="card" style="padding:16px;"><h4 style="color:var(--purple);font-size:13px;">Uplift Existing</h4><p>Brownfield uplift to Data Product standards</p></div>
+        </div>
+      </div>
+      <div class="reveal-right">
+        <h3 style="font-size:16px;font-weight:700;margin-bottom:12px;">AI-Native Shift</h3>
+        <div class="card card-top" style="margin-bottom:12px;"><h4>Legacy (Human-Driven)</h4><p>Advisor opens CRM &#8594; navigates Portfolio tool &#8594; copies to spreadsheet &#8594; opens Risk dashboard &#8594; manually synthesizes &#8594; recommends</p></div>
+        <div class="card card-top-teal"><h4>Agentic (AI-Driven)</h4><p>Supervisor Agent queries Client + Holdings + Lending + Market Data Products via API &#8594; reasons across all &#8594; generates recommendation &#8594; human review</p></div>
+      </div>
+    </div>
+    <div class="quote-block reveal"><p>When AI agents interact directly with data models rather than UIs, data-first thinking naturally becomes the starting point for architecture.</p></div>
+  </div>
+</section>
+
+<div class="sep"></div>
+
+<!-- WS7: Architect Convergence -->
+<section id="ws7">
+  <div class="container">
+    <div class="ws-header reveal"><span class="ws-num" style="background:var(--purple);">WS 7</span><span class="ws-title">Architect Role Convergence</span></div>
+    <div class="ws-obj reveal">Transform the architect role from document reviewers to product builders -- and merge functional and data architect roles into AI-Native Enterprise Architects.</div>
+
+    <div class="table-wrap reveal">
+      <table>
+        <tr><th>Dimension</th><th style="background:var(--red);">Functional Architect</th><th style="background:var(--blue);">Data Architect</th><th style="background:var(--teal);">AI-Native Enterprise Architect (2026+)</th></tr>
+        <tr><td><strong>Focus</strong></td><td>Application(s) within functional domain(s)</td><td>Data modeling, SOR design, ETL</td><td><strong>End-to-end system + data + AI flows</strong></td></tr>
+        <tr><td><strong>Artifacts</strong></td><td>UI wireframes, process flows</td><td>ER diagrams, data models</td><td><strong>Ontologies, agent workflows, data contracts, MCP interfaces, KBs, Skills</strong></td></tr>
+        <tr><td><strong>Designs For</strong></td><td>Human operators clicking screens</td><td>Systems consuming via batch/ETL</td><td><strong>Both humans AND AI agents</strong></td></tr>
+        <tr><td><strong>Scope</strong></td><td>One functional silo</td><td>One or more data domains</td><td><strong>Full vertical + cross-vertical integration</strong></td></tr>
+        <tr><td><strong>Governance</strong></td><td>Manual review gates</td><td>DQ rules, SOR mapping, lineage</td><td><strong>Policy-as-code, automated contracts, drift detection</strong></td></tr>
+        <tr><td><strong>Trajectory</strong></td><td style="color:var(--red);">Becoming obsolete</td><td>Must expand scope</td><td style="color:var(--teal);font-weight:700;">The two roles merge -- this is the future</td></tr>
+      </table>
+    </div>
+    <div class="quote-block reveal"><p>The era of the architect who only knows one application is ending and the era of the data architect who only draws ER diagrams is also ending. What we need are architects who can think across all three pillars: data, functional/process, and AI.</p></div>
+  </div>
+</section>
+
+<!-- ========== FRAMEWORK ========== -->
+<div class="divider-sec" id="framework">
+  <div class="sec-label">AI-for-Data</div>
+  <div class="sec-title">Five-Layered Framework</div>
+  <div class="sec-desc">From raw sources to autonomous AI agents -- this framework underpins all workstreams.</div>
+</div>
+
+<section>
+  <div class="container">
+    <div class="layer-stack stagger">
+      <div class="layer-row l5"><div class="ln">Layer 5</div><div class="ld">AI Agents -- autonomous, with guardrails</div><div class="lw">WS4 Delivery, WS6 Data</div></div>
+      <div class="layer-row l4"><div class="ln">Layer 4</div><div class="ld">Semantic Layer -- Metadata, Glossary, Ontology, Skills Catalog</div><div class="lw">WS2 Events, WS6</div></div>
+      <div class="layer-row l3"><div class="ln">Layer 3</div><div class="ld">Unstructured Knowledge -- Policies, Rules, Decision History (RAG)</div><div class="lw">WS2 Semantic, WS7</div></div>
+      <div class="layer-row l2"><div class="ln">Layer 2</div><div class="ld">Data Products -- Core + Analytic (governed Data Mesh)</div><div class="lw">WS6, WS1 Patterns</div></div>
+      <div class="layer-row l1"><div class="ln">Layer 1</div><div class="ld">Raw Sources -- SORs, bronze datasets (1,000+)</div><div class="lw">WS6 uplift path</div></div>
+    </div>
+
+    <div class="g3 stagger" style="margin-top:32px;">
+      <div class="card card-top"><h4>Each Vertical Builds</h4><ul><li>Comprehensive Knowledge Bases</li><li>Skills Repository</li><li>Governed Data Products</li></ul></div>
+      <div class="card card-top-blue"><h4>Semantic Layer Delivers</h4><ul><li>Business glossary across 5 verticals</li><li>Metadata: provenance, quality, access</li><li>Machine-readable ontology</li></ul></div>
+      <div class="card card-top-purple"><h4>Orchestration Agent</h4><ul><li>Extracts business intent</li><li>Transforms into data product delivery</li><li>Ongoing automated governance</li></ul></div>
+    </div>
+
+    <div class="quote-block reveal"><p>For your vertical, what unstructured knowledge -- policies, rules, decision frameworks -- would an AI agent need to operate autonomously? How much of it is currently machine-readable?</p></div>
+  </div>
+</section>
+
+<!-- ========== ROADMAP ========== -->
+<div class="divider-sec" id="roadmap">
+  <div class="sec-label">Execution</div>
+  <div class="sec-title">4-Wave Roadmap</div>
+  <div class="sec-desc">12 months from foundation to scale across all 7 workstreams.</div>
+</div>
+
+<section>
+  <div class="container">
+    <div class="wave-block reveal">
+      <div class="wave-head"><h4>Wave 1: Foundation</h4><div class="wave-time">Months 1-3</div></div>
+      <ul class="wave-items">
+        <li>Inventory existing patterns across GPB teams</li>
+        <li>Define 6 core patterns + data domain alignment</li>
+        <li>Establish fact vs. behavior event taxonomy</li>
+        <li>Define 4 reliability tiers</li>
+        <li>Design <code>.platform/deploy.yaml</code> intent spec</li>
+        <li>Align architects on converged role</li>
+        <li>Appoint Data Executives for all 5 verticals</li>
+        <li>Begin business glossary -- cross-vertical terms</li>
+        <li>Define chaos primitives &amp; scenario library</li>
+        <li>Assess SBOM coverage &amp; define policy rules</li>
+      </ul>
+    </div>
+
+    <div class="wave-block w-blue reveal">
+      <div class="wave-head"><h4>Wave 2: Build</h4><div class="wave-time">Months 3-6</div></div>
+      <ul class="wave-items">
+        <li>Build Pattern Catalog UI</li>
+        <li>Build Event Architecture Control Plane</li>
+        <li>Build Environment Composition platform</li>
+        <li>Build Enterprise Delivery Broker v1</li>
+        <li>Build executable Reliability Profiles</li>
+        <li>Implement policy-as-code in CI pipelines</li>
+        <li>Core Data Products per vertical</li>
+        <li>Semantic Layer v1 (glossary, metadata, ontology)</li>
+        <li>Chaos Engineering platform capability</li>
+        <li>Phase 1 Replay: record production behavior</li>
+        <li>Build SBOM intelligence layer &amp; policy engine</li>
+      </ul>
+    </div>
+
+    <div class="wave-block w-teal reveal">
+      <div class="wave-head"><h4>Wave 3: Adopt</h4><div class="wave-time">Months 6-9</div></div>
+      <ul class="wave-items">
+        <li>Onboard 3 pilot teams to pattern catalog</li>
+        <li>Onboard 3 pilot teams to delivery platform</li>
+        <li>Deploy preview environments</li>
+        <li>Publish Core Data Products to marketplace</li>
+        <li>Build Analytical Data Products (Performance Insights, Client 360)</li>
+        <li>Phase 2 Replay: replace envs with proxies</li>
+        <li>Continuous chaos validation in CI/CD</li>
+        <li>Autonomous SBOM remediation (low-risk)</li>
+        <li>Measure adoption metrics</li>
+        <li>Collect feedback, iterate</li>
+      </ul>
+    </div>
+
+    <div class="wave-block w-purple reveal">
+      <div class="wave-head"><h4>Wave 4: Scale</h4><div class="wave-time">Months 9-12</div></div>
+      <ul class="wave-items">
+        <li>Roll out to all GPB teams</li>
+        <li>Enable AI agent delivery path</li>
+        <li>Full EventCatalog + dependency visualization</li>
+        <li>Platform-managed pipelines for all</li>
+        <li>Decommission custom CI/CD configurations</li>
+        <li>Complete Core Data Products all verticals</li>
+        <li>Cross-vertical AI-native queries</li>
+        <li>Semantic Layer v2 (full ontology, skills, KBs)</li>
+        <li>Replay-driven env cost reduction</li>
+        <li>Chaos validation all Critical+ services</li>
+        <li>Full autonomous SBOM remediation loop</li>
+        <li>All architects in converged model</li>
+      </ul>
+    </div>
+  </div>
+</section>
+
+<!-- ========== QUOTES ========== -->
+<section id="quotes" style="background:var(--bg-dark);padding:80px 0;">
+  <div class="container">
+    <div class="sec-label reveal" style="color:var(--gold-l);">Design Principles</div>
+    <div class="sec-title reveal" style="color:#fff;">Key Quotes</div>
+    <div class="sec-desc reveal" style="color:rgba(255,255,255,.4);">The principles that drive every workstream.</div>
+
+    <div class="quote-gallery stagger">
+      <div class="qg-item"><div class="qg-cat">Architecture</div><p>Architecture should be consumed, not reinterpreted.</p></div>
+      <div class="qg-item"><div class="qg-cat">Architecture</div><p>Standards become products. Products drive behavior.</p></div>
+      <div class="qg-item"><div class="qg-cat">Architecture</div><p>Make the best path the easiest path.</p></div>
+      <div class="qg-item"><div class="qg-cat">Delivery</div><p>Build once. Promote many.</p></div>
+      <div class="qg-item"><div class="qg-cat">Delivery</div><p>CI/CD should be invisible infrastructure -- not a user experience.</p></div>
+      <div class="qg-item"><div class="qg-cat">Data</div><p>The architecture shifts from 'which app?' to 'which data products does the agent consume?'</p></div>
+      <div class="qg-item"><div class="qg-cat">Reliability</div><p>Designed &#8800; Proven. Reliability is demonstrated under stress.</p></div>
+      <div class="qg-item"><div class="qg-cat">Reliability</div><p>We don't need environments. We need behavior.</p></div>
+      <div class="qg-item"><div class="qg-cat">Self-Healing</div><p>If the system can detect the problem, it should fix it.</p></div>
+      <div class="qg-item"><div class="qg-cat">Role Evolution</div><p>What we need are architects who can think across all three pillars: data, functional/process, and AI.</p></div>
+      <div class="qg-item"><div class="qg-cat">Call to Action</div><p>Architecture stops being a diagram and starts becoming the operating model.</p></div>
+      <div class="qg-item"><div class="qg-cat">Call to Action</div><p>This is not a discussion. This is a working session.</p></div>
+    </div>
+  </div>
+</section>
+
+<footer>
+  <strong>Architecture as a Product</strong> -- GPB A&amp;E Offsite 2026 Merged Implementation Plan<br>
+  Rod Thomas &middot; Eddie Hsu &middot; Patrick Neal
+</footer>
+
+<!-- Back to top -->
+<button class="btt" id="btt" onclick="window.scrollTo({top:0,behavior:'smooth'})">&#8593;</button>
+
+<script>
+// Scroll reveal
+const revealEls = document.querySelectorAll('.reveal,.reveal-left,.reveal-right,.reveal-scale,.stagger');
+const observer = new IntersectionObserver((entries) => {
+  entries.forEach(e => { if (e.isIntersecting) { e.target.classList.add('visible'); } });
+}, { threshold: 0.1, rootMargin: '0px 0px -40px 0px' });
+revealEls.forEach(el => observer.observe(el));
+
+// Scroll progress
+const scrollProg = document.getElementById('scrollProgress');
+const btt = document.getElementById('btt');
+const topnav = document.getElementById('topnav');
+let lastScroll = 0;
+
+window.addEventListener('scroll', () => {
+  const h = document.documentElement.scrollHeight - window.innerHeight;
+  const pct = (window.scrollY / h) * 100;
+  scrollProg.style.width = pct + '%';
+
+  // Back to top
+  if (window.scrollY > 600) btt.classList.add('show');
+  else btt.classList.remove('show');
+
+  // Hide/show nav on scroll direction
+  if (window.scrollY > lastScroll && window.scrollY > 300) topnav.classList.add('hidden');
+  else topnav.classList.remove('hidden');
+  lastScroll = window.scrollY;
+});
+
+// Active nav link
+const sections = document.querySelectorAll('section[id], .divider-sec[id]');
+const navLinks = document.querySelectorAll('#navLinks a');
+const navObserver = new IntersectionObserver((entries) => {
+  entries.forEach(e => {
+    if (e.isIntersecting) {
+      const id = e.target.id;
+      navLinks.forEach(l => l.classList.remove('active'));
+      const match = document.querySelector(`#navLinks a[href="#${id}"]`);
+      if (match) match.classList.add('active');
+    }
+  });
+}, { threshold: 0.3, rootMargin: '-64px 0px -50% 0px' });
+sections.forEach(s => navObserver.observe(s));
+
+// Smooth hover parallax on hero stats
+document.querySelectorAll('.hero-stat').forEach(el => {
+  el.addEventListener('mousemove', (e) => {
+    const rect = el.getBoundingClientRect();
+    const x = ((e.clientX - rect.left) / rect.width - 0.5) * 8;
+    const y = ((e.clientY - rect.top) / rect.height - 0.5) * 8;
+    el.style.transform = `translateY(-4px) rotateX(${-y}deg) rotateY(${x}deg)`;
+  });
+  el.addEventListener('mouseleave', () => { el.style.transform = ''; });
+});
+</script>
+</body>
+</html>

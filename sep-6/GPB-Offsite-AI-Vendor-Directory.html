@@ -1,0 +1,781 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Extended AI Vendor Directory — Mapped to the GPB A&amp;E Offsite</title>
+<meta name="color-scheme" content="light dark">
+<style>
+*,*::before,*::after{box-sizing:border-box}
+:root{
+  --bg:#fbfbfa; --surface:#fff; --text:#1c1e21; --muted:#5f6570; --faint:#8b919b;
+  --line:#e4e6ea; --line-soft:#eef0f3; --accent:#2f5fd0; --accent-soft:#eaf0fd;
+  --code-bg:#f4f5f7; --mark:#fff6cc;
+  --sans:-apple-system,BlinkMacSystemFont,"Segoe UI",Inter,Helvetica,Arial,sans-serif;
+  --mono:ui-monospace,SFMono-Regular,"SF Mono",Menlo,Consolas,monospace;
+}
+@media (prefers-color-scheme:dark){
+  :root{
+    --bg:#14161a; --surface:#1a1d22; --text:#e3e6ea; --muted:#9aa1ac; --faint:#6f7681;
+    --line:#2c3037; --line-soft:#23262c; --accent:#7fa9ff; --accent-soft:#1e2634;
+    --code-bg:#22262c; --mark:#4a3f14;
+  }
+}
+html{-webkit-text-size-adjust:100%}
+body{margin:0;background:var(--bg);color:var(--text);
+  font:400 17px/1.7 var(--sans);
+  font-feature-settings:"kern","liga";-webkit-font-smoothing:antialiased}
+
+/* ---------- shell ---------- */
+.page{max-width:80rem;margin:0 auto;padding:0 1.5rem 6rem;
+  display:grid;grid-template-columns:minmax(0,1fr);gap:0 3.5rem}
+@media (min-width:64rem){
+  .page{grid-template-columns:16rem minmax(0,1fr);padding-top:1rem}
+  .masthead{grid-column:1/-1}
+}
+
+/* ---------- masthead ---------- */
+.masthead{padding:4rem 0 2rem;border-bottom:1px solid var(--line);margin-bottom:2.5rem}
+.back{display:inline-block;margin-bottom:1.1rem;font-size:.83rem;color:var(--muted);
+  text-decoration:none}
+.back::before{content:"\2190";margin-right:.4rem}
+.back:hover{color:var(--accent)}
+.back + .eyebrow{margin-left:.75rem}
+.eyebrow{display:inline-flex;align-items:center;gap:.5rem;
+  font-size:.72rem;font-weight:600;letter-spacing:.09em;text-transform:uppercase;
+  color:var(--accent);background:var(--accent-soft);
+  padding:.3rem .6rem;border-radius:999px;margin-bottom:1.1rem}
+.masthead h1{margin:0;font-size:clamp(1.9rem,4.4vw,3rem);line-height:1.14;
+  font-weight:680;letter-spacing:-.022em;max-width:22ch}
+.subtitle{margin:.85rem 0 0;font-size:1.1rem;line-height:1.5;color:var(--muted);max-width:60ch;font-weight:400}
+.meta{margin:1.6rem 0 0;padding:0;list-style:none;display:flex;flex-wrap:wrap;gap:.5rem 1.5rem;
+  font-size:.85rem;color:var(--faint)}
+.meta strong{color:var(--muted);font-weight:600}
+
+/* ---------- toc ---------- */
+.toc{font-size:.875rem;line-height:1.45}
+@media (min-width:64rem){
+  .toc{position:sticky;top:1.5rem;align-self:start;max-height:calc(100vh - 3rem);
+    overflow-y:auto;padding-right:.5rem;scrollbar-width:thin}
+}
+@media (max-width:63.99rem){
+  .toc{background:var(--surface);border:1px solid var(--line);border-radius:12px;
+    padding:.4rem 1.1rem 1.1rem;margin-bottom:2.5rem}
+  .toc-title{cursor:pointer}
+}
+.toc-title{font-size:.72rem;font-weight:650;letter-spacing:.09em;text-transform:uppercase;
+  color:var(--faint);margin:0 0 .9rem}
+.toc ol{list-style:none;margin:0;padding:0}
+.toc li{margin:0}
+.toc a{display:block;padding:.32rem 0 .32rem .8rem;color:var(--muted);text-decoration:none;
+  border-left:2px solid var(--line-soft);transition:color .12s,border-color .12s}
+.toc a:hover{color:var(--accent);border-left-color:var(--accent)}
+.toc .lv3 a{padding-left:1.6rem;font-size:.83rem;color:var(--faint)}
+
+/* ---------- prose ---------- */
+.prose{max-width:44rem;min-width:0}
+.prose > *:first-child{margin-top:0}
+.prose h1,.prose h2,.prose h3,.prose h4{line-height:1.25;font-weight:650;letter-spacing:-.014em;scroll-margin-top:1.5rem}
+.prose h1{font-size:1.75rem;margin:3.6rem 0 1rem;padding-bottom:.55rem;border-bottom:1px solid var(--line)}
+.prose h2{font-size:1.35rem;margin:2.8rem 0 .85rem}
+.prose h3{font-size:1.08rem;margin:2.1rem 0 .6rem}
+.prose h4{font-size:.98rem;margin:1.7rem 0 .5rem;color:var(--muted)}
+.prose p{margin:0 0 1.15rem}
+.prose a{color:var(--accent);text-decoration:none;border-bottom:1px solid color-mix(in srgb,var(--accent) 32%,transparent)}
+.prose a:hover{border-bottom-color:var(--accent)}
+.prose a[href^="http"]{overflow-wrap:anywhere}
+.prose td a{word-break:break-word}
+.prose strong{font-weight:640;color:var(--text)}
+.prose ul,.prose ol{margin:0 0 1.15rem;padding-left:1.35rem}
+.prose li{margin:.3rem 0}
+.prose li::marker{color:var(--faint)}
+.prose li > ul,.prose li > ol{margin:.3rem 0}
+.prose blockquote{margin:1.6rem 0;padding:.1rem 0 .1rem 1.25rem;
+  border-left:3px solid var(--accent);color:var(--muted)}
+.prose blockquote p:last-child{margin-bottom:0}
+.prose hr{border:0;height:1px;background:var(--line);margin:3rem 0}
+.prose img{max-width:100%;height:auto;border-radius:8px}
+.prose code{font-family:var(--mono);font-size:.875em;background:var(--code-bg);
+  padding:.15em .4em;border-radius:5px;border:1px solid var(--line-soft)}
+.prose pre{background:var(--code-bg);border:1px solid var(--line);border-radius:10px;
+  padding:1rem 1.15rem;overflow-x:auto;margin:0 0 1.4rem;font-size:.88rem;line-height:1.6}
+.prose pre code{background:none;border:0;padding:0;font-size:inherit}
+
+/* ---------- tables ---------- */
+.table-wrap{overflow-x:auto;margin:0 0 1.6rem;border:1px solid var(--line);
+  border-radius:10px;background:var(--surface)}
+.prose table{border-collapse:collapse;width:100%;font-size:.9rem;line-height:1.55}
+.prose th,.prose td{padding:.62rem .85rem;text-align:left;vertical-align:top;
+  border-bottom:1px solid var(--line-soft)}
+.prose th{background:var(--code-bg);font-weight:640;font-size:.78rem;
+  letter-spacing:.04em;text-transform:uppercase;color:var(--muted);white-space:nowrap}
+.prose tbody tr:last-child td{border-bottom:0}
+.prose tbody tr:hover td{background:var(--line-soft)}
+
+@media (min-width:64rem){
+  .table-wrap,.prose pre{width:min(56rem,calc(100vw - 22rem))}
+}
+
+/* ---------- footer ---------- */
+.colophon{grid-column:1/-1;margin-top:4rem;padding-top:1.5rem;border-top:1px solid var(--line);
+  font-size:.8rem;color:var(--faint);display:flex;flex-wrap:wrap;gap:.4rem 1.25rem}
+
+/* ---------- print ---------- */
+@media print{
+  :root{--bg:#fff;--surface:#fff;--text:#000;--muted:#333;--line:#ccc}
+  body{font-size:11pt}
+  .toc,.colophon{display:none}
+  .page{display:block;max-width:none;padding:0}
+  .prose{max-width:none}
+  .prose h1,.prose h2{break-after:avoid}
+  .table-wrap,.prose pre,.prose blockquote{break-inside:avoid}
+  .prose a{color:#000;border:0}
+}
+</style>
+</head>
+<body>
+<div class="page">
+  <header class="masthead">
+    <a class="back" href="index.html">All documents</a>
+    <span class="eyebrow">Working notes</span>
+    <h1>Extended AI Vendor Directory — Mapped to the GPB A&amp;E Offsite</h1>
+    
+    <ul class="meta"><li><strong>Source</strong> GPB-Offsite-AI-Vendor-Directory.md</li><li><strong>Length</strong> 2,677 words</li></ul>
+  </header>
+  <nav class="toc" aria-label="Contents"><p class="toc-title">Contents</p><ol><li class="lv2"><a href="#1-architectural-observability-agentic-modernisation">1. Architectural observability &amp; agentic modernisation</a></li>
+<li class="lv2"><a href="#2-ai-code-review-the-missing-gate-in-11-and-14">2. AI code review — the missing gate in §11 and §14</a></li>
+<li class="lv2"><a href="#3-autonomous-finops-this-partially-fills-the-gap-i-said-was-empty">3. Autonomous FinOps — this partially fills the gap I said was empty</a></li>
+<li class="lv2"><a href="#4-ai-sre-and-incident-response-the-ai-roster">4. AI SRE and incident response — the .ai roster</a></li>
+<li class="lv2"><a href="#5-testing-and-quality-the-ai-roster">5. Testing and quality — the .ai roster</a></li>
+<li class="lv2"><a href="#6-data-catalogs-and-agentic-governance-the-ai-roster">6. Data, catalogs and agentic governance — the .ai roster</a></li>
+<li class="lv2"><a href="#7-agentic-sdlc-platforms-coding-agents">7. Agentic SDLC platforms &amp; coding agents</a></li>
+<li class="lv2"><a href="#8-agent-governance-infrastructure-the-newest-category">8. Agent governance infrastructure — the newest category</a></li>
+<li class="lv2"><a href="#9-platform-idp-adjacent">9. Platform / IDP adjacent</a></li>
+<li class="lv2"><a href="#10-how-to-evaluate-any-of-these-a-five-question-filter">10. How to evaluate any of these — a five-question filter</a></li>
+<li class="lv2"><a href="#11-what-still-has-no-vendor">11. What still has no vendor</a></li></ol></nav>
+  <main class="prose">
+<p><strong>Companion to:</strong> <code>GPB-AE-Offsite-Notes.md</code> and <code>GPB-Offsite-Agentic-Landscape.md</code>
+<strong>Compiled:</strong> September 2026</p>
+<p>This is the wider sweep — the AI-native vendors and <code>.ai</code> sites in each capability area, including the categories the first landscape document didn&rsquo;t cover: architectural observability, AI code review, autonomous FinOps, and agent governance infrastructure.</p>
+<p><strong>Two health warnings before the lists.</strong></p>
+<ol>
+<li><strong>This category turns over roughly quarterly.</strong> Confirmed casualties and changes in the last year alone: Octomind (AI testing) vanished; Bloop, the company behind Vibe Kanban, shut down in April 2026 with the project continuing community-maintained and fully local; Graphite was acquired by Cursor in December 2025. Verify a vendor is still trading before you put it in a plan.</li>
+<li><strong>Benchmark claims in this space are mostly self-published and mutually contradictory.</strong> On AI code review, one vendor-run benchmark of 118 real bugs across 45 repos put Greptile at 24% detection while Greptile&rsquo;s own head-to-head puts it &gt;50% ahead of CodeRabbit. Treat every number as a hypothesis, not evidence. The only numbers worth acting on are the ones you generate on your own repos.</li>
+</ol>
+<hr />
+<h2 id="1-architectural-observability-agentic-modernisation">1. Architectural observability &amp; agentic modernisation</h2>
+<h3 id="maps-to-notes-3-patterns-8-meridianacl-17-domain-boundaries">Maps to: Notes §3 (patterns), §8 (Meridian/ACL), §17 (domain boundaries)</h3>
+<p>This is the category most directly aimed at Rod&rsquo;s hexagonal-drift skill — and the one I under-covered last time.</p>
+<div class="table-wrap"><table>
+<thead>
+<tr>
+<th>Product</th>
+<th>Site</th>
+<th>What it does</th>
+<th>Fit</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><strong>vFunction</strong></td>
+<td><a href="https://vfunction.com" target="_blank" rel="noopener noreferrer">vfunction.com</a></td>
+<td>AI-driven architectural observability: baselines how an app is architected, identifies domains and cross-domain pollution, monitors architectural drift against the intended boundaries and dependency rules over time, and generates prescriptive modernisation &ldquo;to do&rdquo; tasks. Custom rules and alerts (e.g. enforce an architectural policy across hundreds of microservices), OpenTelemetry integration, and a Refactoring Engine that automates extraction of identified domains into services. <strong>vFunction 4.5 added the vFunction Agent</strong> — you give the intent, the agent handles implementation, working through TODOs in one conversational workflow.</td>
+<td><strong>The closest commercial product to what §3 and §8 describe.</strong> Their Q1 2026 framing is worth quoting internally: the differentiator is not who generates more code, but who can define bounded contexts correctly, maintain behavioural integrity during refactoring, and embed governance and resilience into the modernisation process. Also cites the Gartner line that by 2026, 80% of technical debt will be architectural technical debt.</td>
+</tr>
+<tr>
+<td><strong>CAST</strong> (Imaging / Highlight)</td>
+<td><a href="https://castsoftware.com" target="_blank" rel="noopener noreferrer">castsoftware.com</a></td>
+<td>Static architectural mapping of large estates, portfolio-level cloud-readiness scoring</td>
+<td>The incumbent alternative; heavier, less agentic</td>
+</tr>
+<tr>
+<td><strong>Moderne</strong></td>
+<td><a href="https://moderne.ai" target="_blank" rel="noopener noreferrer">moderne.ai</a></td>
+<td>Deterministic multi-repo transformation on the Lossless Semantic Tree</td>
+<td>Covered in the previous doc; pairs with vFunction — vFunction finds the boundary, OpenRewrite moves the code</td>
+</tr>
+<tr>
+<td><strong>CodeScene</strong></td>
+<td><a href="https://codescene.com" target="_blank" rel="noopener noreferrer">codescene.com</a></td>
+<td>Behavioural code analysis — hotspots, coupling and knowledge risk from git history</td>
+<td>Directly operationalises the transcript&rsquo;s &ldquo;git history is context&rdquo; observation</td>
+</tr>
+<tr>
+<td><strong>IcePanel</strong></td>
+<td><a href="https://icepanel.io" target="_blank" rel="noopener noreferrer">icepanel.io</a></td>
+<td>C4 model diagramming with a live catalog; pairs with EventCatalog</td>
+<td>Business-facing architecture view for the §7 audience</td>
+</tr>
+<tr>
+<td><strong>Structurizr</strong></td>
+<td><a href="https://structurizr.com" target="_blank" rel="noopener noreferrer">structurizr.com</a></td>
+<td>Architecture-as-code (C4 DSL) — diagrams generated from a model in git</td>
+<td>The OSS-adjacent option if you want the model in the repo</td>
+</tr>
+<tr>
+<td><strong>Mechanical Orchard</strong></td>
+<td><a href="https://mechanical-orchard.com" target="_blank" rel="noopener noreferrer">mechanical-orchard.com</a></td>
+<td>AI-assisted mainframe/legacy rewrite with behavioural equivalence verification</td>
+<td>Relevant to the §8 parallel-run verification pattern, if mainframe is in scope</td>
+</tr>
+<tr>
+<td><strong>Blitzy</strong></td>
+<td><a href="https://blitzy.com" target="_blank" rel="noopener noreferrer">blitzy.com</a></td>
+<td>Autonomous large-scale codebase transformation</td>
+<td>Watch-list; verify claims independently</td>
+</tr>
+</tbody>
+</table></div>
+<hr />
+<h2 id="2-ai-code-review-the-missing-gate-in-11-and-14">2. AI code review — the missing gate in §11 and §14</h2>
+<h3 id="maps-to-notes-11-pr-gates-14-shift-left-enforcement-18-multi-lens-review">Maps to: Notes §11 (PR gates), §14 (shift-left enforcement), §18 (multi-lens review)</h3>
+<p>Two research findings make this category unavoidable given your direction of travel: Veracode tested 100+ LLMs and found 45% of AI-generated code samples introduced an OWASP Top 10 vulnerability; and Faros AI measured that once AI-generated code enters a pipeline, review time increased 91% and PR size grew 154%. <strong>If you accelerate generation without an automated review gate, you move the bottleneck rather than removing it</strong> — which is exactly what §14 predicted.</p>
+<div class="table-wrap"><table>
+<thead>
+<tr>
+<th>Product</th>
+<th>Site</th>
+<th>Note</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><strong>Qodo</strong></td>
+<td><a href="https://qodo.ai" target="_blank" rel="noopener noreferrer">qodo.ai</a></td>
+<td>Governance-first — a configurable rule system that enforces specific engineering standards, multi-agent architecture with auto-learning rules, and coverage across all four major git providers (relevant given your Bitbucket estate). Built on PR-Agent, which they handed to the community as open source in April 2026. <strong>The best fit for &ldquo;encode our architecture standards as review rules.&rdquo;</strong></td>
+</tr>
+<tr>
+<td><strong>CodeRabbit</strong></td>
+<td><a href="https://coderabbit.ai" target="_blank" rel="noopener noreferrer">coderabbit.ai</a></td>
+<td>Layers AI on 40+ bundled linters and SAST scanners; broadest platform support including GitLab, Azure DevOps and Bitbucket; noisier (~10.8 comments/PR)</td>
+</tr>
+<tr>
+<td><strong>Greptile</strong></td>
+<td><a href="https://greptile.com" target="_blank" rel="noopener noreferrer">greptile.com</a></td>
+<td>Indexes the whole codebase before commenting; catches issues that depend on callers, shared modules and internal APIs — invisible from the diff alone. Self-hosting and GitLab support. Turns code review into architecture review</td>
+</tr>
+<tr>
+<td><strong>Macroscope</strong></td>
+<td><a href="https://macroscope.com" target="_blank" rel="noopener noreferrer">macroscope.com</a></td>
+<td>Claims the only integrated detect–fix–validate auto-fix loop; publishes the 118-bug benchmark others are measured against</td>
+</tr>
+<tr>
+<td><strong>Cursor BugBot</strong></td>
+<td><a href="https://cursor.com/bugbot" target="_blank" rel="noopener noreferrer">cursor.com/bugbot</a></td>
+<td>Extremely selective (~0.9 comments/PR, nearly all runtime-relevant) — the low-noise option</td>
+</tr>
+<tr>
+<td><strong>Kodus</strong></td>
+<td><a href="https://kodus.io" target="_blank" rel="noopener noreferrer">kodus.io</a></td>
+<td>Open source AI code review — the self-hostable option</td>
+</tr>
+<tr>
+<td><strong>PR-Agent</strong></td>
+<td><a href="https://github.com/qodo-ai/pr-agent" target="_blank" rel="noopener noreferrer">github.com/qodo-ai/pr-agent</a></td>
+<td>Open source; the base layer several products are built on</td>
+</tr>
+<tr>
+<td><strong>SonarQube / Codacy</strong></td>
+<td><a href="https://sonarsource.com" target="_blank" rel="noopener noreferrer">sonarsource.com</a>, <a href="https://codacy.com" target="_blank" rel="noopener noreferrer">codacy.com</a></td>
+<td>Deterministic SAST plus AI layer in one product. Worth remembering the trade-off: SAST applies deterministic rules and returns the same result every run; AI review reads intent and catches logic errors no rule expresses, <strong>at the cost of reproducibility</strong> — which matters for audit evidence</td>
+</tr>
+</tbody>
+</table></div>
+<p><strong>Deployment filter for JPMC:</strong> most of these are SaaS-only. Enterprise Server support, air-gapped deployment, cross-repo context and a rules layer are the four requirements that eliminate most of the list. Qodo and Greptile are the two that survive it; Graphite Diamond explicitly lacks all four.</p>
+<hr />
+<h2 id="3-autonomous-finops-this-partially-fills-the-gap-i-said-was-empty">3. Autonomous FinOps — this partially fills the gap I said was empty</h2>
+<h3 id="maps-to-notes-4-cost-as-the-economic-engine-10-risk-score-from-unit-cost">Maps to: Notes §4 (cost as the economic engine), §10 (risk score from unit cost)</h3>
+<p>Last time I said nothing joins unit economics to architecture-pattern recommendation. That&rsquo;s still true for the <em>recommendation</em> half, but the <em>autonomous action</em> half now exists.</p>
+<div class="table-wrap"><table>
+<thead>
+<tr>
+<th>Product</th>
+<th>Site</th>
+<th>What it does</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><strong>Sedai</strong></td>
+<td><a href="https://sedai.io" target="_blank" rel="noopener noreferrer">sedai.io</a></td>
+<td>The genuinely autonomous one: reinforcement-learning platform with dedicated cost, performance and safety agents, three operating modes including full autopilot, executing <strong>SLO-aware</strong> optimisation continuously across compute and Kubernetes. Palo Alto Networks reported $3.5M saved. Extended in 2026 to GPU/inference/model-serving cost</td>
+</tr>
+<tr>
+<td><strong>Cast AI</strong></td>
+<td><a href="https://cast.ai" target="_blank" rel="noopener noreferrer">cast.ai</a></td>
+<td>Kubernetes-only: real-time pod rightsizing, spot automation with interruption protection, bin-packing. Stops at the infrastructure layer</td>
+</tr>
+<tr>
+<td><strong>nOps / Clara</strong></td>
+<td><a href="https://nops.io" target="_blank" rel="noopener noreferrer">nops.io</a></td>
+<td>AWS-focused; Clara detects anomalies, identifies root cause and routes actions; Compute Copilot autonomously manages spot fleets</td>
+</tr>
+<tr>
+<td><strong>ProsperOps</strong></td>
+<td><a href="https://prosperops.com" target="_blank" rel="noopener noreferrer">prosperops.com</a></td>
+<td>Autonomous RI/Savings Plan management — strong for high-spend AWS with stable workloads</td>
+</tr>
+<tr>
+<td><strong><a href="https://Cloudgov.ai" target="_blank" rel="noopener noreferrer">Cloudgov.ai</a></strong></td>
+<td><a href="https://cloudgov.ai" target="_blank" rel="noopener noreferrer">cloudgov.ai</a></td>
+<td><strong>Read-only multicloud agent with approval-gated remediation, explicitly built for regulated teams</strong> — the shape most likely to pass your controls</td>
+</tr>
+<tr>
+<td><strong>Vantage</strong></td>
+<td><a href="https://vantage.sh" target="_blank" rel="noopener noreferrer">vantage.sh</a></td>
+<td>Cost visibility and reporting; the reference for allocation done well</td>
+</tr>
+<tr>
+<td><strong>Harness CCM</strong></td>
+<td><a href="https://harness.io" target="_blank" rel="noopener noreferrer">harness.io</a></td>
+<td>Rightsizing and scheduling — already in your platform</td>
+</tr>
+<tr>
+<td><strong>IBM Turbonomic</strong></td>
+<td><a href="https://ibm.com/turbonomic" target="_blank" rel="noopener noreferrer">ibm.com/turbonomic</a></td>
+<td>Hybrid/multi-cloud resource optimisation; heavy enterprise implementation</td>
+</tr>
+<tr>
+<td><strong>Amnic / <a href="https://usage.ai" target="_blank" rel="noopener noreferrer">usage.ai</a> / PointFive</strong></td>
+<td><a href="https://amnic.com" target="_blank" rel="noopener noreferrer">amnic.com</a>, <a href="https://usage.ai" target="_blank" rel="noopener noreferrer">usage.ai</a></td>
+<td>Newer entrants; PointFive&rsquo;s TokenShift also compresses tokens for coding agents</td>
+</tr>
+</tbody>
+</table></div>
+<p><strong>The number for your CTO deck:</strong> the FinOps Foundation&rsquo;s State of FinOps 2026 surveyed 1,192 practitioners representing &gt;$83bn of annual cloud spend and found 98% now manage AI spend, up from 31% two years earlier. Cloud waste is estimated at ~$44.5bn annually. And the concept worth importing directly into §4: <strong>shift-left FinOps</strong> — cost-modelling a workload <em>before</em> it is provisioned rather than remediating after the bill. That is precisely the environment-profile-plus-cost-estimate gate you described.</p>
+<hr />
+<h2 id="4-ai-sre-and-incident-response-the-ai-roster">4. AI SRE and incident response — the <code>.ai</code> roster</h2>
+<h3 id="maps-to-notes-10">Maps to: Notes §10</h3>
+<p>Beyond the four in the previous doc, the fuller field:</p>
+<div class="table-wrap"><table>
+<thead>
+<tr>
+<th>Product</th>
+<th>Site</th>
+<th>Angle</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Resolve AI</td>
+<td><a href="https://resolve.ai" target="_blank" rel="noopener noreferrer">resolve.ai</a></td>
+<td>Parallel hypothesis investigation; targets ~80% autonomous resolution</td>
+</tr>
+<tr>
+<td>Traversal</td>
+<td><a href="https://traversal.com" target="_blank" rel="noopener noreferrer">traversal.com</a></td>
+<td>Causal RCA at scale; <strong>on-prem option</strong></td>
+</tr>
+<tr>
+<td>Cleric</td>
+<td><a href="https://cleric.ai" target="_blank" rel="noopener noreferrer">cleric.ai</a></td>
+<td>Autonomous SRE teammate investigating alerts 24/7, delivering RCA in Slack</td>
+</tr>
+<tr>
+<td>Anyshift</td>
+<td><a href="https://anyshift.io" target="_blank" rel="noopener noreferrer">anyshift.io</a></td>
+<td>Versioned infrastructure graph — answers &ldquo;what changed?&rdquo; as a query rather than inferring from telemetry</td>
+</tr>
+<tr>
+<td>NeuBird</td>
+<td><a href="https://neubird.ai" target="_blank" rel="noopener noreferrer">neubird.ai</a></td>
+<td>Agentic co-pilot for enterprise IT; 230K+ alerts resolved</td>
+</tr>
+<tr>
+<td>Sherlocks AI</td>
+<td><a href="https://sherlocks.ai" target="_blank" rel="noopener noreferrer">sherlocks.ai</a></td>
+<td>AI-native SRE assistant with institutional memory</td>
+</tr>
+<tr>
+<td>Wild Moose</td>
+<td><a href="https://wildmoose.ai" target="_blank" rel="noopener noreferrer">wildmoose.ai</a></td>
+<td>First responder — root cause surfaced in under a minute</td>
+</tr>
+<tr>
+<td>Kubiya</td>
+<td><a href="https://kubiya.ai" target="_blank" rel="noopener noreferrer">kubiya.ai</a></td>
+<td>Agentic platform with Slack/Teams natural-language commands, Terraform and CI/CD automation, RBAC</td>
+</tr>
+<tr>
+<td><a href="https://SRE.ai" target="_blank" rel="noopener noreferrer">SRE.ai</a></td>
+<td><a href="https://sre.ai" target="_blank" rel="noopener noreferrer">sre.ai</a></td>
+<td>NL agents for enterprise DevOps workflows</td>
+</tr>
+<tr>
+<td>CloudThinker</td>
+<td><a href="https://cloudthinker.io" target="_blank" rel="noopener noreferrer">cloudthinker.io</a></td>
+<td>AgenticOps positioning, broader than incident response</td>
+</tr>
+<tr>
+<td>Metoro</td>
+<td><a href="https://metoro.io" target="_blank" rel="noopener noreferrer">metoro.io</a></td>
+<td>Runs the full loop — detect, investigate, verify, open a fix</td>
+</tr>
+<tr>
+<td>Aurora</td>
+<td><a href="https://aurorasre.ai" target="_blank" rel="noopener noreferrer">aurorasre.ai</a></td>
+<td>Agentic investigation; publishes a useful taxonomy of the category</td>
+</tr>
+<tr>
+<td>Parity</td>
+<td><a href="https://tryparity.com" target="_blank" rel="noopener noreferrer">tryparity.com</a></td>
+<td>Kubernetes reliability agent</td>
+</tr>
+<tr>
+<td><strong>HolmesGPT / K8sGPT</strong></td>
+<td><a href="https://github.com/robusta-dev/holmesgpt" target="_blank" rel="noopener noreferrer">github.com/robusta-dev/holmesgpt</a>, <a href="https://k8sgpt.ai" target="_blank" rel="noopener noreferrer">k8sgpt.ai</a></td>
+<td>The open-source, self-hostable options</td>
+</tr>
+</tbody>
+</table></div>
+<p><strong>Sovereign/self-hosted note:</strong> at least one vendor in this space now runs entirely inside your environment with zero data egress specifically for regulated estates (banking, rail, defence), pricing against infrastructure size rather than seats or log volume. That deployment model — not the model quality — is the filter that matters for you.</p>
+<hr />
+<h2 id="5-testing-and-quality-the-ai-roster">5. Testing and quality — the <code>.ai</code> roster</h2>
+<h3 id="maps-to-notes-13">Maps to: Notes §13</h3>
+<div class="table-wrap"><table>
+<thead>
+<tr>
+<th>Product</th>
+<th>Site</th>
+<th>Angle</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><strong>Keploy</strong></td>
+<td><a href="https://keploy.io" target="_blank" rel="noopener noreferrer">keploy.io</a></td>
+<td>eBPF record-replay with auto-generated dependency mocks (Apache 2.0) — covered previously, still the top pick</td>
+</tr>
+<tr>
+<td><strong>Tusk</strong></td>
+<td><a href="https://usetusk.ai" target="_blank" rel="noopener noreferrer">usetusk.ai</a></td>
+<td>Drift: live traffic record/replay as API tests, PR-native regression detection</td>
+</tr>
+<tr>
+<td><strong>Momentic</strong></td>
+<td><a href="https://momentic.ai" target="_blank" rel="noopener noreferrer">momentic.ai</a></td>
+<td>Most developer-forward of the low-code platforms; exploratory testing exposed via MCP; note tests live in the platform and can&rsquo;t be exported as code</td>
+</tr>
+<tr>
+<td><strong>mabl</strong></td>
+<td><a href="https://mabl.com" target="_blank" rel="noopener noreferrer">mabl.com</a></td>
+<td>Broadest single-platform coverage: web, mobile, API, performance, accessibility</td>
+</tr>
+<tr>
+<td><strong><a href="https://QA.tech" target="_blank" rel="noopener noreferrer">QA.tech</a></strong></td>
+<td><a href="https://qa.tech" target="_blank" rel="noopener noreferrer">qa.tech</a></td>
+<td>Autonomous QA agents; publishes an unusually honest comparison of the field</td>
+</tr>
+<tr>
+<td><strong>Bug0</strong></td>
+<td><a href="https://bug0.com" target="_blank" rel="noopener noreferrer">bug0.com</a></td>
+<td>Planner/Generator/Healer pattern with MCP integration; describes the multi-lens agent-team testing model (functional + security + accessibility + performance on the same flow, sharing one browser context)</td>
+</tr>
+<tr>
+<td><strong>Checksum</strong></td>
+<td><a href="https://checksum.ai" target="_blank" rel="noopener noreferrer">checksum.ai</a></td>
+<td>Generates Playwright/Cypress tests <strong>from real user sessions</strong> — the commercial version of §13&rsquo;s capture half</td>
+</tr>
+<tr>
+<td><strong>testRigor</strong></td>
+<td><a href="https://testrigor.com" target="_blank" rel="noopener noreferrer">testrigor.com</a></td>
+<td>Plain-English test authoring, strong self-healing</td>
+</tr>
+<tr>
+<td><strong>Functionize</strong></td>
+<td><a href="https://functionize.com" target="_blank" rel="noopener noreferrer">functionize.com</a></td>
+<td>Imports existing Selenium/Cypress suites instead of requiring a rewrite</td>
+</tr>
+<tr>
+<td><strong>QA Wolf</strong></td>
+<td><a href="https://qawolf.com" target="_blank" rel="noopener noreferrer">qawolf.com</a></td>
+<td>QA-as-a-service generating Playwright at scale</td>
+</tr>
+<tr>
+<td><strong>Antithesis</strong></td>
+<td><a href="https://antithesis.com" target="_blank" rel="noopener noreferrer">antithesis.com</a></td>
+<td>Deterministic simulation with time control — the only credible answer to your T+1/T+2 batch problem</td>
+</tr>
+<tr>
+<td><strong>AgentQL</strong></td>
+<td><a href="https://agentql.com" target="_blank" rel="noopener noreferrer">agentql.com</a></td>
+<td>NL queries with self-healing selectors that plug into Playwright</td>
+</tr>
+<tr>
+<td><strong>Stagehand / Browserbase</strong></td>
+<td><a href="https://browserbase.com" target="_blank" rel="noopener noreferrer">browserbase.com</a></td>
+<td>&ldquo;Playwright that AI can use&rdquo;; exposes the underlying page object so you can mix approaches</td>
+</tr>
+<tr>
+<td><strong>Skyvern</strong></td>
+<td><a href="https://skyvern.com" target="_blank" rel="noopener noreferrer">skyvern.com</a></td>
+<td>Browser workflows via LLM + computer vision</td>
+</tr>
+<tr>
+<td><strong>TestDino</strong></td>
+<td><a href="https://testdino.com" target="_blank" rel="noopener noreferrer">testdino.com</a></td>
+<td>Reporting/analytics layer over the Playwright agent ecosystem</td>
+</tr>
+</tbody>
+</table></div>
+<hr />
+<h2 id="6-data-catalogs-and-agentic-governance-the-ai-roster">6. Data, catalogs and agentic governance — the <code>.ai</code> roster</h2>
+<h3 id="maps-to-notes-1517">Maps to: Notes §15–17</h3>
+<div class="table-wrap"><table>
+<thead>
+<tr>
+<th>Product</th>
+<th>Site</th>
+<th>Angle</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><strong>Atlan</strong></td>
+<td><a href="https://atlan.com" target="_blank" rel="noopener noreferrer">atlan.com</a></td>
+<td>MCP-native governance; Gartner MQ Leader 2026 for D&amp;A Governance</td>
+</tr>
+<tr>
+<td><strong>Marmot</strong></td>
+<td><a href="https://marmotdata.io" target="_blank" rel="noopener noreferrer">marmotdata.io</a></td>
+<td>Open source, native MCP, single Go binary on Postgres — no Kafka, graph store or search cluster to run</td>
+</tr>
+<tr>
+<td><strong>DQLabs / Prizm</strong></td>
+<td><a href="https://dqlabs.ai" target="_blank" rel="noopener noreferrer">dqlabs.ai</a></td>
+<td>Catalog + observability + DQ as one continuously validated context layer exposed to agents via MCP</td>
+</tr>
+<tr>
+<td><strong>Secoda / Select Star / data.world</strong></td>
+<td><a href="https://secoda.co" target="_blank" rel="noopener noreferrer">secoda.co</a>, <a href="https://selectstar.com" target="_blank" rel="noopener noreferrer">selectstar.com</a>, data.world</td>
+<td>Mid-market and knowledge-graph-shaped alternatives</td>
+</tr>
+<tr>
+<td><strong>Promethium</strong></td>
+<td><a href="https://promethium.ai" target="_blank" rel="noopener noreferrer">promethium.ai</a></td>
+<td>Publishes the &ldquo;data product management for AI agents&rdquo; architecture — metadata as operational infrastructure agents query at decision time</td>
+</tr>
+<tr>
+<td><strong>Dataworkers</strong></td>
+<td><a href="https://dataworkers.io" target="_blank" rel="noopener noreferrer">dataworkers.io</a></td>
+<td>Apache-2.0 agent-native data stack; useful six-layer reference architecture (storage, transformation, metadata, agents, observability, governance)</td>
+</tr>
+<tr>
+<td><strong>Monte Carlo / Soda</strong></td>
+<td><a href="https://montecarlodata.com" target="_blank" rel="noopener noreferrer">montecarlodata.com</a>, <a href="https://soda.io" target="_blank" rel="noopener noreferrer">soda.io</a></td>
+<td>Data observability feeding trust signals into the contract</td>
+</tr>
+<tr>
+<td><strong>Tonic / Gretel / Synthesized</strong></td>
+<td><a href="https://tonic.ai" target="_blank" rel="noopener noreferrer">tonic.ai</a>, <a href="https://gretel.ai" target="_blank" rel="noopener noreferrer">gretel.ai</a>, <a href="https://synthesized.io" target="_blank" rel="noopener noreferrer">synthesized.io</a></td>
+<td>Masking, subsetting and synthesis with cross-database referential integrity — the §13 seed-data problem</td>
+</tr>
+<tr>
+<td><strong>OvalEdge</strong></td>
+<td><a href="https://ovaledge.com" target="_blank" rel="noopener noreferrer">ovaledge.com</a></td>
+<td>Publishes the governance-<em>by</em>-agents vs governance-<em>of</em>-agents distinction, which is the framing to adopt</td>
+</tr>
+</tbody>
+</table></div>
+<p><strong>The claim to test:</strong> Atlan&rsquo;s research that 40% of AI agents fail without proper context layers, because agents lack the business definitions and governance signals experienced employees carry in their heads. Whether or not the number holds, it is the argument for §16&rsquo;s AI-ready metadata programme.</p>
+<hr />
+<h2 id="7-agentic-sdlc-platforms-coding-agents">7. Agentic SDLC platforms &amp; coding agents</h2>
+<h3 id="maps-to-notes-18">Maps to: Notes §18</h3>
+<div class="table-wrap"><table>
+<thead>
+<tr>
+<th>Product</th>
+<th>Site</th>
+<th>Angle</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><strong>Augment Code</strong></td>
+<td><a href="https://augmentcode.com" target="_blank" rel="noopener noreferrer">augmentcode.com</a></td>
+<td>Context Engine over 400–500k file codebases, MCP-compatible; Cosmos coordinates agents across triage, authoring, review and verification. Covered in detail previously</td>
+</tr>
+<tr>
+<td><strong>Cognition / Devin</strong></td>
+<td><a href="https://devin.ai" target="_blank" rel="noopener noreferrer">devin.ai</a>, <a href="https://cognition.ai" target="_blank" rel="noopener noreferrer">cognition.ai</a></td>
+<td>Autonomous engineer; also now owns Windsurf</td>
+</tr>
+<tr>
+<td><strong>Factory</strong></td>
+<td><a href="https://factory.ai" target="_blank" rel="noopener noreferrer">factory.ai</a></td>
+<td>&ldquo;Droids&rdquo; — enterprise agent fleet with strong audit posture</td>
+</tr>
+<tr>
+<td><strong>Sourcegraph Amp</strong></td>
+<td><a href="https://ampcode.com" target="_blank" rel="noopener noreferrer">ampcode.com</a></td>
+<td>Agentic coding on top of Sourcegraph&rsquo;s code intelligence — the closest philosophical cousin to SCG</td>
+</tr>
+<tr>
+<td><strong>Tessl</strong></td>
+<td><a href="https://tessl.io" target="_blank" rel="noopener noreferrer">tessl.io</a></td>
+<td>Spec-centric development — the code becomes the artefact, the spec is the source</td>
+</tr>
+<tr>
+<td><strong>Cursor</strong></td>
+<td><a href="https://cursor.com" target="_blank" rel="noopener noreferrer">cursor.com</a></td>
+<td>Background agents + BugBot; acquired Graphite</td>
+</tr>
+<tr>
+<td><strong>Kilo</strong></td>
+<td><a href="https://kilocode.ai" target="_blank" rel="noopener noreferrer">kilocode.ai</a></td>
+<td>Hosted Gastown, plus their own agent</td>
+</tr>
+<tr>
+<td><strong>Manus</strong></td>
+<td>manus.im</td>
+<td>Task-driven reasoning engine rather than a PR comment bot — an &ldquo;AI analyst&rdquo; shape worth studying for architecture review</td>
+</tr>
+</tbody>
+</table></div>
+<hr />
+<h2 id="8-agent-governance-infrastructure-the-newest-category">8. Agent governance infrastructure — the newest category</h2>
+<h3 id="maps-to-notes-18s-unresolved-marketplace-and-skills-problem">Maps to: Notes §18&rsquo;s unresolved marketplace and skills problem</h3>
+<p>This barely existed a year ago and is now where the enterprise action is.</p>
+<div class="table-wrap"><table>
+<thead>
+<tr>
+<th>Thing</th>
+<th>Site</th>
+<th>Why it matters</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><strong>Anthropic enterprise skills governance</strong></td>
+<td><a href="https://platform.claude.com/docs" target="_blank" rel="noopener noreferrer">platform.claude.com/docs</a> → Agent Skills → enterprise</td>
+<td>The authoritative guidance: internal registry per skill, role-based bundles containing only what that role needs daily, skills in git for history and PR review</td>
+</tr>
+<tr>
+<td><strong>LiteLLM</strong></td>
+<td><a href="https://litellm.ai" target="_blank" rel="noopener noreferrer">litellm.ai</a></td>
+<td>Can act as a central Claude Code plugin registry — admins govern which plugins are available org-wide, engineers install from one source, served as a marketplace URL</td>
+</tr>
+<tr>
+<td><strong>Smithery</strong></td>
+<td><a href="https://smithery.ai" target="_blank" rel="noopener noreferrer">smithery.ai</a></td>
+<td>MCP and skills registry with cross-client install (Claude Code, Codex, Copilot, Cursor, Roo, OpenHands, and ~15 others) — useful as a model for how a <em>portable</em> skill registry should behave</td>
+</tr>
+<tr>
+<td><strong><a href="https://claude-plugins.dev" target="_blank" rel="noopener noreferrer">claude-plugins.dev</a></strong></td>
+<td><a href="https://claude-plugins.dev" target="_blank" rel="noopener noreferrer">claude-plugins.dev</a></td>
+<td>Public discovery index (~12k plugins, ~63k agent skills at last count) — mainly useful as a scale reality-check on why curation matters</td>
+</tr>
+<tr>
+<td><strong><a href="https://skills.sh" target="_blank" rel="noopener noreferrer">skills.sh</a> / <a href="https://skild.sh" target="_blank" rel="noopener noreferrer">skild.sh</a></strong></td>
+<td><a href="https://skills.sh" target="_blank" rel="noopener noreferrer">skills.sh</a></td>
+<td>CLI-based skill installation from git — the distribution mechanism to copy</td>
+</tr>
+<tr>
+<td><strong>Harness AI Asset Catalog</strong></td>
+<td><a href="https://harness.io" target="_blank" rel="noopener noreferrer">harness.io</a></td>
+<td>Discovers every agent, skill and plugin in your repos and who owns them — the governance-of-agents inventory, in a platform you already license</td>
+</tr>
+<tr>
+<td><strong>OWASP GenAI / Agentic Top 10</strong></td>
+<td><a href="https://genai.owasp.org" target="_blank" rel="noopener noreferrer">genai.owasp.org</a></td>
+<td>The threat model you&rsquo;ll be asked for. Note the standing reality: there is no binary signing for plugins in 2026, so the defence is marketplace allowlist + runtime hooks + human review before entry</td>
+</tr>
+<tr>
+<td><strong>AIUC-1</strong></td>
+<td>—</td>
+<td>Emerging certification standard for AI coding agent security, safety and reliability; Lovable is among the first pursuing it, with third-party audit scheduled summer 2026. Worth tracking as procurement language</td>
+</tr>
+</tbody>
+</table></div>
+<hr />
+<h2 id="9-platform-idp-adjacent">9. Platform / IDP adjacent</h2>
+<h3 id="maps-to-notes-2-4-9-12">Maps to: Notes §2, §4, §9, §12</h3>
+<div class="table-wrap"><table>
+<thead>
+<tr>
+<th>Product</th>
+<th>Site</th>
+<th>Angle</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Port</td>
+<td><a href="https://port.io" target="_blank" rel="noopener noreferrer">port.io</a></td>
+<td>Agentic engineering platform; Context Lake</td>
+</tr>
+<tr>
+<td>Cortex</td>
+<td><a href="https://cortex.io" target="_blank" rel="noopener noreferrer">cortex.io</a></td>
+<td>Scorecards and standards enforcement as the framework agents evaluate against</td>
+</tr>
+<tr>
+<td>OpsLevel</td>
+<td><a href="https://opslevel.com" target="_blank" rel="noopener noreferrer">opslevel.com</a></td>
+<td>Standards enforcement, lighter than Cortex</td>
+</tr>
+<tr>
+<td>Roadie</td>
+<td><a href="https://roadie.io" target="_blank" rel="noopener noreferrer">roadie.io</a></td>
+<td>Managed Backstage</td>
+</tr>
+<tr>
+<td>Humanitec</td>
+<td><a href="https://humanitec.com" target="_blank" rel="noopener noreferrer">humanitec.com</a></td>
+<td>Platform Orchestrator — governance applied when a developer <em>or agent</em> requests a deployment</td>
+</tr>
+<tr>
+<td>Kratix</td>
+<td><a href="https://kratix.io" target="_blank" rel="noopener noreferrer">kratix.io</a></td>
+<td>Promises as composable platform capability contracts</td>
+</tr>
+<tr>
+<td>Facets / Qovery / env0</td>
+<td><a href="https://facets.cloud" target="_blank" rel="noopener noreferrer">facets.cloud</a>, <a href="https://qovery.com" target="_blank" rel="noopener noreferrer">qovery.com</a>, <a href="https://env0.com" target="_blank" rel="noopener noreferrer">env0.com</a></td>
+<td>Environment-as-a-service and Terraform orchestration layers</td>
+</tr>
+<tr>
+<td>Firefly</td>
+<td><a href="https://firefly.ai" target="_blank" rel="noopener noreferrer">firefly.ai</a></td>
+<td>Cloud asset inventory, drift detection and IaC codification — relevant to §9&rsquo;s &ldquo;we don&rsquo;t treat infrastructure as cattle&rdquo;</td>
+</tr>
+<tr>
+<td>DuploCloud</td>
+<td><a href="https://duplocloud.com" target="_blank" rel="noopener noreferrer">duplocloud.com</a></td>
+<td>Full-stack agentic DevOps with structured approval workflows and audit trails — the compliance-shaped version</td>
+</tr>
+<tr>
+<td>Northflank</td>
+<td><a href="https://northflank.com" target="_blank" rel="noopener noreferrer">northflank.com</a></td>
+<td>Useful published comparisons of the whole IDP field</td>
+</tr>
+</tbody>
+</table></div>
+<hr />
+<h2 id="10-how-to-evaluate-any-of-these-a-five-question-filter">10. How to evaluate any of these — a five-question filter</h2>
+<p>Given the volume, use a filter rather than a shortlist. For each candidate, ask:</p>
+<ol>
+<li><strong>Where does execution happen?</strong> In your environment, or does source/telemetry leave it? This eliminates ~60% of the list immediately for JPMC.</li>
+<li><strong>Is it MCP-compatible / does it expose its context to other agents?</strong> Anything that only works inside its own agent UI is a silo you&rsquo;ll have to unpick. Augment&rsquo;s context layer and EventCatalog&rsquo;s MCP server pass; most low-code testing platforms fail.</li>
+<li><strong>Does it produce a deterministic, reviewable artefact?</strong> A PR, a recipe, a policy, a signed attestation. Anything whose output is only a chat answer can&rsquo;t feed a control.</li>
+<li><strong>Does it consume your context, or ask the model to guess?</strong> The consistent finding across security, SRE and code review is that pre-computed context (reachability, topology, dependency graph) beats a bigger model. This is the question SCG is the answer to.</li>
+<li><strong>Will it exist in 18 months?</strong> Check funding, ownership changes and whether the OSS project is company-controlled. Three of the tools on these lists changed status in the last twelve months.</li>
+</ol>
+<hr />
+<h2 id="11-what-still-has-no-vendor">11. What still has no vendor</h2>
+<p>Updated from the previous doc, having now swept the wider field:</p>
+<ul>
+<li><strong>Unit-cost-per-request feeding architecture pattern recommendation and LDA accountability</strong> (§4, §10). Sedai and Cloudgov autonomously <em>optimise</em> within the chosen architecture; nobody recommends a different <em>pattern</em> because your cost-per-request is wrong, and nobody routes that to an accountable architect. Still the most novel idea in the pack.</li>
+<li><strong>Business-fact vs system-behaviour event taxonomy enforcement</strong> (§6). EventCatalog gives you the place to record and check it; the taxonomy and ownership split remain yours.</li>
+<li><strong>Stateful replay with reset semantics and T+1/T+2 time simulation</strong> (§13). Antithesis is the only near-miss.</li>
+<li><strong>A credible benchmark of which engineering task classes parallelise profitably across agent fleets</strong> (§18). Everyone publishes cost savings; nobody publishes the boundary.</li>
+<li><strong>Reconciling functional domains with data domains</strong> (§17). Organisational.</li>
+</ul>
+  </main>
+  <footer class="colophon">
+    <span>Extended AI Vendor Directory — Mapped to the GPB A&amp;E Offsite</span>
+    <span>Converted from GPB-Offsite-AI-Vendor-Directory.md</span>
+  </footer>
+</div>
+</body>
+</html>

@@ -1,0 +1,272 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>GPB A&amp;E Offsite — Document Index</title>
+<meta name="color-scheme" content="light dark">
+<style>
+*,*::before,*::after{box-sizing:border-box}
+:root{
+  --bg:#fbfbfa; --surface:#fff; --text:#1c1e21; --muted:#5f6570; --faint:#8b919b;
+  --line:#e4e6ea; --line-soft:#eef0f3; --accent:#2f5fd0; --accent-soft:#eaf0fd;
+  --code-bg:#f4f5f7; --mark:#fff6cc;
+  --sans:-apple-system,BlinkMacSystemFont,"Segoe UI",Inter,Helvetica,Arial,sans-serif;
+  --mono:ui-monospace,SFMono-Regular,"SF Mono",Menlo,Consolas,monospace;
+}
+@media (prefers-color-scheme:dark){
+  :root{
+    --bg:#14161a; --surface:#1a1d22; --text:#e3e6ea; --muted:#9aa1ac; --faint:#6f7681;
+    --line:#2c3037; --line-soft:#23262c; --accent:#7fa9ff; --accent-soft:#1e2634;
+    --code-bg:#22262c; --mark:#4a3f14;
+  }
+}
+html{-webkit-text-size-adjust:100%}
+body{margin:0;background:var(--bg);color:var(--text);
+  font:400 17px/1.7 var(--sans);
+  font-feature-settings:"kern","liga";-webkit-font-smoothing:antialiased}
+
+/* ---------- shell ---------- */
+.page{max-width:80rem;margin:0 auto;padding:0 1.5rem 6rem;
+  display:grid;grid-template-columns:minmax(0,1fr);gap:0 3.5rem}
+@media (min-width:64rem){
+  .page{grid-template-columns:16rem minmax(0,1fr);padding-top:1rem}
+  .masthead{grid-column:1/-1}
+}
+
+/* ---------- masthead ---------- */
+.masthead{padding:4rem 0 2rem;border-bottom:1px solid var(--line);margin-bottom:2.5rem}
+.back{display:inline-block;margin-bottom:1.1rem;font-size:.83rem;color:var(--muted);
+  text-decoration:none}
+.back::before{content:"\2190";margin-right:.4rem}
+.back:hover{color:var(--accent)}
+.back + .eyebrow{margin-left:.75rem}
+.eyebrow{display:inline-flex;align-items:center;gap:.5rem;
+  font-size:.72rem;font-weight:600;letter-spacing:.09em;text-transform:uppercase;
+  color:var(--accent);background:var(--accent-soft);
+  padding:.3rem .6rem;border-radius:999px;margin-bottom:1.1rem}
+.masthead h1{margin:0;font-size:clamp(1.9rem,4.4vw,3rem);line-height:1.14;
+  font-weight:680;letter-spacing:-.022em;max-width:22ch}
+.subtitle{margin:.85rem 0 0;font-size:1.1rem;line-height:1.5;color:var(--muted);max-width:60ch;font-weight:400}
+.meta{margin:1.6rem 0 0;padding:0;list-style:none;display:flex;flex-wrap:wrap;gap:.5rem 1.5rem;
+  font-size:.85rem;color:var(--faint)}
+.meta strong{color:var(--muted);font-weight:600}
+
+/* ---------- toc ---------- */
+.toc{font-size:.875rem;line-height:1.45}
+@media (min-width:64rem){
+  .toc{position:sticky;top:1.5rem;align-self:start;max-height:calc(100vh - 3rem);
+    overflow-y:auto;padding-right:.5rem;scrollbar-width:thin}
+}
+@media (max-width:63.99rem){
+  .toc{background:var(--surface);border:1px solid var(--line);border-radius:12px;
+    padding:.4rem 1.1rem 1.1rem;margin-bottom:2.5rem}
+  .toc-title{cursor:pointer}
+}
+.toc-title{font-size:.72rem;font-weight:650;letter-spacing:.09em;text-transform:uppercase;
+  color:var(--faint);margin:0 0 .9rem}
+.toc ol{list-style:none;margin:0;padding:0}
+.toc li{margin:0}
+.toc a{display:block;padding:.32rem 0 .32rem .8rem;color:var(--muted);text-decoration:none;
+  border-left:2px solid var(--line-soft);transition:color .12s,border-color .12s}
+.toc a:hover{color:var(--accent);border-left-color:var(--accent)}
+.toc .lv3 a{padding-left:1.6rem;font-size:.83rem;color:var(--faint)}
+
+/* ---------- prose ---------- */
+.prose{max-width:44rem;min-width:0}
+.prose > *:first-child{margin-top:0}
+.prose h1,.prose h2,.prose h3,.prose h4{line-height:1.25;font-weight:650;letter-spacing:-.014em;scroll-margin-top:1.5rem}
+.prose h1{font-size:1.75rem;margin:3.6rem 0 1rem;padding-bottom:.55rem;border-bottom:1px solid var(--line)}
+.prose h2{font-size:1.35rem;margin:2.8rem 0 .85rem}
+.prose h3{font-size:1.08rem;margin:2.1rem 0 .6rem}
+.prose h4{font-size:.98rem;margin:1.7rem 0 .5rem;color:var(--muted)}
+.prose p{margin:0 0 1.15rem}
+.prose a{color:var(--accent);text-decoration:none;border-bottom:1px solid color-mix(in srgb,var(--accent) 32%,transparent)}
+.prose a:hover{border-bottom-color:var(--accent)}
+.prose a[href^="http"]{overflow-wrap:anywhere}
+.prose td a{word-break:break-word}
+.prose strong{font-weight:640;color:var(--text)}
+.prose ul,.prose ol{margin:0 0 1.15rem;padding-left:1.35rem}
+.prose li{margin:.3rem 0}
+.prose li::marker{color:var(--faint)}
+.prose li > ul,.prose li > ol{margin:.3rem 0}
+.prose blockquote{margin:1.6rem 0;padding:.1rem 0 .1rem 1.25rem;
+  border-left:3px solid var(--accent);color:var(--muted)}
+.prose blockquote p:last-child{margin-bottom:0}
+.prose hr{border:0;height:1px;background:var(--line);margin:3rem 0}
+.prose img{max-width:100%;height:auto;border-radius:8px}
+.prose code{font-family:var(--mono);font-size:.875em;background:var(--code-bg);
+  padding:.15em .4em;border-radius:5px;border:1px solid var(--line-soft)}
+.prose pre{background:var(--code-bg);border:1px solid var(--line);border-radius:10px;
+  padding:1rem 1.15rem;overflow-x:auto;margin:0 0 1.4rem;font-size:.88rem;line-height:1.6}
+.prose pre code{background:none;border:0;padding:0;font-size:inherit}
+
+/* ---------- tables ---------- */
+.table-wrap{overflow-x:auto;margin:0 0 1.6rem;border:1px solid var(--line);
+  border-radius:10px;background:var(--surface)}
+.prose table{border-collapse:collapse;width:100%;font-size:.9rem;line-height:1.55}
+.prose th,.prose td{padding:.62rem .85rem;text-align:left;vertical-align:top;
+  border-bottom:1px solid var(--line-soft)}
+.prose th{background:var(--code-bg);font-weight:640;font-size:.78rem;
+  letter-spacing:.04em;text-transform:uppercase;color:var(--muted);white-space:nowrap}
+.prose tbody tr:last-child td{border-bottom:0}
+.prose tbody tr:hover td{background:var(--line-soft)}
+
+@media (min-width:64rem){
+  .table-wrap,.prose pre{width:min(56rem,calc(100vw - 22rem))}
+}
+
+/* ---------- footer ---------- */
+.colophon{grid-column:1/-1;margin-top:4rem;padding-top:1.5rem;border-top:1px solid var(--line);
+  font-size:.8rem;color:var(--faint);display:flex;flex-wrap:wrap;gap:.4rem 1.25rem}
+
+/* ---------- print ---------- */
+@media print{
+  :root{--bg:#fff;--surface:#fff;--text:#000;--muted:#333;--line:#ccc}
+  body{font-size:11pt}
+  .toc,.colophon{display:none}
+  .page{display:block;max-width:none;padding:0}
+  .prose{max-width:none}
+  .prose h1,.prose h2{break-after:avoid}
+  .table-wrap,.prose pre,.prose blockquote{break-inside:avoid}
+  .prose a{color:#000;border:0}
+}
+/* ---------- index page ---------- */
+.wrap{max-width:64rem;margin:0 auto;padding:0 1.5rem 5rem}
+.home .masthead{margin-bottom:3.5rem}
+.home .meta li{color:var(--muted)}
+.home .meta strong{color:var(--text)}
+.group{margin:0 0 3.5rem}
+.group-head{margin:0 0 1.25rem}
+.group-head h2{margin:0;font-size:1.05rem;font-weight:650;letter-spacing:-.01em}
+.group-head p{margin:.3rem 0 0;font-size:.9rem;color:var(--muted)}
+.cards{list-style:none;margin:0;padding:0;display:grid;gap:1rem;
+  grid-template-columns:repeat(auto-fill,minmax(19rem,1fr))}
+.card{margin:0}
+.card-link{display:flex;flex-direction:column;height:100%;gap:.55rem;
+  padding:1.35rem 1.4rem;background:var(--surface);border:1px solid var(--line);
+  border-radius:12px;text-decoration:none;color:inherit;
+  transition:border-color .14s,transform .14s,box-shadow .14s}
+.card-link:hover{border-color:var(--accent);transform:translateY(-2px);
+  box-shadow:0 6px 20px -12px rgba(0,0,0,.35)}
+.card-link h3{margin:0;font-size:1.02rem;font-weight:640;line-height:1.35;letter-spacing:-.012em}
+.card-link p{margin:0;font-size:.89rem;line-height:1.55;color:var(--muted);flex:1}
+.stats{list-style:none;display:flex;flex-wrap:wrap;gap:.4rem;margin:.35rem 0 0;padding:0}
+.stats li{font-size:.72rem;color:var(--faint);background:var(--code-bg);
+  border:1px solid var(--line-soft);border-radius:999px;padding:.18rem .55rem;white-space:nowrap}
+.home .colophon{display:flex;flex-wrap:wrap;gap:.4rem 1.25rem}
+</style>
+</head>
+<body class="home">
+<div class="wrap">
+  <header class="masthead">
+    <span class="eyebrow">Document index</span>
+    <h1>GPB Architecture &amp; Engineering Offsite</h1>
+    <p class="subtitle">Notes, research and implementation plans from the offsite — every document in one place.</p>
+    <ul class="meta">
+      <li><strong>10</strong> documents</li>
+      <li><strong>37,018</strong> words</li>
+      <li><strong>466</strong> external links</li>
+      <li><strong>Updated</strong> 6 September 2026</li>
+    </ul>
+  </header>
+  <section class="group">
+    <div class="group-head">
+      <h2>Offsite research</h2>
+      <p>Notes and research compiled from the GPB A&amp;E offsite.</p>
+    </div>
+    <ul class="cards">
+      <li class="card">
+        <a class="card-link" href="GPB-AE-Offsite-Notes.html">
+          <h3>GPB Architecture &amp; Engineering Offsite — Structured Notes</h3>
+          <p>The full transcript of the multi-day A&amp;E / LDA offsite turned into readable, section-by-section working notes.</p>
+          <ul class="stats"><li>11,512 words</li><li>11 sections</li><li>107 links</li></ul>
+        </a>
+      </li>
+      <li class="card">
+        <a class="card-link" href="Rod_Discussion_Summary.html">
+          <h3>Discussion with Rod Thomas</h3>
+          <p>The reset in expectations for the architecture and engineering organisation: priorities, structure and engineering excellence.</p>
+          <ul class="stats"><li>3,165 words</li><li>31 sections</li></ul>
+        </a>
+      </li>
+      <li class="card">
+        <a class="card-link" href="GPB-Offsite-Agentic-Landscape.html">
+          <h3>Agentic Solutions, Products &amp; Repos — Mapped to the GPB A&amp;E Offsite</h3>
+          <p>Agentic products, platforms and repos mapped 1:1 to each section of the offsite notes.</p>
+          <ul class="stats"><li>5,467 words</li><li>14 sections</li><li>5 links</li></ul>
+        </a>
+      </li>
+      <li class="card">
+        <a class="card-link" href="GPB-Offsite-AI-Vendor-Directory.html">
+          <h3>Extended AI Vendor Directory — Mapped to the GPB A&amp;E Offsite</h3>
+          <p>The wider vendor sweep — AI-native tooling per capability area, including the categories the landscape doc didn't cover.</p>
+          <ul class="stats"><li>2,834 words</li><li>11 sections</li><li>104 links</li></ul>
+        </a>
+      </li>
+      <li class="card">
+        <a class="card-link" href="GPB-Offsite-Link-Index.html">
+          <h3>Link Index — GPB A&amp;E Offsite Research</h3>
+          <p>Every link referenced across the three research documents, consolidated and verification-flagged.</p>
+          <ul class="stats"><li>1,889 words</li><li>14 sections</li><li>243 links</li></ul>
+        </a>
+      </li>
+    </ul>
+  </section>
+  <section class="group">
+    <div class="group-head">
+      <h2>Architecture as a product</h2>
+      <p>The CTO offsite thread on running architecture as a product.</p>
+    </div>
+    <ul class="cards">
+      <li class="card">
+        <a class="card-link" href="Architecture_as_a_Product_Executive_Summary.html">
+          <h3>Architecture as a Product Executive Summary</h3>
+          <p>The short-form case for treating architecture as a product with users, a roadmap and measurable outcomes.</p>
+          <ul class="stats"><li>1,057 words</li><li>15 sections</li></ul>
+        </a>
+      </li>
+      <li class="card">
+        <a class="card-link" href="CTO_Offsite_Architecture_as_a_Product_Detailed_Notes.html">
+          <h3>CTO Offsite Architecture as a Product Detailed Notes</h3>
+          <p>Long-form offsite notes on the architecture-as-a-product operating model.</p>
+          <ul class="stats"><li>4,533 words</li><li>24 sections</li><li>7 links</li></ul>
+        </a>
+      </li>
+      <li class="card">
+        <a class="card-link" href="CTO_Offsite_Meaningful_Notes.html">
+          <h3>CTO Offsite Meaningful Notes</h3>
+          <p>Condensed offsite notes — the themes worth carrying forward, from Meridian complexity to event-driven architecture.</p>
+          <ul class="stats"><li>2,326 words</li><li>23 sections</li></ul>
+        </a>
+      </li>
+    </ul>
+  </section>
+  <section class="group">
+    <div class="group-head">
+      <h2>Interactive sites</h2>
+      <p>Purpose-built pages with their own navigation and visuals.</p>
+    </div>
+    <ul class="cards">
+      <li class="card">
+        <a class="card-link" href="Architecture-as-Product-Implementation-Site.html">
+          <h3>Architecture as a Product - Implementation Plan</h3>
+          <p>Interactive implementation plan merging platform architecture, data architecture and AI-native delivery into one strategy.</p>
+          <ul class="stats"><li>2,096 words</li></ul>
+        </a>
+      </li>
+      <li class="card">
+        <a class="card-link" href="ai3_project_architecture.html">
+          <h3>Multi-Repo Analysis - Architecture &amp; Persistent Store</h3>
+          <p>Interactive walkthrough of the multi-repo analysis system — 17-step pipeline, graph schema and persistent store.</p>
+          <ul class="stats"><li>2,139 words</li></ul>
+        </a>
+      </li>
+    </ul>
+  </section>
+  <footer class="colophon">
+    <span>GPB A&amp;E Offsite</span><span>Generated from the source .docx and .md files</span>
+  </footer>
+</div>
+</body>
+</html>

@@ -1,0 +1,736 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Discussion with Rod Thomas</title>
+<meta name="color-scheme" content="light dark">
+<style>
+*,*::before,*::after{box-sizing:border-box}
+:root{
+  --bg:#fbfbfa; --surface:#fff; --text:#1c1e21; --muted:#5f6570; --faint:#8b919b;
+  --line:#e4e6ea; --line-soft:#eef0f3; --accent:#2f5fd0; --accent-soft:#eaf0fd;
+  --code-bg:#f4f5f7; --mark:#fff6cc;
+  --sans:-apple-system,BlinkMacSystemFont,"Segoe UI",Inter,Helvetica,Arial,sans-serif;
+  --mono:ui-monospace,SFMono-Regular,"SF Mono",Menlo,Consolas,monospace;
+}
+@media (prefers-color-scheme:dark){
+  :root{
+    --bg:#14161a; --surface:#1a1d22; --text:#e3e6ea; --muted:#9aa1ac; --faint:#6f7681;
+    --line:#2c3037; --line-soft:#23262c; --accent:#7fa9ff; --accent-soft:#1e2634;
+    --code-bg:#22262c; --mark:#4a3f14;
+  }
+}
+html{-webkit-text-size-adjust:100%}
+body{margin:0;background:var(--bg);color:var(--text);
+  font:400 17px/1.7 var(--sans);
+  font-feature-settings:"kern","liga";-webkit-font-smoothing:antialiased}
+
+/* ---------- shell ---------- */
+.page{max-width:80rem;margin:0 auto;padding:0 1.5rem 6rem;
+  display:grid;grid-template-columns:minmax(0,1fr);gap:0 3.5rem}
+@media (min-width:64rem){
+  .page{grid-template-columns:16rem minmax(0,1fr);padding-top:1rem}
+  .masthead{grid-column:1/-1}
+}
+
+/* ---------- masthead ---------- */
+.masthead{padding:4rem 0 2rem;border-bottom:1px solid var(--line);margin-bottom:2.5rem}
+.back{display:inline-block;margin-bottom:1.1rem;font-size:.83rem;color:var(--muted);
+  text-decoration:none}
+.back::before{content:"\2190";margin-right:.4rem}
+.back:hover{color:var(--accent)}
+.back + .eyebrow{margin-left:.75rem}
+.eyebrow{display:inline-flex;align-items:center;gap:.5rem;
+  font-size:.72rem;font-weight:600;letter-spacing:.09em;text-transform:uppercase;
+  color:var(--accent);background:var(--accent-soft);
+  padding:.3rem .6rem;border-radius:999px;margin-bottom:1.1rem}
+.masthead h1{margin:0;font-size:clamp(1.9rem,4.4vw,3rem);line-height:1.14;
+  font-weight:680;letter-spacing:-.022em;max-width:22ch}
+.subtitle{margin:.85rem 0 0;font-size:1.1rem;line-height:1.5;color:var(--muted);max-width:60ch;font-weight:400}
+.meta{margin:1.6rem 0 0;padding:0;list-style:none;display:flex;flex-wrap:wrap;gap:.5rem 1.5rem;
+  font-size:.85rem;color:var(--faint)}
+.meta strong{color:var(--muted);font-weight:600}
+
+/* ---------- toc ---------- */
+.toc{font-size:.875rem;line-height:1.45}
+@media (min-width:64rem){
+  .toc{position:sticky;top:1.5rem;align-self:start;max-height:calc(100vh - 3rem);
+    overflow-y:auto;padding-right:.5rem;scrollbar-width:thin}
+}
+@media (max-width:63.99rem){
+  .toc{background:var(--surface);border:1px solid var(--line);border-radius:12px;
+    padding:.4rem 1.1rem 1.1rem;margin-bottom:2.5rem}
+  .toc-title{cursor:pointer}
+}
+.toc-title{font-size:.72rem;font-weight:650;letter-spacing:.09em;text-transform:uppercase;
+  color:var(--faint);margin:0 0 .9rem}
+.toc ol{list-style:none;margin:0;padding:0}
+.toc li{margin:0}
+.toc a{display:block;padding:.32rem 0 .32rem .8rem;color:var(--muted);text-decoration:none;
+  border-left:2px solid var(--line-soft);transition:color .12s,border-color .12s}
+.toc a:hover{color:var(--accent);border-left-color:var(--accent)}
+.toc .lv3 a{padding-left:1.6rem;font-size:.83rem;color:var(--faint)}
+
+/* ---------- prose ---------- */
+.prose{max-width:44rem;min-width:0}
+.prose > *:first-child{margin-top:0}
+.prose h1,.prose h2,.prose h3,.prose h4{line-height:1.25;font-weight:650;letter-spacing:-.014em;scroll-margin-top:1.5rem}
+.prose h1{font-size:1.75rem;margin:3.6rem 0 1rem;padding-bottom:.55rem;border-bottom:1px solid var(--line)}
+.prose h2{font-size:1.35rem;margin:2.8rem 0 .85rem}
+.prose h3{font-size:1.08rem;margin:2.1rem 0 .6rem}
+.prose h4{font-size:.98rem;margin:1.7rem 0 .5rem;color:var(--muted)}
+.prose p{margin:0 0 1.15rem}
+.prose a{color:var(--accent);text-decoration:none;border-bottom:1px solid color-mix(in srgb,var(--accent) 32%,transparent)}
+.prose a:hover{border-bottom-color:var(--accent)}
+.prose a[href^="http"]{overflow-wrap:anywhere}
+.prose td a{word-break:break-word}
+.prose strong{font-weight:640;color:var(--text)}
+.prose ul,.prose ol{margin:0 0 1.15rem;padding-left:1.35rem}
+.prose li{margin:.3rem 0}
+.prose li::marker{color:var(--faint)}
+.prose li > ul,.prose li > ol{margin:.3rem 0}
+.prose blockquote{margin:1.6rem 0;padding:.1rem 0 .1rem 1.25rem;
+  border-left:3px solid var(--accent);color:var(--muted)}
+.prose blockquote p:last-child{margin-bottom:0}
+.prose hr{border:0;height:1px;background:var(--line);margin:3rem 0}
+.prose img{max-width:100%;height:auto;border-radius:8px}
+.prose code{font-family:var(--mono);font-size:.875em;background:var(--code-bg);
+  padding:.15em .4em;border-radius:5px;border:1px solid var(--line-soft)}
+.prose pre{background:var(--code-bg);border:1px solid var(--line);border-radius:10px;
+  padding:1rem 1.15rem;overflow-x:auto;margin:0 0 1.4rem;font-size:.88rem;line-height:1.6}
+.prose pre code{background:none;border:0;padding:0;font-size:inherit}
+
+/* ---------- tables ---------- */
+.table-wrap{overflow-x:auto;margin:0 0 1.6rem;border:1px solid var(--line);
+  border-radius:10px;background:var(--surface)}
+.prose table{border-collapse:collapse;width:100%;font-size:.9rem;line-height:1.55}
+.prose th,.prose td{padding:.62rem .85rem;text-align:left;vertical-align:top;
+  border-bottom:1px solid var(--line-soft)}
+.prose th{background:var(--code-bg);font-weight:640;font-size:.78rem;
+  letter-spacing:.04em;text-transform:uppercase;color:var(--muted);white-space:nowrap}
+.prose tbody tr:last-child td{border-bottom:0}
+.prose tbody tr:hover td{background:var(--line-soft)}
+
+@media (min-width:64rem){
+  .table-wrap,.prose pre{width:min(56rem,calc(100vw - 22rem))}
+}
+
+/* ---------- footer ---------- */
+.colophon{grid-column:1/-1;margin-top:4rem;padding-top:1.5rem;border-top:1px solid var(--line);
+  font-size:.8rem;color:var(--faint);display:flex;flex-wrap:wrap;gap:.4rem 1.25rem}
+
+/* ---------- print ---------- */
+@media print{
+  :root{--bg:#fff;--surface:#fff;--text:#000;--muted:#333;--line:#ccc}
+  body{font-size:11pt}
+  .toc,.colophon{display:none}
+  .page{display:block;max-width:none;padding:0}
+  .prose{max-width:none}
+  .prose h1,.prose h2{break-after:avoid}
+  .table-wrap,.prose pre,.prose blockquote{break-inside:avoid}
+  .prose a{color:#000;border:0}
+}
+</style>
+</head>
+<body>
+<div class="page">
+  <header class="masthead">
+    <a class="back" href="index.html">All documents</a>
+    <span class="eyebrow">Working notes</span>
+    <h1>Discussion with Rod Thomas</h1>
+    <p class="subtitle">Summary, Expectations, Organizational Changes and Engineering Excellence</p>
+    <ul class="meta"><li><strong>Source</strong> Rod_Discussion_Summary.md</li><li><strong>Length</strong> 2,913 words</li></ul>
+  </header>
+  <nav class="toc" aria-label="Contents"><p class="toc-title">Contents</p><ol><li class="lv2"><a href="#2-rods-core-principle-demonstrate-excellence-first-then-standardize">2. Rod’s Core Principle: Demonstrate Excellence First, Then Standardize</a></li>
+<li class="lv2"><a href="#3-100-focus-on-rods-agenda">3. 100% Focus on Rod’s Agenda</a></li>
+<li class="lv2"><a href="#4-leadership-means-doing-not-only-coaching">4. Leadership Means Doing, Not Only Coaching</a></li>
+<li class="lv2"><a href="#5-business-value-must-drive-engineering">5. Business Value Must Drive Engineering</a></li>
+<li class="lv2"><a href="#6-organizational-and-resource-realignment">6. Organizational and Resource Realignment</a></li>
+<li class="lv2"><a href="#7-need-for-strong-technical-leadership-in-bangalore">7. Need for Strong Technical Leadership in Bangalore</a></li>
+<li class="lv2"><a href="#8-harness-should-be-treated-as-a-platform-not-a-tool">8. Harness Should Be Treated as a Platform, Not a Tool</a></li>
+<li class="lv2"><a href="#9-harness-onboarding-must-become-self-service">9. Harness Onboarding Must Become Self-Service</a></li>
+<li class="lv2"><a href="#10-analyze-one-year-of-harness-support-tickets">10. Analyze One Year of Harness Support Tickets</a></li>
+<li class="lv2"><a href="#11-consolidate-harness-templates">11. Consolidate Harness Templates</a></li>
+<li class="lv2"><a href="#12-harness-needs-a-clear-roadmap">12. Harness Needs a Clear Roadmap</a></li>
+<li class="lv2"><a href="#13-engineering-excellence-is-a-major-concern">13. Engineering Excellence Is a Major Concern</a></li>
+<li class="lv2"><a href="#14-engineering-metrics-will-be-used-to-measure-behavior">14. Engineering Metrics Will Be Used to Measure Behavior</a></li>
+<li class="lv2"><a href="#15-self-merging-and-lack-of-peer-review-must-change">15. Self-Merging and Lack of Peer Review Must Change</a></li>
+<li class="lv2"><a href="#16-test-coverage-and-golden-pipelines">16. Test Coverage and Golden Pipelines</a></li>
+<li class="lv2"><a href="#17-farm-genie-and-ai3-need-to-move-beyond-demos">17. Farm Genie and AI3 Need to Move Beyond Demos</a></li>
+<li class="lv2"><a href="#18-42-people-must-produce-visible-value">18. 42 People Must Produce Visible Value</a></li>
+<li class="lv2"><a href="#19-the-team-needs-a-cultural-reset">19. The Team Needs a Cultural Reset</a></li>
+<li class="lv2"><a href="#20-architect-titles-must-mean-something">20. Architect Titles Must Mean Something</a></li>
+<li class="lv2"><a href="#21-hiring-profile-needs-to-change">21. Hiring Profile Needs to Change</a></li>
+<li class="lv2"><a href="#22-reframe-the-organization-as-a-platform">22. Reframe the Organization as a Platform</a></li>
+<li class="lv2"><a href="#23-career-path-needs-to-match-the-platform-mission">23. Career Path Needs to Match the Platform Mission</a></li>
+<li class="lv2"><a href="#24-cross-team-leadership-needs-to-improve">24. Cross-Team Leadership Needs to Improve</a></li>
+<li class="lv2"><a href="#25-india-should-be-a-global-capability-not-staff-augmentation">25. India Should Be a Global Capability, Not Staff Augmentation</a></li>
+<li class="lv2"><a href="#26-architecture-leadership-across-cto-organizations">26. Architecture Leadership Across CTO Organizations</a></li>
+<li class="lv2"><a href="#27-federated-architecture-leadership">27. Federated Architecture Leadership</a></li>
+<li class="lv2"><a href="#28-regular-cadence-with-rod">28. Regular Cadence with Rod</a></li>
+<li class="lv2"><a href="#29-near-term-priorities">29. Near-Term Priorities</a></li>
+<li class="lv2"><a href="#30-the-leadership-model-rod-is-looking-for">30. The Leadership Model Rod Is Looking For</a></li>
+<li class="lv2"><a href="#31-overall-strategic-direction">31. Overall Strategic Direction</a></li>
+<li class="lv2"><a href="#32-bottom-line">32. Bottom Line</a></li></ol></nav>
+  <main class="prose">
+<h2 id="1-executive-summary">1. Executive Summary</h2>
+<p>The discussion with Rod was primarily about a significant reset in expectations for the architecture and engineering organization.</p>
+<p>Rod made it clear that the immediate priority is <strong>execution and demonstrated outcomes</strong>, not theory, documentation, or activity for its own sake. The organization needs to show excellence through real delivery, measurable value, engineering discipline and adoption, and then use those successful outcomes as the basis for standardization and scale.</p>
+<p>A second major theme was <strong>100% focus on Rod&rsquo;s agenda</strong>. While collaboration with AI for Tech and other areas is expected, operational ownership and execution need to be clearly separated so that the architecture organization can concentrate on Rod&rsquo;s priorities.</p>
+<p>The third major theme was <strong>engineering excellence and culture</strong>. Rod is using engineering metrics, code contribution, pull requests, test coverage and development practices to assess the organization. His expectation is that the team should become an example of high-performing engineering rather than being perceived as a laggard.</p>
+<p>Finally, Rod wants the India architecture organization to act as a genuine global capability, not as a staff-augmentation function. The team should work directly with CTO leaders, understand their problems, build solutions that create measurable business value, and then scale what works.</p>
+<hr />
+<h1 id="2-rods-core-principle-demonstrate-excellence-first-then-standardize">2. Rod&rsquo;s Core Principle: Demonstrate Excellence First, Then Standardize</h1>
+<p>Rod emphasized that the organization should stop trying to standardize things before proving what excellent looks like.</p>
+<p>The sequence he wants is:</p>
+<p><strong>Demonstrate excellence → Prove the outcome → Identify what works → Standardize → Scale</strong></p>
+<p>The focus should therefore be on:</p>
+<ul>
+<li>Real implementation</li>
+<li>Coding</li>
+<li>Measurable outcomes</li>
+<li>Business value</li>
+<li>Engineering quality</li>
+<li>Adoption</li>
+<li>Learning from practical experience</li>
+</ul>
+<p>Rod does not want architecture to remain theoretical.</p>
+<p>The important question is not:</p>
+<blockquote>
+<p>&ldquo;What should the architecture look like?&rdquo;</p>
+</blockquote>
+<p>It is:</p>
+<blockquote>
+<p>&ldquo;What can we build that demonstrates excellence and delivers measurable value?&rdquo;</p>
+</blockquote>
+<p>Once the organization proves a successful approach, it can become a reusable pattern or standard.</p>
+<hr />
+<h1 id="3-100-focus-on-rods-agenda">3. 100% Focus on Rod&rsquo;s Agenda</h1>
+<p>Rod was very explicit about expectations.</p>
+<p>If the user chooses to remain in the organization, the expectation is <strong>100% focus on Rod&rsquo;s agenda</strong>.</p>
+<p>This does not mean collaboration with AI for Tech stops. Rather, Rod wants to remove ambiguity about accountability and priority.</p>
+<p>His expectation is:</p>
+<ul>
+<li>Rod&rsquo;s agenda is the primary focus.</li>
+<li>Collaboration across organizations is encouraged.</li>
+<li>Delivery accountability for other organizations should not distract from the primary mandate.</li>
+<li>The work needs to be execution-oriented.</li>
+<li>The user is expected to personally contribute through delivery and coding, not only leadership and influence.</li>
+</ul>
+<p>Rod emphasized that he can see engineering metrics and contribution data, so he expects leaders to demonstrate their understanding through actual work.</p>
+<hr />
+<h1 id="4-leadership-means-doing-not-only-coaching">4. Leadership Means Doing, Not Only Coaching</h1>
+<p>One of Rod&rsquo;s strongest messages was that leadership cannot be limited to:</p>
+<ul>
+<li>Coaching</li>
+<li>Encouraging</li>
+<li>Influencing</li>
+<li>Reviewing</li>
+<li>Delegating</li>
+</ul>
+<p>Leaders are expected to <strong>do the work as well</strong>.</p>
+<p>Rod wants leaders to gain real-world experience by building and delivering. That experience then gives them credibility to coach the broader team.</p>
+<p>The desired leadership model is:</p>
+<p><strong>Do → Learn → Demonstrate → Coach → Scale</strong></p>
+<p>This is particularly important for architecture leaders. Architects need to understand the practical engineering experience rather than simply prescribing solutions.</p>
+<hr />
+<h1 id="5-business-value-must-drive-engineering">5. Business Value Must Drive Engineering</h1>
+<p>Rod repeatedly connected engineering activity to outcomes.</p>
+<p>The organization should not build simply because something is technically interesting.</p>
+<p>The expected model is:</p>
+<p><strong>Problem → Build → Demonstrate value → Measure outcome → Scale</strong></p>
+<p>The architecture organization should work directly with CTO leaders and business problems.</p>
+<p>This is a major shift from a model based on:</p>
+<ul>
+<li>Architectural theory</li>
+<li>Documentation</li>
+<li>Reviews</li>
+<li>Technology experiments without adoption</li>
+</ul>
+<p>toward:</p>
+<ul>
+<li>Business problems</li>
+<li>Working software</li>
+<li>Measurable value</li>
+<li>Proven patterns</li>
+<li>Scalable capabilities</li>
+</ul>
+<hr />
+<h1 id="6-organizational-and-resource-realignment">6. Organizational and Resource Realignment</h1>
+<p>A significant portion of the discussion covered the resources currently labelled as AI for Tech.</p>
+<p>Rod wants this realigned so that the organizational structure is explicit and there is no confusion about ownership.</p>
+<p>The intention is to:</p>
+<ul>
+<li>Identify which resources should remain within the architecture organization.</li>
+<li>Move resources whose primary focus belongs elsewhere.</li>
+<li>Retain useful capabilities such as Farm Genie and AI-for-testing resources where appropriate.</li>
+<li>Establish clear reporting relationships.</li>
+<li>Complete the realignment quickly rather than allowing ambiguity to continue.</li>
+</ul>
+<p>Rod wanted the resource changes to be completed around the beginning of the next month.</p>
+<p>The discussion also covered the need for appropriate Bangalore-based technical leadership for the India resources.</p>
+<hr />
+<h1 id="7-need-for-strong-technical-leadership-in-bangalore">7. Need for Strong Technical Leadership in Bangalore</h1>
+<p>Rod challenged the current leadership model for the Bangalore team.</p>
+<p>His expectation is that the team needs a <strong>technical leader who can advise, coach and ensure that people are delivering valuable outcomes</strong>.</p>
+<p>This should not simply be a product-owner role.</p>
+<p>The desired leadership capability should include:</p>
+<ul>
+<li>Technical depth</li>
+<li>Architecture understanding</li>
+<li>Engineering leadership</li>
+<li>Coaching</li>
+<li>Accountability for engineering outcomes</li>
+<li>Ability to improve team behavior</li>
+<li>Ability to create a high-performance culture</li>
+</ul>
+<p>Until the appropriate VP/technical leader is hired, an interim reporting structure may be used.</p>
+<hr />
+<h1 id="8-harness-should-be-treated-as-a-platform-not-a-tool">8. Harness Should Be Treated as a Platform, Not a Tool</h1>
+<p>Rod challenged the size and structure of the Harness organization.</p>
+<p>His question was essentially:</p>
+<blockquote>
+<p>Why do we need so many people to manage a SaaS platform?</p>
+</blockquote>
+<p>The underlying concern is that too much human effort is currently required for:</p>
+<ul>
+<li>Onboarding</li>
+<li>Support</li>
+<li>Templates</li>
+<li>Access</li>
+<li>Operational assistance</li>
+<li>User enablement</li>
+</ul>
+<p>The target should be a much more <strong>self-service platform experience</strong>.</p>
+<p>Instead of people helping every team manually, the platform should make the correct path easy and repeatable.</p>
+<hr />
+<h1 id="9-harness-onboarding-must-become-self-service">9. Harness Onboarding Must Become Self-Service</h1>
+<p>Rod specifically requested the written Harness onboarding process.</p>
+<p>The current onboarding experience reportedly requires significant hand-holding, including access, login and setup activities.</p>
+<p>Even though the process is documented, the organization still depends heavily on people to guide users through it.</p>
+<p>Rod&rsquo;s expectation is that this should evolve toward:</p>
+<p><strong>Documented process → Automated process → Self-service onboarding</strong></p>
+<p>The goal is to reduce the human support burden and make adoption significantly easier.</p>
+<h3 id="immediate-action">Immediate action</h3>
+<p>Provide Rod with the existing written Harness onboarding process.</p>
+<hr />
+<h1 id="10-analyze-one-year-of-harness-support-tickets">10. Analyze One Year of Harness Support Tickets</h1>
+<p>Rod also requested a data-driven view of the support burden.</p>
+<p>He asked for:</p>
+<blockquote>
+<p><strong>One year&rsquo;s worth of Harness support tickets</strong></p>
+</blockquote>
+<p>The purpose is to understand:</p>
+<ul>
+<li>What users are asking for</li>
+<li>Where onboarding breaks down</li>
+<li>Which issues repeat</li>
+<li>What should be automated</li>
+<li>What should become platform capability</li>
+<li>Where the team is spending unnecessary operational effort</li>
+</ul>
+<p>This is an important example of Rod&rsquo;s broader philosophy:</p>
+<p><strong>Use evidence to identify repetitive problems, then build the solution into the platform.</strong></p>
+<hr />
+<h1 id="11-consolidate-harness-templates">11. Consolidate Harness Templates</h1>
+<p>The discussion identified another source of organizational and operational complexity.</p>
+<p>There are currently:</p>
+<ul>
+<li>Centrally managed templates</li>
+<li>Separate templates managed by other teams</li>
+<li>Customized templates</li>
+<li>Different runtime support levels</li>
+<li>Teams that have not yet migrated to managed templates</li>
+</ul>
+<p>Rod&rsquo;s reaction was that much of this is unnecessary noise.</p>
+<p>The desired direction is:</p>
+<p><strong>One common template strategy → Broad runtime support → Seamless migration → Self-service adoption</strong></p>
+<p>Teams should not need to maintain separate implementations simply because the platform has not yet provided a sufficiently complete managed capability.</p>
+<hr />
+<h1 id="12-harness-needs-a-clear-roadmap">12. Harness Needs a Clear Roadmap</h1>
+<p>Rod identified the lack of a definitive roadmap as another weakness.</p>
+<p>The team needs to be able to answer:</p>
+<ul>
+<li>What are we delivering this quarter?</li>
+<li>What is the next major capability?</li>
+<li>What does success look like?</li>
+<li>Which problems are we solving?</li>
+<li>What will be different for users after the quarter?</li>
+</ul>
+<p>The roadmap should be tied to outcomes rather than simply a list of technical tasks.</p>
+<hr />
+<h1 id="13-engineering-excellence-is-a-major-concern">13. Engineering Excellence Is a Major Concern</h1>
+<p>This was one of the strongest parts of the conversation.</p>
+<p>Rod reviewed engineering metrics and identified several concerns around:</p>
+<ul>
+<li>Code contribution</li>
+<li>Pull requests</li>
+<li>Self-merging</li>
+<li>Peer review</li>
+<li>Test coverage</li>
+<li>Consistency of contribution</li>
+<li>Development discipline</li>
+<li>Delivery output</li>
+</ul>
+<p>He believes the team currently has a <strong>reputational problem</strong> and is not perceived as a high-performing engineering organization.</p>
+<p>His expectation is to change that perception.</p>
+<p>The team should become:</p>
+<blockquote>
+<p><strong>The epitome of what engineering excellence looks like.</strong></p>
+</blockquote>
+<hr />
+<h1 id="14-engineering-metrics-will-be-used-to-measure-behavior">14. Engineering Metrics Will Be Used to Measure Behavior</h1>
+<p>Rod is actively looking at engineering data.</p>
+<p>Examples discussed include:</p>
+<ul>
+<li>Number of commits</li>
+<li>Frequency of commits</li>
+<li>Pull requests</li>
+<li>Pull-request review behavior</li>
+<li>Pull-request merge times</li>
+<li>Self-merged pull requests</li>
+<li>Repository activity</li>
+<li>Test coverage</li>
+<li>Consistency of contribution over time</li>
+</ul>
+<p>The purpose is not simply to count commits.</p>
+<p>Rod specifically said he is looking for <strong>consistent contribution and engineering behavior</strong>.</p>
+<p>The metrics are being used to understand:</p>
+<ul>
+<li>Who is contributing</li>
+<li>How they are contributing</li>
+<li>Whether peer review is happening</li>
+<li>Whether engineering practices are healthy</li>
+<li>Where coaching or organizational intervention is needed</li>
+</ul>
+<hr />
+<h1 id="15-self-merging-and-lack-of-peer-review-must-change">15. Self-Merging and Lack of Peer Review Must Change</h1>
+<p>Rod identified examples where engineers can:</p>
+<ul>
+<li>Commit directly</li>
+<li>Raise pull requests</li>
+<li>Approve their own pull requests</li>
+<li>Merge without meaningful peer review</li>
+</ul>
+<p>He considers this a serious engineering practice problem.</p>
+<p>The expected behavior should include:</p>
+<ul>
+<li>Peer review</li>
+<li>Meaningful code discussion</li>
+<li>Quality gates</li>
+<li>Testing</li>
+<li>Shared learning</li>
+<li>Accountability</li>
+</ul>
+<p>A pull request should be more than a mechanism for merging code.</p>
+<p>It should be part of the engineering learning and quality process.</p>
+<hr />
+<h1 id="16-test-coverage-and-golden-pipelines">16. Test Coverage and Golden Pipelines</h1>
+<p>Rod also highlighted weaknesses in engineering quality.</p>
+<p>Examples included:</p>
+<ul>
+<li>Poor unit-test coverage</li>
+<li>Some components reportedly having only around 15% to 20% unit-test coverage</li>
+<li>Lack of golden pipelines</li>
+<li>Weak standardized testing practices</li>
+</ul>
+<p>The organization needs to establish stronger engineering foundations, including:</p>
+<p><strong>Code → PR → Peer review → Automated tests → Quality gates → Deployment</strong></p>
+<p>These should become standard platform capabilities where possible.</p>
+<hr />
+<h1 id="17-farm-genie-and-ai3-need-to-move-beyond-demos">17. Farm Genie and AI3 Need to Move Beyond Demos</h1>
+<p>Rod expressed frustration with initiatives that remain in experimentation or demo mode for too long.</p>
+<p>Farm Genie has reportedly existed for an extended period without sufficient visible value.</p>
+<p>AI3 was described as a strong demo, but Rod&rsquo;s concern is:</p>
+<blockquote>
+<p><strong>Where is the scale, adoption and measurable value?</strong></p>
+</blockquote>
+<p>The expected progression is:</p>
+<p><strong>Demo → Production → Adoption → Measurement → Improvement → Scale</strong></p>
+<p>The team should treat internal AI products as real products, not experiments that remain on an individual&rsquo;s machine.</p>
+<hr />
+<h1 id="18-42-people-must-produce-visible-value">18. 42 People Must Produce Visible Value</h1>
+<p>Rod questioned how a team of approximately 42 people could be working across many areas without producing enough visible outcomes.</p>
+<p>The concern is not simply headcount.</p>
+<p>The concern is <strong>focus</strong>.</p>
+<p>Too many parallel initiatives can result in:</p>
+<ul>
+<li>Fragmented attention</li>
+<li>Slow progress</li>
+<li>Many partial solutions</li>
+<li>Little adoption</li>
+<li>Weak accountability</li>
+<li>Lack of visible business value</li>
+</ul>
+<p>Rod wants fewer priorities with stronger execution.</p>
+<hr />
+<h1 id="19-the-team-needs-a-cultural-reset">19. The Team Needs a Cultural Reset</h1>
+<p>Rod believes a significant portion of the problem is cultural and behavioral.</p>
+<p>The organization needs to shift from:</p>
+<p><strong>&ldquo;We are working on many things&rdquo;</strong></p>
+<p>to:</p>
+<p><strong>&ldquo;We deliver valuable outcomes.&rdquo;</strong></p>
+<p>The desired culture is:</p>
+<ul>
+<li>Entrepreneurial</li>
+<li>Fast-moving</li>
+<li>Technically excellent</li>
+<li>Outcome-oriented</li>
+<li>Accountable</li>
+<li>Data-driven</li>
+<li>Willing to experiment</li>
+<li>Willing to learn</li>
+<li>Focused on adoption</li>
+</ul>
+<p>The goal is for the organization to become one of the strongest engineering teams in the company.</p>
+<hr />
+<h1 id="20-architect-titles-must-mean-something">20. Architect Titles Must Mean Something</h1>
+<p>Rod also challenged the distribution of senior titles.</p>
+<p>His position is that senior architecture titles should not be given simply based on tenure or historical structure.</p>
+<p>People with architect or senior leadership titles should:</p>
+<ul>
+<li>Lead their respective areas</li>
+<li>Demonstrate technical authority</li>
+<li>Deliver outcomes</li>
+<li>Improve engineering behavior</li>
+<li>Coach other engineers</li>
+<li>Be accountable for standards and excellence</li>
+</ul>
+<p>In other words:</p>
+<p><strong>Title → Responsibility → Leadership → Demonstrated value</strong></p>
+<hr />
+<h1 id="21-hiring-profile-needs-to-change">21. Hiring Profile Needs to Change</h1>
+<p>The discussion highlighted a mismatch between some current team members&rsquo; backgrounds and the skills required for a platform organization.</p>
+<p>Many people came from application-development backgrounds and are now working on:</p>
+<ul>
+<li>Harness</li>
+<li>CI/CD</li>
+<li>AWS</li>
+<li>Platform engineering</li>
+<li>Python automation</li>
+<li>Cloud integrations</li>
+<li>Infrastructure capabilities</li>
+</ul>
+<p>This can create a learning curve.</p>
+<p>Rod suggested thinking of the team as a <strong>platform engineering organization</strong>, rather than an application-development organization.</p>
+<p>The desired skill profile should therefore emphasize:</p>
+<ul>
+<li>Platform engineering</li>
+<li>Cloud</li>
+<li>AWS</li>
+<li>CI/CD</li>
+<li>Developer platforms</li>
+<li>Automation</li>
+<li>Architecture</li>
+<li>Engineering excellence</li>
+<li>Coding</li>
+</ul>
+<p>SRE experience can be valuable, but the role should not simply be defined as an SRE role.</p>
+<hr />
+<h1 id="22-reframe-the-organization-as-a-platform">22. Reframe the Organization as a Platform</h1>
+<p>An important cultural opportunity is changing the language from:</p>
+<p><strong>Tools</strong></p>
+<p>to:</p>
+<p><strong>Platform</strong></p>
+<p>Rod believes this could help people understand the strategic importance of what they are building.</p>
+<p>The organization is not simply operating a collection of tools.</p>
+<p>It is building a platform that can provide:</p>
+<ul>
+<li>Developer capabilities</li>
+<li>Engineering standards</li>
+<li>Automation</li>
+<li>Templates</li>
+<li>Pipelines</li>
+<li>Architecture patterns</li>
+<li>AI capabilities</li>
+<li>Governance</li>
+</ul>
+<p>This reframing can also improve recruitment, career development and team identity.</p>
+<hr />
+<h1 id="23-career-path-needs-to-match-the-platform-mission">23. Career Path Needs to Match the Platform Mission</h1>
+<p>People need to understand what their career path looks like within the platform organization.</p>
+<p>A developer who joins and spends significant time learning Harness, CI/CD, cloud and platform engineering needs to see how those skills translate into career growth.</p>
+<p>The organization should define:</p>
+<ul>
+<li>Platform engineering roles</li>
+<li>Architecture engineering roles</li>
+<li>Technical leadership roles</li>
+<li>Skills progression</li>
+<li>Career expectations</li>
+<li>Engineering competency models</li>
+</ul>
+<p>This should make the work feel like a deliberate career path rather than simply learning an internal product.</p>
+<hr />
+<h1 id="24-cross-team-leadership-needs-to-improve">24. Cross-Team Leadership Needs to Improve</h1>
+<p>Rod asked whether the leadership team operates as a genuinely connected group.</p>
+<p>The current model appears to have:</p>
+<ul>
+<li>Weekly management meetings</li>
+<li>Functional ownership</li>
+<li>Individual leaders managing separate areas</li>
+<li>Limited cross-team awareness</li>
+</ul>
+<p>Rod sees this as a cultural issue.</p>
+<p>The leadership team should have greater awareness of:</p>
+<ul>
+<li>What other teams are doing</li>
+<li>Current priorities</li>
+<li>Challenges</li>
+<li>Dependencies</li>
+<li>Architecture decisions</li>
+<li>Opportunities to collaborate</li>
+</ul>
+<p>The organization should behave more like one team rather than several independent groups.</p>
+<hr />
+<h1 id="25-india-should-be-a-global-capability-not-staff-augmentation">25. India Should Be a Global Capability, Not Staff Augmentation</h1>
+<p>Rod was explicit that India should not operate as a staff-augmentation center.</p>
+<p>The intended model is:</p>
+<p><strong>India = Global engineering and architecture capability</strong></p>
+<p>People in India should:</p>
+<ul>
+<li>Understand global priorities</li>
+<li>Work directly with CTO organizations</li>
+<li>Contribute to global outcomes</li>
+<li>Have awareness of work happening in other regions</li>
+<li>Provide technical leadership</li>
+<li>Build reusable capabilities</li>
+<li>Participate in architectural decisions</li>
+</ul>
+<p>The value proposition is not simply lower-cost execution.</p>
+<p>The value is <strong>global engineering capacity and technical excellence</strong>.</p>
+<hr />
+<h1 id="26-architecture-leadership-across-cto-organizations">26. Architecture Leadership Across CTO Organizations</h1>
+<p>Rod sees an important role for the user in India.</p>
+<p>Because many CTO leaders and technology organizations are based in India, the architecture leadership should be able to work directly with them.</p>
+<p>The role is to:</p>
+<ul>
+<li>Understand their problems</li>
+<li>Identify opportunities</li>
+<li>Build solutions</li>
+<li>Demonstrate outcomes</li>
+<li>Create reusable patterns</li>
+<li>Influence change</li>
+<li>Scale proven capabilities</li>
+</ul>
+<p>This is a much more entrepreneurial architecture model.</p>
+<hr />
+<h1 id="27-federated-architecture-leadership">27. Federated Architecture Leadership</h1>
+<p>Rod also expects the user to become a central coordination point for other architects and international partners.</p>
+<p>The federated architecture community should not operate independently without alignment.</p>
+<p>The user will need to help:</p>
+<ul>
+<li>Establish direction</li>
+<li>Coordinate priorities</li>
+<li>Share patterns</li>
+<li>Ensure consistency</li>
+<li>Prevent teams from going off track</li>
+<li>Accelerate adoption</li>
+<li>Connect global architecture efforts</li>
+</ul>
+<p>This is leadership through influence, standards and demonstrated outcomes.</p>
+<hr />
+<h1 id="28-regular-cadence-with-rod">28. Regular Cadence with Rod</h1>
+<p>Rod indicated that there will be a recurring leadership connection.</p>
+<p>The cadence may initially be more frequent while the strategy and execution plan are being established.</p>
+<p>Over time, it may become approximately every 45 days.</p>
+<p>The purpose will be to review:</p>
+<ul>
+<li>What has improved</li>
+<li>What has been delivered</li>
+<li>What is working</li>
+<li>What is not working</li>
+<li>What should change</li>
+<li>What is being learned</li>
+<li>What should happen next</li>
+</ul>
+<p>The relationship is intended to be focused on execution, feedback and continuous improvement.</p>
+<hr />
+<h1 id="29-near-term-priorities">29. Near-Term Priorities</h1>
+<p>Based on the discussion, the immediate priorities are:</p>
+<h3 id="1-clarify-organizational-ownership">1. Clarify organizational ownership</h3>
+<p>Complete the AI for Tech resource realignment and reporting changes.</p>
+<h3 id="2-establish-technical-leadership">2. Establish technical leadership</h3>
+<p>Identify or hire the appropriate Bangalore technical leader.</p>
+<h3 id="3-understand-harness-operational-burden">3. Understand Harness operational burden</h3>
+<p>Provide:</p>
+<ul>
+<li>Written onboarding process</li>
+<li>One year of support-ticket data</li>
+</ul>
+<h3 id="4-establish-engineering-baseline">4. Establish engineering baseline</h3>
+<p>Analyze:</p>
+<ul>
+<li>Code contributions</li>
+<li>PR practices</li>
+<li>Self-merging</li>
+<li>Test coverage</li>
+<li>Pipeline quality</li>
+<li>Delivery consistency</li>
+</ul>
+<h3 id="5-create-a-clear-harness-roadmap">5. Create a clear Harness roadmap</h3>
+<p>Define quarterly priorities and measurable outcomes.</p>
+<h3 id="6-move-ai3-and-other-initiatives-toward-production">6. Move AI3 and other initiatives toward production</h3>
+<p>Stop treating successful demos as the end state.</p>
+<h3 id="7-reset-engineering-culture">7. Reset engineering culture</h3>
+<p>Make the team a visible example of engineering excellence.</p>
+<h3 id="8-build-global-architecture-leadership">8. Build global architecture leadership</h3>
+<p>Use India as a global capability and connect the federated architecture community.</p>
+<hr />
+<h1 id="30-the-leadership-model-rod-is-looking-for">30. The Leadership Model Rod Is Looking For</h1>
+<p>The conversation suggests a leadership model built around five behaviors:</p>
+<h2 id="do">Do</h2>
+<p>Personally build, code and deliver.</p>
+<h2 id="demonstrate">Demonstrate</h2>
+<p>Show measurable outcomes rather than describing theoretical value.</p>
+<h2 id="coach">Coach</h2>
+<p>Use practical experience to raise the capability of others.</p>
+<h2 id="standardize">Standardize</h2>
+<p>Turn successful approaches into reusable patterns and platform capabilities.</p>
+<h2 id="scale">Scale</h2>
+<p>Take proven solutions across CTO organizations.</p>
+<p>The resulting cycle is:</p>
+<p><strong>Do → Demonstrate → Coach → Standardize → Scale</strong></p>
+<hr />
+<h1 id="31-overall-strategic-direction">31. Overall Strategic Direction</h1>
+<p>The discussion with Rod is ultimately about transforming the organization from a collection of people and tools into a <strong>high-performing engineering and architecture platform</strong>.</p>
+<p>The target organization should:</p>
+<ul>
+<li>Build real software</li>
+<li>Deliver measurable business value</li>
+<li>Use engineering data to improve behavior</li>
+<li>Automate repetitive work</li>
+<li>Make platforms self-service</li>
+<li>Establish strong technical standards</li>
+<li>Develop reusable patterns</li>
+<li>Build AI capabilities that scale</li>
+<li>Work directly with CTO organizations</li>
+<li>Operate globally</li>
+<li>Create a culture of excellence</li>
+</ul>
+<p>This aligns strongly with the broader Architecture-as-a-Product direction from the offsite: architecture should become something teams consume directly, with reusable patterns, automated governance, self-service capabilities and AI-assisted engineering rather than relying primarily on documents and manual reviews. fileciteturn14file5L419-L443</p>
+<hr />
+<h1 id="32-bottom-line">32. Bottom Line</h1>
+<p>The most important message from Rod is:</p>
+<blockquote>
+<p><strong>Stop measuring activity. Start demonstrating excellence and outcomes.</strong></p>
+</blockquote>
+<p>The organization has an opportunity to reset its reputation and become a high-performing global engineering capability.</p>
+<p>That requires three simultaneous changes:</p>
+<h3 id="organizational">Organizational</h3>
+<p>Clear ownership, appropriate leadership and a focused mandate.</p>
+<h3 id="engineering">Engineering</h3>
+<p>Coding, testing, peer review, automation, delivery discipline and measurable contribution.</p>
+<h3 id="strategic">Strategic</h3>
+<p>Build platforms and architecture capabilities that solve real CTO problems, prove value, standardize what works and scale it globally.</p>
+<p>The transformation can be summarized as:</p>
+<p><strong>Focus → Build → Demonstrate value → Measure → Improve → Standardize → Scale</strong></p>
+<p>That is the operating model Rod appears to be asking the organization to adopt.</p>
+  </main>
+  <footer class="colophon">
+    <span>Discussion with Rod Thomas</span>
+    <span>Converted from Rod_Discussion_Summary.md</span>
+  </footer>
+</div>
+</body>
+</html>

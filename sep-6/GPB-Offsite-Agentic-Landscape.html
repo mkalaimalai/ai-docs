@@ -1,0 +1,687 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Agentic Solutions, Products &amp; Repos — Mapped to the GPB A&amp;E Offsite</title>
+<meta name="color-scheme" content="light dark">
+<style>
+*,*::before,*::after{box-sizing:border-box}
+:root{
+  --bg:#fbfbfa; --surface:#fff; --text:#1c1e21; --muted:#5f6570; --faint:#8b919b;
+  --line:#e4e6ea; --line-soft:#eef0f3; --accent:#2f5fd0; --accent-soft:#eaf0fd;
+  --code-bg:#f4f5f7; --mark:#fff6cc;
+  --sans:-apple-system,BlinkMacSystemFont,"Segoe UI",Inter,Helvetica,Arial,sans-serif;
+  --mono:ui-monospace,SFMono-Regular,"SF Mono",Menlo,Consolas,monospace;
+}
+@media (prefers-color-scheme:dark){
+  :root{
+    --bg:#14161a; --surface:#1a1d22; --text:#e3e6ea; --muted:#9aa1ac; --faint:#6f7681;
+    --line:#2c3037; --line-soft:#23262c; --accent:#7fa9ff; --accent-soft:#1e2634;
+    --code-bg:#22262c; --mark:#4a3f14;
+  }
+}
+html{-webkit-text-size-adjust:100%}
+body{margin:0;background:var(--bg);color:var(--text);
+  font:400 17px/1.7 var(--sans);
+  font-feature-settings:"kern","liga";-webkit-font-smoothing:antialiased}
+
+/* ---------- shell ---------- */
+.page{max-width:80rem;margin:0 auto;padding:0 1.5rem 6rem;
+  display:grid;grid-template-columns:minmax(0,1fr);gap:0 3.5rem}
+@media (min-width:64rem){
+  .page{grid-template-columns:16rem minmax(0,1fr);padding-top:1rem}
+  .masthead{grid-column:1/-1}
+}
+
+/* ---------- masthead ---------- */
+.masthead{padding:4rem 0 2rem;border-bottom:1px solid var(--line);margin-bottom:2.5rem}
+.back{display:inline-block;margin-bottom:1.1rem;font-size:.83rem;color:var(--muted);
+  text-decoration:none}
+.back::before{content:"\2190";margin-right:.4rem}
+.back:hover{color:var(--accent)}
+.back + .eyebrow{margin-left:.75rem}
+.eyebrow{display:inline-flex;align-items:center;gap:.5rem;
+  font-size:.72rem;font-weight:600;letter-spacing:.09em;text-transform:uppercase;
+  color:var(--accent);background:var(--accent-soft);
+  padding:.3rem .6rem;border-radius:999px;margin-bottom:1.1rem}
+.masthead h1{margin:0;font-size:clamp(1.9rem,4.4vw,3rem);line-height:1.14;
+  font-weight:680;letter-spacing:-.022em;max-width:22ch}
+.subtitle{margin:.85rem 0 0;font-size:1.1rem;line-height:1.5;color:var(--muted);max-width:60ch;font-weight:400}
+.meta{margin:1.6rem 0 0;padding:0;list-style:none;display:flex;flex-wrap:wrap;gap:.5rem 1.5rem;
+  font-size:.85rem;color:var(--faint)}
+.meta strong{color:var(--muted);font-weight:600}
+
+/* ---------- toc ---------- */
+.toc{font-size:.875rem;line-height:1.45}
+@media (min-width:64rem){
+  .toc{position:sticky;top:1.5rem;align-self:start;max-height:calc(100vh - 3rem);
+    overflow-y:auto;padding-right:.5rem;scrollbar-width:thin}
+}
+@media (max-width:63.99rem){
+  .toc{background:var(--surface);border:1px solid var(--line);border-radius:12px;
+    padding:.4rem 1.1rem 1.1rem;margin-bottom:2.5rem}
+  .toc-title{cursor:pointer}
+}
+.toc-title{font-size:.72rem;font-weight:650;letter-spacing:.09em;text-transform:uppercase;
+  color:var(--faint);margin:0 0 .9rem}
+.toc ol{list-style:none;margin:0;padding:0}
+.toc li{margin:0}
+.toc a{display:block;padding:.32rem 0 .32rem .8rem;color:var(--muted);text-decoration:none;
+  border-left:2px solid var(--line-soft);transition:color .12s,border-color .12s}
+.toc a:hover{color:var(--accent);border-left-color:var(--accent)}
+.toc .lv3 a{padding-left:1.6rem;font-size:.83rem;color:var(--faint)}
+
+/* ---------- prose ---------- */
+.prose{max-width:44rem;min-width:0}
+.prose > *:first-child{margin-top:0}
+.prose h1,.prose h2,.prose h3,.prose h4{line-height:1.25;font-weight:650;letter-spacing:-.014em;scroll-margin-top:1.5rem}
+.prose h1{font-size:1.75rem;margin:3.6rem 0 1rem;padding-bottom:.55rem;border-bottom:1px solid var(--line)}
+.prose h2{font-size:1.35rem;margin:2.8rem 0 .85rem}
+.prose h3{font-size:1.08rem;margin:2.1rem 0 .6rem}
+.prose h4{font-size:.98rem;margin:1.7rem 0 .5rem;color:var(--muted)}
+.prose p{margin:0 0 1.15rem}
+.prose a{color:var(--accent);text-decoration:none;border-bottom:1px solid color-mix(in srgb,var(--accent) 32%,transparent)}
+.prose a:hover{border-bottom-color:var(--accent)}
+.prose a[href^="http"]{overflow-wrap:anywhere}
+.prose td a{word-break:break-word}
+.prose strong{font-weight:640;color:var(--text)}
+.prose ul,.prose ol{margin:0 0 1.15rem;padding-left:1.35rem}
+.prose li{margin:.3rem 0}
+.prose li::marker{color:var(--faint)}
+.prose li > ul,.prose li > ol{margin:.3rem 0}
+.prose blockquote{margin:1.6rem 0;padding:.1rem 0 .1rem 1.25rem;
+  border-left:3px solid var(--accent);color:var(--muted)}
+.prose blockquote p:last-child{margin-bottom:0}
+.prose hr{border:0;height:1px;background:var(--line);margin:3rem 0}
+.prose img{max-width:100%;height:auto;border-radius:8px}
+.prose code{font-family:var(--mono);font-size:.875em;background:var(--code-bg);
+  padding:.15em .4em;border-radius:5px;border:1px solid var(--line-soft)}
+.prose pre{background:var(--code-bg);border:1px solid var(--line);border-radius:10px;
+  padding:1rem 1.15rem;overflow-x:auto;margin:0 0 1.4rem;font-size:.88rem;line-height:1.6}
+.prose pre code{background:none;border:0;padding:0;font-size:inherit}
+
+/* ---------- tables ---------- */
+.table-wrap{overflow-x:auto;margin:0 0 1.6rem;border:1px solid var(--line);
+  border-radius:10px;background:var(--surface)}
+.prose table{border-collapse:collapse;width:100%;font-size:.9rem;line-height:1.55}
+.prose th,.prose td{padding:.62rem .85rem;text-align:left;vertical-align:top;
+  border-bottom:1px solid var(--line-soft)}
+.prose th{background:var(--code-bg);font-weight:640;font-size:.78rem;
+  letter-spacing:.04em;text-transform:uppercase;color:var(--muted);white-space:nowrap}
+.prose tbody tr:last-child td{border-bottom:0}
+.prose tbody tr:hover td{background:var(--line-soft)}
+
+@media (min-width:64rem){
+  .table-wrap,.prose pre{width:min(56rem,calc(100vw - 22rem))}
+}
+
+/* ---------- footer ---------- */
+.colophon{grid-column:1/-1;margin-top:4rem;padding-top:1.5rem;border-top:1px solid var(--line);
+  font-size:.8rem;color:var(--faint);display:flex;flex-wrap:wrap;gap:.4rem 1.25rem}
+
+/* ---------- print ---------- */
+@media print{
+  :root{--bg:#fff;--surface:#fff;--text:#000;--muted:#333;--line:#ccc}
+  body{font-size:11pt}
+  .toc,.colophon{display:none}
+  .page{display:block;max-width:none;padding:0}
+  .prose{max-width:none}
+  .prose h1,.prose h2{break-after:avoid}
+  .table-wrap,.prose pre,.prose blockquote{break-inside:avoid}
+  .prose a{color:#000;border:0}
+}
+</style>
+</head>
+<body>
+<div class="page">
+  <header class="masthead">
+    <a class="back" href="index.html">All documents</a>
+    <span class="eyebrow">Working notes</span>
+    <h1>Agentic Solutions, Products &amp; Repos — Mapped to the GPB A&amp;E Offsite</h1>
+    
+    <ul class="meta"><li><strong>Source</strong> GPB-Offsite-Agentic-Landscape.md</li><li><strong>Length</strong> 5,221 words</li></ul>
+  </header>
+  <nav class="toc" aria-label="Contents"><p class="toc-title">Contents</p><ol><li class="lv2"><a href="#0-the-five-findings-that-matter-most">0. The five findings that matter most</a></li>
+<li class="lv2"><a href="#a-architecture-as-a-product-platform-as-product-notes-14">A. Architecture as a Product / platform-as-product (Notes §1–4)</a></li>
+<li class="lv2"><a href="#b-patterns-as-products-automated-enforcement-notes-34">B. Patterns as products &amp; automated enforcement (Notes §3–4)</a></li>
+<li class="lv2"><a href="#c-event-catalogue-domain-events-schema-governance-notes-68">C. Event catalogue, domain events, schema governance (Notes §6–8)</a></li>
+<li class="lv2"><a href="#d-environments-delivery-broker-preview-environments-notes-9-11-12">D. Environments, delivery broker, preview environments (Notes §9, §11, §12)</a></li>
+<li class="lv2"><a href="#e-reliability-chaos-and-ai-sre-notes-10">E. Reliability, chaos, and AI SRE (Notes §10)</a></li>
+<li class="lv2"><a href="#f-testing-behaviour-capture-and-replay-notes-13">F. Testing: behaviour capture and replay (Notes §13)</a></li>
+<li class="lv2"><a href="#g-sbom-driven-lifecycle-management-notes-14">G. SBOM-driven lifecycle management (Notes §14)</a></li>
+<li class="lv2"><a href="#h-data-products-and-agentic-data-governance-notes-1517">H. Data products and agentic data governance (Notes §15–17)</a></li>
+<li class="lv2"><a href="#i-multi-agent-orchestration-for-engineering-work-notes-18">I. Multi-agent orchestration for engineering work (Notes §18)</a></li>
+<li class="lv2"><a href="#j-skills-and-marketplace-governance-the-18-blocker-solved">J. Skills and marketplace governance — the §18 blocker, solved</a></li>
+<li class="lv2"><a href="#k-shortlist-the-ten-to-look-at-first">K. Shortlist — the ten to look at first</a></li>
+<li class="lv2"><a href="#l-where-the-market-has-nothing-for-you">L. Where the market has nothing for you</a></li>
+<li class="lv2"><a href="#m-reading-list-in-order">M. Reading list, in order</a></li></ol></nav>
+  <main class="prose">
+<p><strong>Companion to:</strong> <code>GPB-AE-Offsite-Notes.md</code>
+<strong>Compiled:</strong> September 2026
+<strong>How to use it:</strong> each section maps 1:1 to a section of the offsite notes. For each capability you get (a) what agentic solutions exist today, (b) commercial products worth studying, (c) GitHub projects worth copying from, and (d) a <strong>verdict</strong> — buy / steal the pattern / build.</p>
+<p>A note on selection: I&rsquo;ve filtered for things that are (1) actually shipping in 2026, not roadmap, (2) either open source or deeply documented enough to learn the architecture from, and (3) compatible with a regulated, on-prem-leaning estate. Vendors that require sending production telemetry or source to a SaaS control plane are flagged.</p>
+<hr />
+<h2 id="0-the-five-findings-that-matter-most">0. The five findings that matter most</h2>
+<p>Before the section-by-section detail, these are the ones that change the plan:</p>
+<ol>
+<li><strong>Harness already ships most of the delivery broker.</strong> Autonomous Worker Agents and the Agent Marketplace went GA on 30 June 2026 — agents as governed pipeline steps in CI, CD, IaCM and security, reasoning over Harness&rsquo;s <em>Software Delivery Knowledge Graph</em>, running under sandboxing, scoped credentials and audit trails, with per-pipeline choice of Anthropic/OpenAI/Gemini models. Harness also now has an <strong>AI Asset Catalog</strong> that discovers every agent, skill and plugin in your repos and who owns them, plus AgentTrace for agent decision paths, an MCP server exposing Harness to Claude Code, and Harness IDP (Backstage-based) and Harness Chaos Engineering. You are paying for a large fraction of §12, §14, §10 and §18&rsquo;s governance problem already.</li>
+<li><strong>The replay substrate in §13 exists as open source.</strong> Keploy (Apache 2.0) captures API calls, DB queries and queue traffic at the kernel level with eBPF — no code changes, no sidecar — and replays them with auto-generated dependency mocks. That is precisely the &ldquo;record real behaviour, replay without downstream dependencies running&rdquo; design, minus the UI-click capture. Tusk Drift is the same idea, PR-native, with an open CLI.</li>
+<li><strong>EventCatalog has become agent-native.</strong> It now ships an MCP server (scopable to a domain), an Agents product that maintains catalog documentation from PR diffs, Skills that teach <em>any</em> agent EventCatalog conventions, and CI breaking-change detection that identifies affected consumers before merge. The §7 &ldquo;catalogue is the agent interface&rdquo; argument is no longer speculative.</li>
+<li><strong>The marketplace blocker in §18 is solvable today without nested marketplaces</strong> — see §J. The pattern is a <em>registry-first generated manifest</em> plus per-repo <code>permissions.deny</code>, which is how Datadog runs it. You don&rsquo;t need nesting; you need generation and filtering.</li>
+<li><strong>The remediation gap is a determinism problem, not a model problem.</strong> Moderne&rsquo;s own position — worth reading before you build anything here — is that agentic coding alone doesn&rsquo;t close it. The winning architecture everywhere is <em>deterministic transformation first (OpenRewrite LST recipes), agent only for the residue</em>, with reachability/upgrade-impact analysis supplied as context rather than left for the model to infer. Endor Labs reports agents doing security tasks 2.8× faster with 92% fewer tokens when given that pre-computed context.</li>
+</ol>
+<hr />
+<h2 id="a-architecture-as-a-product-platform-as-product-notes-14">A. Architecture as a Product / platform-as-product (Notes §1–4)</h2>
+<h3 id="agentic-solutions">Agentic solutions</h3>
+<ul>
+<li><strong>Port</strong> — repositioned in 2026 as an &ldquo;Agentic Engineering Platform&rdquo;: Context Lake, workflow orchestration, agent governance, with the portal as a command centre for agents that resolve incidents, remediate vulnerabilities and enforce standards. Closest commercial articulation of exactly what Rod described.</li>
+<li><strong>Cortex</strong> — scorecards + ownership + standards enforcement as the <em>framework agents evaluate against</em>. The relevant idea: not every autonomous workflow should start with a prompt; many should start with a standard.</li>
+<li><strong>Harness AI DevOps Agent</strong> — conversational generation of pipeline YAML and IaC configs, pipeline troubleshooting, OpenAPI spec generation from existing code.</li>
+<li><strong>CNOE / <code>ai-platform-engineering</code> (CAIPE)</strong> — open-source multi-agent system for platform engineering: a supervisor agent plus ArgoCD, PagerDuty, GitHub, Jira/Confluence, Slack sub-agents, integrating with Backstage. The clearest open reference architecture for &ldquo;platform capabilities as a fleet of specialist agents&rdquo;.</li>
+</ul>
+<h3 id="products-to-learn-from">Products to learn from</h3>
+<div class="table-wrap"><table>
+<thead>
+<tr>
+<th>Product</th>
+<th>What to study</th>
+<th>Caveat</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Port (<a href="https://port.io" target="_blank" rel="noopener noreferrer">port.io</a>)</td>
+<td>Context Lake concept; agent governance model; how they turn a catalog into an agent action surface</td>
+<td>SaaS</td>
+</tr>
+<tr>
+<td>Cortex</td>
+<td>Scorecards as machine-readable standards</td>
+<td>SaaS</td>
+</tr>
+<tr>
+<td>Humanitec</td>
+<td>Platform Orchestrator pattern — sits between developer interface and infra, wraps existing Terraform modules with governance, applies rules per environment when a developer <em>or agent</em> requests a deployment</td>
+<td>Self-hosted option exists</td>
+</tr>
+<tr>
+<td>Kratix</td>
+<td>&ldquo;Promises&rdquo; — a clean model for platform capabilities as versioned, composable contracts</td>
+<td>OSS</td>
+</tr>
+<tr>
+<td>Roadie</td>
+<td>Managed Backstage — study for what you don&rsquo;t want to operate</td>
+<td>SaaS</td>
+</tr>
+</tbody>
+</table></div>
+<h3 id="github-to-copy-from">GitHub to copy from</h3>
+<ul>
+<li><code>backstage/backstage</code> — catalog descriptor format, scaffolder templates, permission framework</li>
+<li><code>cnoe-io/ai-platform-engineering</code> — multi-agent platform engineering reference (A2A + MCP sub-agents)</li>
+<li><code>syntasso/kratix</code> — Promise API for platform capabilities</li>
+<li><code>score-spec/score</code> + <code>humanitec/score-*</code> — workload specification as the developer-facing intent contract</li>
+<li><code>crossplane/crossplane</code> — compositions as the &ldquo;pattern with multiple strategy implementations&rdquo; model from §3</li>
+</ul>
+<h3 id="verdict">Verdict</h3>
+<p><strong>Steal the pattern, don&rsquo;t buy the portal.</strong> You already have Harness IDP (Backstage-based) and a licence. The genuinely new idea to import is Humanitec&rsquo;s <em>orchestrator</em> separation — developer interface, orchestrator, execution — which is exactly the experience/broker/execution split in §12. Study CAIPE as the reference for turning §3&rsquo;s pattern catalogue into a fleet of narrow, auditable agents rather than one large one.</p>
+<hr />
+<h2 id="b-patterns-as-products-automated-enforcement-notes-34">B. Patterns as products &amp; automated enforcement (Notes §3–4)</h2>
+<h3 id="agentic-solutions_1">Agentic solutions</h3>
+<p>The mature answer here is deliberately <em>not</em> agentic at the enforcement point. Enforcement stays deterministic (policy engines, LST transformations); agents author, discover and remediate.</p>
+<ul>
+<li><strong>Moderne / OpenRewrite</strong> — recipes operate on a Lossless Semantic Tree, so transformations are deterministic and semantically accurate rather than regex or model guesswork; Moderne orchestrates recipes across thousands of repos with coordinated PRs, impact preview and audit trail. This is the single best fit for &ldquo;codify the pattern, then enforce it across the estate&rdquo;, and it also covers §14.</li>
+<li><strong>OPA/Rego + Conftest, Kyverno, HashiCorp Sentinel</strong> — the policy hierarchy from §4 (firm → AWM → GPB → LOB → team) is a Rego bundle hierarchy, not a new build.</li>
+<li><strong>Agent-authored recipes</strong> — the emerging pattern is an agent that discovers a repeated pattern across repos and <em>emits an OpenRewrite recipe or Rego policy</em>, which is then reviewed once and applied deterministically forever. That is the highest-leverage thing your architecture skills should produce.</li>
+</ul>
+<h3 id="github-to-copy-from_1">GitHub to copy from</h3>
+<ul>
+<li><code>openrewrite/rewrite</code> + <code>openrewrite/rewrite-spring</code>, <code>rewrite-migrate-java</code> — recipe structure, and the catalogue model for patterns</li>
+<li><code>open-policy-agent/conftest</code>, <code>open-policy-agent/gatekeeper</code></li>
+<li><code>kyverno/kyverno</code> — policy-as-code with mutation as well as validation</li>
+<li><code>crossplane/crossplane</code> compositions — one pattern, per-cloud strategy implementations</li>
+</ul>
+<h3 id="verdict_1">Verdict</h3>
+<p><strong>Build the recipes, buy nothing yet.</strong> Rod&rsquo;s hexagonal-architecture drift skill and the pattern-conformance skills are the right shape; the upgrade is to make their <em>output</em> a deterministic artefact (a recipe or a policy) rather than a report. Evaluate Moderne commercially only once you have &gt;10 recipes you want to run across 400 repos with audit trails.</p>
+<hr />
+<h2 id="c-event-catalogue-domain-events-schema-governance-notes-68">C. Event catalogue, domain events, schema governance (Notes §6–8)</h2>
+<h3 id="agentic-solutions_2">Agentic solutions</h3>
+<ul>
+<li><strong>EventCatalog Agents</strong> (<code>event-catalog/agents</code>) — AI agents that read a PR diff, understand EventCatalog conventions (domains, services, events, commands, queries, channels, specs) and maintain the catalog documentation for you rather than you hand-writing catalog files. Guided by published <strong>Skills</strong> (<code>event-catalog/skills</code>) so any agent — not just theirs — produces correct catalog output.</li>
+<li><strong>EventCatalog MCP server</strong> — agents query the architecture graph: find resources, inspect schemas and ownership, follow producers/consumers, analyse change impact. Crucially it can be <strong>scoped to a domain or system</strong>, giving an agent only the reachable subgraph. That is your entitlement model for agent access to architecture.</li>
+<li><strong>Breaking-change detection in CI</strong> — the agent reviews a schema change against the catalog, flags the break, and names the affected consumers before merge. This is §6&rsquo;s schema governance, automated.</li>
+<li><strong>Buf</strong> (<code>bufbuild/buf</code>) — <code>buf breaking</code> for deterministic protobuf compatibility gates; the same discipline for Avro/JSON Schema via Confluent Schema Registry compatibility modes.</li>
+</ul>
+<h3 id="products-to-learn-from_1">Products to learn from</h3>
+<div class="table-wrap"><table>
+<thead>
+<tr>
+<th>Product</th>
+<th>What to study</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>EventCatalog Cloud</td>
+<td>Federation model for multiple catalogs across orgs — directly relevant to GPB/IPB/USPB flavours in §6</td>
+</tr>
+<tr>
+<td>Confluent Stream Governance</td>
+<td>Schema registry + stream lineage + data contracts as a single product</td>
+</tr>
+<tr>
+<td>Microcks</td>
+<td>Turning AsyncAPI/OpenAPI specs into live mocks <em>and</em> contract tests — bridges §7 and §13</td>
+</tr>
+<tr>
+<td>Solace Event Portal</td>
+<td>The commercial &ldquo;event catalogue with runtime discovery&rdquo; model, for comparison</td>
+</tr>
+</tbody>
+</table></div>
+<h3 id="github-to-copy-from_2">GitHub to copy from</h3>
+<ul>
+<li><code>event-catalog/eventcatalog</code> (core), <code>event-catalog/agents</code>, <code>event-catalog/skills</code>, <code>event-catalog/mcp-server</code>, <code>event-catalog/generators</code> (OpenAPI/AsyncAPI/Kafka/EventBridge ingestion), <code>event-catalog/backstage-plugin-eventcatalog</code>, <code>event-catalog/flowmart-schema-registry</code> (the demo you saw), <code>event-catalog/federation-organization-example</code>, <code>event-catalog/eventcatalog-linter</code></li>
+<li><code>microcks/microcks</code> — CNCF; spec-driven mocking + contract testing</li>
+<li><code>asyncapi/generator</code>, <code>cloudevents/spec</code></li>
+<li><code>bufbuild/buf</code> — breaking-change detection as a CI gate</li>
+</ul>
+<h3 id="verdict_2">Verdict</h3>
+<p><strong>Adopt EventCatalog, extend it — don&rsquo;t rebuild it.</strong> Specifically: the generators give you the CI-time inference from §7; the MCP server with domain scoping gives you the agent interface and the entitlement boundary in one; the Agents + Skills give you self-maintaining documentation; and the federation example addresses the GPB-vs-LOB flavour question. The only genuinely custom piece is the <strong>quarantine mechanism</strong> (non-compliant SEALs deploy but don&rsquo;t appear in the catalog) — that&rsquo;s a CI policy gate you write, roughly 200 lines.</p>
+<hr />
+<h2 id="d-environments-delivery-broker-preview-environments-notes-9-11-12">D. Environments, delivery broker, preview environments (Notes §9, §11, §12)</h2>
+<h3 id="agentic-solutions_3">Agentic solutions</h3>
+<ul>
+<li><strong>Harness Autonomous Worker Agents</strong> — each agent pairs a prompt, a model connector and optional MCP data sources into a single pipeline step, usable across CI/CD/IaCM/security. Six prebuilt agents including Autofix, Code Review and IaCM Remediation. Verint and United Airlines reportedly built production agents in ~4 days. This is your delivery broker&rsquo;s agent layer, already governed.</li>
+<li><strong>GitHub Agentic Workflows</strong> (preview May 2026) — intent-driven AI inside repository automation with guardrails.</li>
+<li><strong>Dagger</strong> — programmable CI as a typed API with LLM primitives; the best open model for &ldquo;pipeline as code an agent can call&rdquo; rather than YAML an agent edits.</li>
+</ul>
+<h3 id="the-three-pieces-you-should-not-build">The three pieces you should not build</h3>
+<div class="table-wrap"><table>
+<thead>
+<tr>
+<th>Need from §12</th>
+<th>Existing solution</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Intent → workload spec</td>
+<td><strong>Score</strong> (<code>score-spec/score</code>) — the deployment-intent contract, cloud-agnostic, with Humanitec/Kubernetes/Compose implementations. This <em>is</em> your <code>platform deploy dev</code> input format.</td>
+</tr>
+<tr>
+<td>Promotion record &amp; progression history</td>
+<td><strong>Kargo</strong> (<code>akuity/kargo</code>) — stage-based promotion of immutable artefacts through environments with a full promotion history. Exactly §11&rsquo;s build-once/promote-many and §12&rsquo;s promotion record.</td>
+</tr>
+<tr>
+<td>Progressive delivery</td>
+<td><strong>Argo Rollouts</strong> — canary/blue-green with analysis-driven automated rollback</td>
+</tr>
+</tbody>
+</table></div>
+<h3 id="preview-environments-the-cost-problem-in-12">Preview environments — the cost problem in §12</h3>
+<ul>
+<li><strong>Signadot</strong> — request-level isolation (&ldquo;sandboxes&rdquo;) inside one shared baseline cluster: you spin up only the service under test, and route only tagged requests to it. This directly answers &ldquo;an environment per PR is too expensive&rdquo; <em>and</em> &ldquo;we don&rsquo;t want all downstream dependencies running&rdquo;. Study this before building ephemeral namespaces.</li>
+<li><strong>Uffizzi</strong>, <strong>Bunnyshell</strong>, <strong>Okteto</strong> — full ephemeral environment platforms with TTL destruction</li>
+<li><strong>Argo CD ApplicationSet PR Generator</strong> — the OSS primitive: an environment per open PR, destroyed on merge/close, ~30 lines of YAML</li>
+</ul>
+<h3 id="artefact-immutability-evidence-11">Artefact immutability &amp; evidence (§11)</h3>
+<ul>
+<li><strong>SLSA</strong> provenance levels; <strong>sigstore/cosign</strong> for signing; <strong>in-toto</strong> attestations. The &ldquo;evidence that cannot be disputed, almost like a blockchain&rdquo; line in the transcript has a standards answer: signed, verifiable build provenance attached to the artefact.</li>
+</ul>
+<h3 id="github-to-copy-from_3">GitHub to copy from</h3>
+<ul>
+<li><code>akuity/kargo</code>, <code>argoproj/argo-rollouts</code>, <code>argoproj/argo-cd</code></li>
+<li><code>score-spec/score</code>, <code>humanitec/humanitec-score-*</code></li>
+<li><code>dagger/dagger</code></li>
+<li><code>signadot/*</code> (operator + examples), <code>UffizziCloud/uffizzi</code></li>
+<li><code>sigstore/cosign</code>, <code>slsa-framework/slsa-github-generator</code></li>
+<li><code>liquibase/liquibase</code>, <code>flyway/flyway</code> — for the unresolved schema-sequencing problem in §12</li>
+</ul>
+<h3 id="verdict_3">Verdict</h3>
+<p><strong>Buy nothing new; assemble Score (intent) + Harness (execution) + Kargo (promotion) + Signadot (preview isolation).</strong> The delivery broker is then genuinely thin: intent resolution, policy lookup, archetype selection. That is weeks of work, not quarters — and it is a credible MVP candidate for §20.</p>
+<hr />
+<h2 id="e-reliability-chaos-and-ai-sre-notes-10">E. Reliability, chaos, and AI SRE (Notes §10)</h2>
+<h3 id="agentic-solutions_4">Agentic solutions</h3>
+<ul>
+<li><strong>AI SRE is now a real category with production deployments.</strong> Three architectural camps worth understanding before choosing: <em>telemetry-based</em> correlation (Traversal, Datadog Bits AI), <em>graph-based</em> change traversal (Anyshift — answers &ldquo;what changed?&rdquo; as a query against a versioned infrastructure graph rather than inferring from telemetry), and <em>integration-based agentic</em> parallel hypothesis investigation (<a href="https://Resolve.ai" target="_blank" rel="noopener noreferrer">Resolve.ai</a>, Cleric).</li>
+<li><strong>The honest state of play:</strong> autonomous <em>investigation</em> is real and reliable in 2026; autonomous <em>remediation</em> — unattended high-impact production change — is still supervised almost everywhere. Plan for investigate-autonomously, remediate-under-approval.</li>
+<li><strong>Agent-designed chaos experiments</strong> — the emerging pattern is: agent analyses the service dependency graph + historical incidents + current architecture, identifies untested failure modes, proposes <em>ranked experiment candidates</em>, human approves, and execution stays on established chaos tooling (FIS, Litmus, Chaos Mesh, Gremlin). The agent&rsquo;s contribution is hypothesis breadth across a system too large to hold in one head — not running the experiment. That is exactly the right division of labour for §10.</li>
+</ul>
+<h3 id="products-to-learn-from_2">Products to learn from</h3>
+<div class="table-wrap"><table>
+<thead>
+<tr>
+<th>Product</th>
+<th>Why</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><a href="https://Resolve.ai" target="_blank" rel="noopener noreferrer">Resolve.ai</a></td>
+<td>Built by OpenTelemetry co-creators; parallel hypothesis investigation; targets ~80% autonomous resolution</td>
+</tr>
+<tr>
+<td>Traversal</td>
+<td>Causal RCA at scale, <strong>on-premise deployment option</strong> — rare in this category and material for a bank</td>
+</tr>
+<tr>
+<td>Anyshift</td>
+<td>Versioned infrastructure graph as the RCA substrate — closest to your §7 catalogue thesis applied to ops</td>
+</tr>
+<tr>
+<td>Datadog Bits AI SRE / New Relic SRE Agent / Azure SRE Agent</td>
+<td>The incumbent path if you&rsquo;re already deep in one stack (you&rsquo;re on Dynatrace — check their Davis AI agent roadmap on the same axes)</td>
+</tr>
+<tr>
+<td>Harness Chaos Engineering</td>
+<td>Already in your licensed platform</td>
+</tr>
+<tr>
+<td>Steadybit / Gremlin</td>
+<td>Experiment libraries and reliability scoring models worth copying conceptually</td>
+</tr>
+</tbody>
+</table></div>
+<p><strong>Caution flag:</strong> independent research (LogicMonitor 2026 SRE Report) found resilience engineering widely valued but production chaos testing still uncommon, with low organisational tolerance for deliberate failure injection. Your §10 &ldquo;conscious chaos&rdquo; ambition is ahead of the market — plan the cultural side, not just the tooling.</p>
+<h3 id="github-to-copy-from_4">GitHub to copy from</h3>
+<ul>
+<li><code>agamm/awesome-ai-sre</code> — 100+ tools, the fastest way to scan the category</li>
+<li><code>robusta-dev/holmesgpt</code> — open-source agentic investigation (the OSS answer to Cleric/Resolve)</li>
+<li><code>k8sgpt-ai/k8sgpt</code> — CNCF sandbox; diagnosis-as-code with an operator model</li>
+<li><code>chaos-mesh/chaos-mesh</code>, <code>litmuschaos/litmus</code>, <code>chaostoolkit/chaostoolkit</code> — experiment-as-code, version-controlled, CI-integrated</li>
+<li><code>aws/aws-fault-injection-simulator</code> examples; <code>Netflix/chaosmonkey</code> (historical)</li>
+</ul>
+<h3 id="verdict_4">Verdict</h3>
+<p><strong>Buy an AI SRE only after the reliability profiles exist.</strong> These tools are only as good as the telemetry and topology you give them — the guides are explicit that teams with sparse logs and no tracing have a bad time. §10&rsquo;s profile-driven provisioning (which standardises Dynatrace instrumentation at deploy) is the <em>prerequisite</em>, not the follow-on. Build the chaos-experiment-proposer agent yourself against Harness Chaos + FIS; it&rsquo;s a skill, not a product.</p>
+<hr />
+<h2 id="f-testing-behaviour-capture-and-replay-notes-13">F. Testing: behaviour capture and replay (Notes §13)</h2>
+<p>This is where the offsite design most closely matches something you can adopt off the shelf.</p>
+<h3 id="agentic-solutions_5">Agentic solutions</h3>
+<ul>
+<li><strong>Keploy</strong> (<code>keploy/keploy</code>, Apache 2.0) — eBPF kernel-level capture of HTTP, gRPC, database wire protocols, Redis and message-queue traffic in a single session, zero code change, sub-microsecond overhead; replays as deterministic tests with <strong>auto-generated dependency mocks</strong>. It explicitly handles non-deterministic fields (timestamps). Compare with proxy-based tools that only see HTTP and with VCR-style libraries that only hook language-specific HTTP clients. Claim: 10–50× faster than Testcontainers-based integration tests with no environment parity issues.</li>
+<li><strong>Tusk Drift</strong> (<code>Use-Tusk/tusk-cli</code>) — record live API traffic, replay traces as tests, detect API drift in PRs automatically, with an AI setup agent. Cloud and local modes.</li>
+<li><strong>Speedscale</strong> — Kubernetes-native capture via sidecars/service mesh; the differentiator is replay-as-load-test, so the load profile is your real traffic shape rather than a guessed curve. Relevant to the performance-testing ambition mentioned at the end of §14.</li>
+<li><strong>Playwright Test Agents (v1.56+)</strong> — the Planner / Generator / Healer triad, driven through <strong>Playwright MCP</strong> using accessibility-tree snapshots, network traces and console diagnostics rather than screenshots or brittle selectors. <code>npx playwright init-agents --loop=claude</code> generates the agent definitions into your repo. <strong>This is exactly the intent-based-locator self-healing capability being hand-built internally</strong> — it now ships in the framework.</li>
+<li><strong>Agent teams for testing</strong> — the pattern already in the wild: Functional, Security, Accessibility and Performance agents traversing the <em>same</em> user flow in parallel, sharing one browser context via MCP and logging to one trace. Same shape as §18&rsquo;s multi-lens code review.</li>
+<li><strong>Checksum</strong> — generates Playwright/Cypress tests from real user sessions; the commercial version of the record-real-behaviour half of §13.</li>
+</ul>
+<h3 id="mocking-virtualisation-the-dont-run-downstream-half">Mocking / virtualisation (the &ldquo;don&rsquo;t run downstream&rdquo; half)</h3>
+<ul>
+<li><strong>Microcks</strong> (CNCF) — mocks <em>and</em> contract tests generated from OpenAPI/AsyncAPI/gRPC/GraphQL specs. Because it&rsquo;s spec-driven and the specs come from your event catalogue, this closes the §7↔§13 loop cleanly.</li>
+<li><strong>WireMock</strong> (already in use), <strong>Hoverfly</strong>, <strong>mountebank</strong>, <strong>Testcontainers</strong>, <strong>LocalStack</strong></li>
+</ul>
+<h3 id="synthetic-masked-test-data-13s-referential-integrity-problem">Synthetic &amp; masked test data (§13&rsquo;s referential-integrity problem)</h3>
+<ul>
+<li><strong>SDV</strong> (<code>sdv-dev/SDV</code>) — multi-table synthesis that preserves referential integrity, which is the hard part</li>
+<li><strong><a href="https://Tonic.ai" target="_blank" rel="noopener noreferrer">Tonic.ai</a></strong>, <strong>Gretel</strong>, <strong>Synthesized</strong> — commercial masking/subsetting with cross-database consistency</li>
+<li><strong><code>Greenmask</code></strong>, <strong><code>pgAnonymizer</code></strong> — open-source Postgres subset + anonymise</li>
+</ul>
+<h3 id="github-to-copy-from_5">GitHub to copy from</h3>
+<ul>
+<li><code>keploy/keploy</code> ← read the eBPF capture and mock-generation design first</li>
+<li><code>Use-Tusk/tusk-cli</code></li>
+<li><code>microcks/microcks</code></li>
+<li><code>microsoft/playwright</code> (agents + MCP), <code>browserbase/stagehand</code>, <code>browser-use/browser-use</code>, <code>Skyvern-AI/skyvern</code></li>
+<li><code>sdv-dev/SDV</code>, <code>GreenmaskIO/greenmask</code></li>
+<li><code>tugkanboz/awesome-ai-testing</code> — curated index of the whole category</li>
+</ul>
+<h3 id="verdict_5">Verdict</h3>
+<p><strong>Adopt Keploy for the API/dependency layer and Playwright Test Agents for the UI layer; keep the internal work for the parts neither covers</strong> — namely the production <em>user-journey</em> capture in Connect/desktop apps, the ECI-consistent seed data, and the mesh-linked obfuscation. Those are genuinely differentiated. Rebuilding eBPF traffic capture and selector self-healing is not.</p>
+<p><strong>Known limits still unsolved by any product:</strong> stateful multi-step mutation with reset semantics, and T+1/T+2 batch cycle simulation. If you want a differentiated internal capability, that&rsquo;s where to spend it — and look at <strong>Antithesis</strong> (deterministic hypervisor-level simulation with time control) as the only credible commercial approach to the time-travel problem.</p>
+<hr />
+<h2 id="g-sbom-driven-lifecycle-management-notes-14">G. SBOM-driven lifecycle management (Notes §14)</h2>
+<h3 id="agentic-solutions_6">Agentic solutions</h3>
+<ul>
+<li><strong>Endor Labs AURI Agents</strong> — the most complete articulation of your §14 design. <em>SCA Remediation</em> takes an open dependency vulnerability, uses reachability and upgrade-impact analysis to pick the safest fix, and opens a PR <strong>with the evidence justifying the change in the PR body</strong>. <em>AI SAST Triage</em> confirms true positives against the exact commit SHA, patches the confirmed, and routes the rest with a stated reason rather than a shrug. Plus exception workflows a developer can request from a PR comment and AppSec can approve into policy. Their <strong>Agent Kit is open source</strong> — agents defined as Markdown and YAML recipes, executing in your environment via <code>gh</code>/<code>glab</code>, no new runtime, no vendor model spend.</li>
+<li><strong>Moderne / OpenRewrite</strong> — deterministic recipe application across the whole estate with impact preview and coordinated PRs. Moderne&rsquo;s published argument is that agentic coding alone can&rsquo;t close the remediation gap; the numbers they cite (average time-to-fix 252 days and rising, ~45% of enterprise vulnerabilities unpatched after a year, &gt;59,000 CVEs expected in 2026) are the ones to put in front of your CTOs.</li>
+<li><strong>NVIDIA Agent Morpheus</strong> — open framework for AI-accelerated CVE triage; reported ~9.3× speedup in CVE processing. Worth reading for the pipeline design.</li>
+<li><strong>Harness IaCM Remediation + Autofix agents</strong> — already in your platform.</li>
+<li><strong>Renovate / Dependabot + Copilot autofix</strong> — the baseline you already know fails on adoption, not capability.</li>
+</ul>
+<h3 id="the-confidence-problem-what-actually-fixes-it">The confidence problem — what actually fixes it</h3>
+<p>Every credible vendor in this space now leads with <em>evidence</em>, not automation: reachability (is the vulnerable function actually called), upgrade impact (what else breaks), and verification (does the change pass). That is the same conclusion §14 reached from the other direction — the blocker is regression confidence, not the version bump. <strong>The preview environment + Keploy replay from §D/§F is the missing evidence generator.</strong> Chain them: SBOM finding → deterministic recipe or agent patch → preview environment → replay recorded production journeys → attach the pass/fail evidence to the PR.</p>
+<h3 id="github-to-copy-from_6">GitHub to copy from</h3>
+<ul>
+<li><code>endorlabs/agent-kit</code> — Markdown/YAML agent recipes; steal the packaging model for <em>all</em> your architecture skills, not just security</li>
+<li><code>openrewrite/rewrite</code> + the CVE/Spring/Java migration recipe repos</li>
+<li><code>nv-morpheus/Morpheus</code> (Agent Morpheus workflow)</li>
+<li><code>CycloneDX/*</code>, <code>anchore/syft</code> + <code>anchore/grype</code> — SBOM generation and matching</li>
+<li><code>renovatebot/renovate</code> — the config model for version-currency policy hierarchies</li>
+<li><code>ossf/scorecard</code></li>
+</ul>
+<h3 id="verdict_6">Verdict</h3>
+<p><strong>Steal Endor&rsquo;s architecture, whether or not you buy Endor.</strong> The reusable idea: pre-compute the expensive context (reachability, upgrade impact, affected consumers) into a structured artefact the agent consumes, instead of asking a model to infer it. They report 2.8× faster and 92% fewer tokens versus unaugmented agents — and in your estate the equivalent pre-computed context is SCG plus the event catalogue. That is a direct, concrete use for the Semantic Code Graph.</p>
+<hr />
+<h2 id="h-data-products-and-agentic-data-governance-notes-1517">H. Data products and agentic data governance (Notes §15–17)</h2>
+<h3 id="agentic-solutions_7">Agentic solutions</h3>
+<ul>
+<li><strong>The catalogue has become the agent context layer.</strong> Every major catalogue now exposes MCP so agents get governed context — glossary definitions, lineage, quality signals, certifications, access policies — before acting. The framing worth adopting internally: governance <em>by</em> agents and governance <em>of</em> agents are two different programmes and the strongest efforts run both.</li>
+<li><strong>Atlan</strong> — MCP-native, Gartner MQ Leader 2026 for D&amp;A Governance; the reference for &ldquo;context-driven agentic data management&rdquo;.</li>
+<li><strong>Open source:</strong> OpenMetadata (schema-first, formal open metadata standard, integrated DQ), DataHub (graph-based, event-driven metadata, 100+ connectors), Marmot (single Go binary on Postgres, native MCP — the low-footprint option).</li>
+<li><strong>The failure mode to quote:</strong> agents fail without context layers because they lack the business definitions and governance signals experienced staff carry in their heads. That is §16&rsquo;s &ldquo;AI-ready means metadata good enough for a machine to judge fitness for purpose&rdquo;, validated externally.</li>
+</ul>
+<h3 id="products-to-learn-from_3">Products to learn from</h3>
+<div class="table-wrap"><table>
+<thead>
+<tr>
+<th>Product</th>
+<th>What to study</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Atlan</td>
+<td>MCP exposure of governed context; agent-facing entitlements</td>
+</tr>
+<tr>
+<td>Collibra / Informatica CDGC</td>
+<td>The regulated-enterprise governance surface you&rsquo;ll be compared against</td>
+</tr>
+<tr>
+<td>dbt Semantic Layer / Cube</td>
+<td>Metric definitions as governed, versioned artefacts — directly relevant to §16&rsquo;s 2027 standardised-metrics initiative</td>
+</tr>
+<tr>
+<td>Confluent Stream Governance</td>
+<td>Data contracts enforced at the stream, not just documented</td>
+</tr>
+</tbody>
+</table></div>
+<h3 id="github-to-copy-from_7">GitHub to copy from</h3>
+<ul>
+<li><code>open-metadata/OpenMetadata</code>, <code>datahub-project/datahub</code>, <code>marmotdata/marmot</code></li>
+<li><code>bitol-io/open-data-contract-standard</code> (ODCS) and <code>open-data-product-standard</code> — the contract shape for §16</li>
+<li><code>datacontract/datacontract-cli</code> — contract linting and enforcement in CI</li>
+<li><code>OpenLineage/OpenLineage</code> + <code>MarquezProject/marquez</code> — the lineage backbone for §16&rsquo;s hop-elimination strategy</li>
+<li><code>great-expectations/great_expectations</code>, <code>sodadata/soda-core</code> — DQ rules as code, attachable to the data product</li>
+<li><code>edmcouncil/fibo</code> — the industry logical model to overlay, as discussed in §17</li>
+</ul>
+<h3 id="verdict_7">Verdict</h3>
+<p><strong>Push the data contract into CI, agentically.</strong> The highest-leverage thing available now is <code>datacontract-cli</code> + ODCS wired into the same pipeline step that registers the event catalogue — one CI stage that validates the event schema, the data contract and the SBOM, and quarantines on failure. That single stage is the physical embodiment of &ldquo;the platform does it for you&rdquo; across §7, §14 and §16 simultaneously.</p>
+<hr />
+<h2 id="i-multi-agent-orchestration-for-engineering-work-notes-18">I. Multi-agent orchestration for engineering work (Notes §18)</h2>
+<h3 id="the-three-tiers-adopt-this-framing-its-the-clearest-in-the-field">The three tiers (adopt this framing — it&rsquo;s the clearest in the field)</h3>
+<ol>
+<li><strong>In-session</strong> — Claude Code subagents and Agent Teams. No extra tooling. Start here.</li>
+<li><strong>Local fleet</strong> — your machine spawns agents in isolated worktrees with dashboards, diff review and merge control. Best for 3–10 agents on known codebases. Tools: Conductor, Vibe Kanban, Gastown, Claude Squad, Cursor background agents.</li>
+<li><strong>Cloud/async</strong> — assign a task, close the laptop, come back to a PR. Claude Code web, GitHub Copilot coding agent, Codex web.</li>
+</ol>
+<p>Most engineers in 2026 use all three: tier 1 interactive, tier 2 parallel sprints, tier 3 to drain the backlog overnight.</p>
+<h3 id="agentic-solutions-worth-serious-evaluation">Agentic solutions worth serious evaluation</h3>
+<ul>
+<li><strong>Gastown + Beads</strong> (<code>gastownhall/gastown</code>, <code>steveyegge/beads</code>) — v1.0 April 2026, v1.2.1 June 2026, ~16k stars, moved to the <code>gastownhall</code> org, hosted version from Kilo GA May 2026. Beads is now Dolt-backed (distributed graph issue tracker); Gastown adds Convoys (bundles of beads assigned to agents), worktree-based persistent storage that survives crashes, GUPP (&ldquo;if there is work on your hook, you must run it&rdquo;), and multi-harness support including Copilot CLI via lifecycle hooks. Honest assessment from the field: <strong>chaotic, expert-oriented, &ldquo;vibe coded&rdquo; — not a polished enterprise product.</strong></li>
+<li><strong>Bernstein</strong> (<code>bernstein.run</code>) — the one to look at hardest for a bank. A <em>deterministic</em> orchestrator for CLI coding agents with <strong>no model in the coordination loop</strong>, so parallel runs in per-task worktrees replay byte-identically; signed lineage plus an opt-in HMAC audit chain a reviewer can check offline; cluster mode and air-gap deployment. That is the regulated-environment answer to &ldquo;we can&rsquo;t reproduce what the fleet did&rdquo;.</li>
+<li><strong>AgentFactory</strong> (<code>LiteTrackerApp/agentfactory</code>, MIT) — &ldquo;the open-source software factory&rdquo;: turns an issue backlog into shipped code through a development → QA → acceptance pipeline, with fleet overview, per-session cost tracking, and a Kanban of Backlog/Started/Finished/Failed/Stopped. The closest open equivalent to the Paperclip demo, and considerably more legible.</li>
+<li><strong>swarm-protocol</strong> — headless coordination over MCP: claim work, detect file conflicts, heartbeat, hand off across sessions. Solves the coordination primitives without a UI.</li>
+<li><strong>wit</strong> — locks individual <em>functions</em> rather than files using Tree-sitter, warning agents of conflicts before they write. The most elegant answer to §11&rsquo;s agent collision problem.</li>
+<li><strong>subtask</strong> — a Claude Skill that runs tasks through subagents in git worktrees. Minimal, copyable.</li>
+</ul>
+<h3 id="products-to-learn-from_4">Products to learn from</h3>
+<div class="table-wrap"><table>
+<thead>
+<tr>
+<th>Product</th>
+<th>Why</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Harness Agent DLC + AgentTrace</td>
+<td>Agents as first-class artefacts requiring CI/CD, evals, AIBOM and firewalls; AgentTrace exposes which tools an agent used and where a run went wrong. The governance model you&rsquo;ll be asked for.</td>
+</tr>
+<tr>
+<td>Augment Cosmos</td>
+<td>Hosted fleet management where OSS orchestrators hit limits</td>
+</tr>
+<tr>
+<td>GitHub Copilot coding agent / Agentic Workflows</td>
+<td>The path of least resistance if enterprise policy constrains you</td>
+</tr>
+</tbody>
+</table></div>
+<h3 id="github-to-copy-from_8">GitHub to copy from</h3>
+<ul>
+<li><code>andyrewlee/awesome-agent-orchestrators</code> — the live index; check it before building anything here</li>
+<li><code>gastownhall/gastown</code>, <code>steveyegge/beads</code></li>
+<li><code>LiteTrackerApp/agentfactory</code></li>
+<li><code>BloopAI/vibe-kanban</code> (Apache-2.0; <strong>note: Bloop shut down April 2026, now community-maintained and fully local — cloud features removed</strong>)</li>
+<li><code>smtg-ai/claude-squad</code>, <code>stravu/crystal</code></li>
+<li><code>Dicklesworthstone/mcp-agent-mail</code> — the inter-agent mailbox pattern Niraja described</li>
+</ul>
+<h3 id="verdict_8">Verdict</h3>
+<p><strong>Keep Paperclip as the internal demo, evaluate Bernstein for anything that needs an audit trail, and steal Beads&rsquo; dependency graph without adopting Beads.</strong> Jira stays the system of capture (correct call), but the <em>dependency-graph-of-work</em> model is what makes fleets coherent — implement it as a Jira-backed projection, not a parallel tracker. Before any of this scales, answer the cost/benefit question raised in §18 with an actual benchmark: which task classes parallelise profitably. Nobody in the market has published that; it would be a genuinely differentiated internal asset.</p>
+<hr />
+<h2 id="j-skills-and-marketplace-governance-the-18-blocker-solved">J. Skills and marketplace governance — the §18 blocker, solved</h2>
+<p>This is the most immediately actionable section. The single-flattened-marketplace problem does not require nested marketplaces.</p>
+<h3 id="the-mechanism">The mechanism</h3>
+<ul>
+<li><strong><code>strictKnownMarketplaces</code></strong> in managed settings is the enterprise control: an empty array is lockdown, a list is an allowlist, and a <code>hostPattern</code> regex gives domain-level control (e.g. <code>^github\.jpmchase\.com$</code>). Pair it with <strong><code>extraKnownMarketplaces</code></strong> to auto-inject the corporate marketplace so engineers never have to discover or configure it. Without this, anyone can add an arbitrary internet marketplace and run unreviewed code with their local credentials.</li>
+<li><strong>Private plugin sources work</strong> when the source is a <a href="https://github.com" target="_blank" rel="noopener noreferrer">github.com</a> repo under the same owner as the marketplace repo (fetched via the Claude GitHub App) or on your GitHub Enterprise host with the org&rsquo;s GitHub Enterprise App installed. Otherwise, vendor the plugin folders into the marketplace repo via git subtree or a CI step and use relative paths.</li>
+<li><strong>URL-sourced marketplaces with auth</strong> — a marketplace can be served from a URL with HTTP headers, or a <code>headersHelper</code> command that mints a short-lived token on request. That means your marketplace manifest can be <strong>generated and served by an internal service</strong>, not hand-maintained in a repo.</li>
+<li><strong><code>strict: false</code></strong> on a marketplace entry lets the <em>marketplace operator</em> define which files in a plugin repo are exposed as skills, agents and hooks — i.e. central curation over decentralised authoring. This is the lever for letting teams author freely while the platform controls exposure.</li>
+</ul>
+<h3 id="the-two-patterns-to-copy">The two patterns to copy</h3>
+<ol>
+<li><strong>Registry-first generation</strong> (<code>avivsinai/skills-marketplace</code>): <code>registry/plugins.json</code> is the only hand-edited file and is the source of truth for metadata, commit pins and sync policy; <code>.claude-plugin/marketplace.json</code> is <em>generated</em> from it, with plugins pinned to an exact commit SHA so installs are reproducible. Plugin source stays in child repos. <strong>This is the answer to &ldquo;seven repos flattened into one marketplace by hand&rdquo;.</strong> Generate the flat manifest; keep the namespacing in the registry.</li>
+<li><strong>Per-repo filtering, not per-marketplace splitting</strong> (DataDog <code>system-tests</code> PR #6420): commit a <code>.claude/settings.json</code> into each repo that registers the marketplace, enables the org plugin bundle, and uses <code>permissions.deny</code> rules to block skills irrelevant to that repo — with a documented allow/deny table in the PR description. No manual setup for contributors; correct skill surface per codebase. <strong>This solves the discoverability and context-cost concern raised in the room without needing nesting.</strong></li>
+<li><strong>Optional:</strong> LiteLLM AI Gateway can act as the marketplace registry endpoint, serving <code>/claude-code/marketplace.json</code> with admin-controlled enable/disable per plugin — a self-hosted governance UI you already have the components for if you run a gateway.</li>
+</ol>
+<h3 id="read-first">Read first</h3>
+<ul>
+<li>Anthropic&rsquo;s <strong>Skills for enterprise</strong> guide — governance, security review, evaluation, internal registry per skill, role-based bundles containing only the skills relevant to that role&rsquo;s daily workflow, skills in Git for history and PR review</li>
+<li><strong>Create and distribute a plugin marketplace</strong> — the <code>strict</code> field, URL sources, <code>headersHelper</code>, version/digest semantics</li>
+<li><strong>Manage plugins for your organization</strong> — org-level marketplace distribution, private source rules</li>
+</ul>
+<h3 id="the-security-reality">The security reality</h3>
+<p>There is no binary signing for plugins in 2026. Static analysis won&rsquo;t catch a plugin that calls an LLM to generate malicious commands at runtime. The defence is: marketplace allowlist + runtime hooks + human code review before entry into the marketplace. Structure it as two repos — a marketplace manifest repo with approval metadata, and separate plugin source repos — so approval lists can change without touching plugin internals, and ship the managed-settings policy via your existing MDM/config management.</p>
+<h3 id="verdict_9">Verdict</h3>
+<p><strong>This is a two-week job and it unblocks everything else in §18.</strong> Propose it back to central as a concrete design rather than a request for more marketplaces: registry-first generation, SHA-pinned plugins, per-repo deny rules, <code>strictKnownMarketplaces</code> lockdown, two-repo separation. It gives central the control they want and gives AWM orgs the namespacing they need.</p>
+<hr />
+<h2 id="k-shortlist-the-ten-to-look-at-first">K. Shortlist — the ten to look at first</h2>
+<div class="table-wrap"><table>
+<thead>
+<tr>
+<th>#</th>
+<th>Thing</th>
+<th>Section</th>
+<th>Why it&rsquo;s first</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>1</td>
+<td>Harness Autonomous Worker Agents + AI Asset Catalog + MCP server</td>
+<td>D, G, I</td>
+<td>Already licensed; agents as governed pipeline steps with audit trails</td>
+</tr>
+<tr>
+<td>2</td>
+<td><code>keploy/keploy</code></td>
+<td>F</td>
+<td>The §13 replay substrate, Apache 2.0, eBPF, zero code change</td>
+</tr>
+<tr>
+<td>3</td>
+<td>EventCatalog Agents + Skills + MCP server + generators</td>
+<td>C</td>
+<td>Turns §7 from a demo into a self-maintaining, agent-queryable catalogue</td>
+</tr>
+<tr>
+<td>4</td>
+<td>Claude Code marketplace mechanics (<code>strictKnownMarketplaces</code>, registry-first generation, per-repo deny)</td>
+<td>J</td>
+<td>Unblocks §18 in weeks</td>
+</tr>
+<tr>
+<td>5</td>
+<td><code>score-spec/score</code> + <code>akuity/kargo</code></td>
+<td>D</td>
+<td>Deployment intent + promotion history without building either</td>
+</tr>
+<tr>
+<td>6</td>
+<td><code>endorlabs/agent-kit</code></td>
+<td>G</td>
+<td>The Markdown/YAML agent recipe packaging model, plus the evidence-in-the-PR pattern</td>
+</tr>
+<tr>
+<td>7</td>
+<td><code>openrewrite/rewrite</code> + Moderne</td>
+<td>B, G</td>
+<td>Deterministic transformation as the enforcement layer under the agents</td>
+</tr>
+<tr>
+<td>8</td>
+<td>Playwright Test Agents + Playwright MCP</td>
+<td>F</td>
+<td>Planner/Generator/Healer and intent-based locators, in the framework</td>
+</tr>
+<tr>
+<td>9</td>
+<td>Signadot</td>
+<td>D</td>
+<td>Request-level preview isolation — kills the per-PR environment cost objection</td>
+</tr>
+<tr>
+<td>10</td>
+<td><code>bernstein.run</code> (Bernstein)</td>
+<td>I</td>
+<td>Deterministic, replayable, signed-lineage agent orchestration for a regulated estate</td>
+</tr>
+</tbody>
+</table></div>
+<hr />
+<h2 id="l-where-the-market-has-nothing-for-you">L. Where the market has nothing for you</h2>
+<p>Worth knowing so you don&rsquo;t go looking:</p>
+<ul>
+<li><strong>Stateful multi-step replay with reset semantics</strong> and <strong>T+1/T+2 batch time simulation</strong> (§13). Antithesis is the only serious attempt at the time-control problem. This is a legitimate build.</li>
+<li><strong>Business-fact vs system-behaviour event classification at scale</strong> (§6). No product enforces this distinction; EventCatalog gives you the place to record it and the CI hook to check it, but the taxonomy and the ownership split are yours.</li>
+<li><strong>Cost-per-request risk scoring feeding pattern recommendations</strong> (§4, §10). FinOps tools give you cost; IDPs give you scorecards; nothing joins unit economics to architecture pattern recommendation and LDA accountability. This is the most genuinely novel idea in the whole pack and the one most worth publishing internally.</li>
+<li><strong>A published benchmark of which engineering task classes parallelise profitably across agent teams</strong> (§18). Everyone is guessing.</li>
+<li><strong>Reconciling functional domains with data domains</strong> (§17). Organisational, not tooling.</li>
+</ul>
+<hr />
+<h2 id="m-reading-list-in-order">M. Reading list, in order</h2>
+<ol>
+<li>Moderne — <em>Agentic Coding Can&rsquo;t Close the Remediation Gap</em> (the determinism argument, with the industry numbers)</li>
+<li>Anthropic — <em>Skills for enterprise</em> and <em>Create and distribute a plugin marketplace</em></li>
+<li>Keploy — record-replay architecture docs (eBPF vs proxy vs VCR)</li>
+<li>EventCatalog — <em>Ask your architecture</em> (MCP server, Agents, Skills)</li>
+<li>Addy Osmani — <em>The Code Agent Orchestra</em> (the three-tier framing)</li>
+<li>Steve Yegge — <em>Welcome to Gas Town</em> (beads, convoys, GUPP — read for the model, not the tool)</li>
+<li>Endor Labs — <em>Agentic AppSec and Agentic Remediation</em> (pre-computed context as the token/accuracy lever)</li>
+<li>DORA — <em>State of AI-Assisted Software Development</em> (the seven capabilities that decide whether AI helps or amplifies dysfunction; note the finding that delivery instability still rises with AI adoption)</li>
+<li>CNCF TAG App Delivery — Platforms White Paper</li>
+<li><code>andyrewlee/awesome-agent-orchestrators</code> and <code>agamm/awesome-ai-sre</code> — keep both bookmarked; the category turns over roughly quarterly</li>
+</ol>
+  </main>
+  <footer class="colophon">
+    <span>Agentic Solutions, Products &amp; Repos — Mapped to the GPB A&amp;E Offsite</span>
+    <span>Converted from GPB-Offsite-Agentic-Landscape.md</span>
+  </footer>
+</div>
+</body>
+</html>

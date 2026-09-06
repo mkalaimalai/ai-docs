@@ -1,0 +1,1746 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Multi-Repo Analysis - Architecture & Persistent Store</title>
+    <style>
+        :root {
+            --bg-primary: #0f1923;
+            --bg-secondary: #162231;
+            --bg-card: #1a2d42;
+            --bg-card-hover: #1f3650;
+            --text-primary: #e8edf2;
+            --text-secondary: #8899aa;
+            --accent-blue: #3b82f6;
+            --accent-cyan: #06b6d4;
+            --accent-green: #10b981;
+            --accent-purple: #8b5cf6;
+            --accent-orange: #f59e0b;
+            --accent-red: #ef4444;
+            --accent-pink: #ec4899;
+            --border: #2a3f55;
+            --glow-blue: rgba(59, 130, 246, 0.3);
+            --glow-cyan: rgba(6, 182, 212, 0.3);
+            --glow-green: rgba(16, 185, 129, 0.3);
+            --glow-purple: rgba(139, 92, 246, 0.3);
+        }
+
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+
+        body {
+            font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+            background: var(--bg-primary);
+            color: var(--text-primary);
+            line-height: 1.7;
+            overflow-x: hidden;
+        }
+
+        /* Animated background grid */
+        body::before {
+            content: '';
+            position: fixed;
+            top: 0; left: 0; width: 100%; height: 100%;
+            background:
+                linear-gradient(rgba(59, 130, 246, 0.03) 1px, transparent 1px),
+                linear-gradient(90deg, rgba(59, 130, 246, 0.03) 1px, transparent 1px);
+            background-size: 60px 60px;
+            z-index: -1;
+            animation: gridPulse 8s ease-in-out infinite;
+        }
+
+        @keyframes gridPulse {
+            0%, 100% { opacity: 0.5; }
+            50% { opacity: 1; }
+        }
+
+        .container { max-width: 1400px; margin: 0 auto; padding: 20px; }
+
+        /* Navigation */
+        .nav {
+            position: sticky; top: 0; z-index: 100;
+            background: rgba(15, 25, 35, 0.92);
+            backdrop-filter: blur(20px);
+            border-bottom: 1px solid var(--border);
+            padding: 12px 0;
+            margin-bottom: 30px;
+        }
+
+        .nav-inner {
+            max-width: 1400px; margin: 0 auto; padding: 0 20px;
+            display: flex; align-items: center; gap: 20px;
+            overflow-x: auto;
+        }
+
+        .nav-brand {
+            font-weight: 700; font-size: 1.1em;
+            color: var(--accent-cyan);
+            white-space: nowrap;
+            letter-spacing: -0.5px;
+        }
+
+        .nav-links { display: flex; gap: 4px; }
+
+        .nav-link {
+            padding: 6px 14px; border-radius: 6px;
+            color: var(--text-secondary); cursor: pointer;
+            font-size: 0.85em; white-space: nowrap;
+            transition: all 0.2s; border: 1px solid transparent;
+        }
+
+        .nav-link:hover, .nav-link.active {
+            color: var(--text-primary);
+            background: var(--bg-card);
+            border-color: var(--border);
+        }
+
+        .nav-link.active { border-color: var(--accent-blue); color: var(--accent-blue); }
+
+        /* Hero */
+        .hero {
+            text-align: center; padding: 60px 20px;
+            background: radial-gradient(ellipse at center, rgba(59, 130, 246, 0.08) 0%, transparent 70%);
+            border-radius: 20px; margin-bottom: 40px;
+            position: relative; overflow: hidden;
+        }
+
+        .hero::after {
+            content: '';
+            position: absolute; bottom: 0; left: 0; width: 100%; height: 2px;
+            background: linear-gradient(90deg, transparent, var(--accent-blue), var(--accent-cyan), var(--accent-purple), transparent);
+            animation: shimmer 3s linear infinite;
+        }
+
+        @keyframes shimmer {
+            0% { transform: translateX(-100%); }
+            100% { transform: translateX(100%); }
+        }
+
+        .hero h1 {
+            font-size: 2.8em; font-weight: 800;
+            background: linear-gradient(135deg, var(--accent-blue), var(--accent-cyan), var(--accent-purple));
+            -webkit-background-clip: text; -webkit-text-fill-color: transparent;
+            background-clip: text; margin-bottom: 15px;
+            letter-spacing: -1px;
+        }
+
+        .hero .subtitle {
+            font-size: 1.2em; color: var(--text-secondary);
+            max-width: 700px; margin: 0 auto 20px;
+        }
+
+        .hero-badges {
+            display: flex; gap: 12px; justify-content: center; flex-wrap: wrap;
+        }
+
+        .badge {
+            padding: 5px 14px; border-radius: 20px;
+            font-size: 0.8em; font-weight: 600;
+            border: 1px solid var(--border);
+            background: var(--bg-card);
+        }
+
+        .badge-blue { border-color: var(--accent-blue); color: var(--accent-blue); }
+        .badge-green { border-color: var(--accent-green); color: var(--accent-green); }
+        .badge-purple { border-color: var(--accent-purple); color: var(--accent-purple); }
+
+        /* Section */
+        .section {
+            margin-bottom: 40px;
+            opacity: 0; transform: translateY(30px);
+            transition: all 0.6s cubic-bezier(0.16, 1, 0.3, 1);
+        }
+
+        .section.visible { opacity: 1; transform: translateY(0); }
+
+        .section-title {
+            font-size: 1.5em; font-weight: 700;
+            margin-bottom: 8px; display: flex;
+            align-items: center; gap: 12px;
+        }
+
+        .section-title .dot {
+            width: 10px; height: 10px; border-radius: 50%;
+            display: inline-block;
+        }
+
+        .section-desc {
+            color: var(--text-secondary); margin-bottom: 24px;
+            font-size: 0.95em;
+        }
+
+        /* Architecture Diagram */
+        .arch-diagram {
+            position: relative; padding: 30px 0;
+        }
+
+        .arch-layer {
+            border: 1px solid var(--border);
+            border-radius: 14px; padding: 24px;
+            margin-bottom: 16px; position: relative;
+            transition: all 0.4s;
+            cursor: pointer;
+        }
+
+        .arch-layer:hover {
+            transform: translateX(8px);
+            border-color: var(--accent-blue);
+        }
+
+        .arch-layer-label {
+            position: absolute; top: -12px; left: 20px;
+            background: var(--bg-primary); padding: 0 12px;
+            font-size: 0.75em; font-weight: 700;
+            text-transform: uppercase; letter-spacing: 2px;
+        }
+
+        .arch-layer-content {
+            display: flex; gap: 12px; flex-wrap: wrap;
+            margin-top: 8px;
+        }
+
+        .arch-node {
+            background: var(--bg-card); border: 1px solid var(--border);
+            border-radius: 10px; padding: 14px 18px;
+            font-size: 0.88em; transition: all 0.3s;
+            position: relative; overflow: hidden;
+            flex: 1; min-width: 180px;
+        }
+
+        .arch-node::before {
+            content: '';
+            position: absolute; top: 0; left: 0;
+            width: 3px; height: 100%; border-radius: 3px 0 0 3px;
+        }
+
+        .arch-node:hover {
+            transform: translateY(-4px);
+            box-shadow: 0 8px 30px rgba(0,0,0,0.3);
+            border-color: var(--accent-blue);
+        }
+
+        .arch-node h4 { font-size: 0.92em; margin-bottom: 4px; }
+        .arch-node p { font-size: 0.8em; color: var(--text-secondary); }
+
+        .node-blue::before { background: var(--accent-blue); }
+        .node-cyan::before { background: var(--accent-cyan); }
+        .node-green::before { background: var(--accent-green); }
+        .node-purple::before { background: var(--accent-purple); }
+        .node-orange::before { background: var(--accent-orange); }
+        .node-pink::before { background: var(--accent-pink); }
+
+        .label-blue { color: var(--accent-blue); }
+        .label-cyan { color: var(--accent-cyan); }
+        .label-green { color: var(--accent-green); }
+        .label-purple { color: var(--accent-purple); }
+        .label-orange { color: var(--accent-orange); }
+
+        /* Animated connectors between layers */
+        .layer-connector {
+            display: flex; align-items: center; justify-content: center;
+            height: 32px; position: relative;
+        }
+
+        .layer-connector svg { overflow: visible; }
+
+        .connector-line {
+            stroke: var(--accent-blue); stroke-width: 2;
+            stroke-dasharray: 6 4;
+            animation: dashFlow 1s linear infinite;
+        }
+
+        .connector-dot {
+            fill: var(--accent-cyan);
+            animation: pulseConnector 2s ease-in-out infinite;
+        }
+
+        @keyframes dashFlow {
+            to { stroke-dashoffset: -10; }
+        }
+
+        @keyframes pulseConnector {
+            0%, 100% { r: 4; opacity: 1; }
+            50% { r: 6; opacity: 0.6; }
+        }
+
+        /* Pipeline */
+        .pipeline-container { position: relative; }
+
+        .pipeline-track {
+            position: absolute; left: 28px; top: 0; bottom: 0;
+            width: 3px; background: var(--border);
+        }
+
+        .pipeline-progress {
+            width: 100%; background: linear-gradient(180deg, var(--accent-blue), var(--accent-cyan), var(--accent-green));
+            border-radius: 3px;
+            height: 0; transition: height 2s ease;
+        }
+
+        .pipeline-step {
+            display: flex; gap: 20px; align-items: flex-start;
+            margin-bottom: 24px; position: relative;
+            padding-left: 60px;
+        }
+
+        .step-marker {
+            position: absolute; left: 16px; top: 4px;
+            width: 26px; height: 26px; border-radius: 50%;
+            display: flex; align-items: center; justify-content: center;
+            font-size: 0.7em; font-weight: 700; z-index: 2;
+            border: 2px solid var(--border);
+            background: var(--bg-primary);
+            transition: all 0.3s;
+        }
+
+        .pipeline-step:hover .step-marker {
+            border-color: var(--accent-cyan);
+            box-shadow: 0 0 12px var(--glow-cyan);
+            transform: scale(1.15);
+        }
+
+        .step-card {
+            flex: 1;
+            background: var(--bg-card); border: 1px solid var(--border);
+            border-radius: 12px; padding: 18px 22px;
+            transition: all 0.3s; cursor: pointer;
+        }
+
+        .step-card:hover {
+            border-color: var(--accent-blue);
+            box-shadow: 0 4px 20px rgba(59, 130, 246, 0.1);
+        }
+
+        .step-card h4 { font-size: 0.95em; margin-bottom: 4px; }
+
+        .step-card .step-meta {
+            font-size: 0.8em; color: var(--text-secondary);
+            margin-bottom: 8px;
+        }
+
+        .step-card .step-detail {
+            display: none; margin-top: 12px;
+            padding-top: 12px; border-top: 1px solid var(--border);
+            font-size: 0.85em;
+        }
+
+        .step-card.expanded .step-detail { display: block; }
+
+        .step-tags { display: flex; gap: 6px; flex-wrap: wrap; margin-top: 8px; }
+
+        .step-tag {
+            padding: 2px 8px; border-radius: 4px;
+            font-size: 0.72em; font-weight: 600;
+            background: rgba(59, 130, 246, 0.1);
+            color: var(--accent-blue);
+            border: 1px solid rgba(59, 130, 246, 0.2);
+        }
+
+        .step-tag.llm {
+            background: rgba(139, 92, 246, 0.1);
+            color: var(--accent-purple);
+            border-color: rgba(139, 92, 246, 0.2);
+        }
+
+        .step-tag.io {
+            background: rgba(16, 185, 129, 0.1);
+            color: var(--accent-green);
+            border-color: rgba(16, 185, 129, 0.2);
+        }
+
+        .step-tag.heavy {
+            background: rgba(239, 68, 68, 0.1);
+            color: var(--accent-red);
+            border-color: rgba(239, 68, 68, 0.2);
+        }
+
+        /* Neo4j / Persistent Store */
+        .store-vision {
+            display: grid; grid-template-columns: 1fr 1fr;
+            gap: 30px; align-items: start;
+        }
+
+        @media (max-width: 900px) { .store-vision { grid-template-columns: 1fr; } }
+
+        .store-current, .store-future {
+            border: 1px solid var(--border);
+            border-radius: 14px; padding: 28px;
+            position: relative;
+        }
+
+        .store-current { border-color: var(--accent-orange); }
+        .store-future { border-color: var(--accent-cyan); }
+
+        .store-label {
+            position: absolute; top: -12px; left: 20px;
+            padding: 0 12px; font-size: 0.75em;
+            font-weight: 700; text-transform: uppercase;
+            letter-spacing: 1.5px; background: var(--bg-primary);
+        }
+
+        /* Graph Schema SVG */
+        .graph-schema {
+            width: 100%; max-width: 900px; margin: 30px auto;
+            display: block;
+        }
+
+        .graph-schema .node-circle {
+            transition: all 0.3s; cursor: pointer;
+        }
+
+        .graph-schema .node-circle:hover {
+            filter: brightness(1.3) drop-shadow(0 0 10px currentColor);
+        }
+
+        .graph-schema .edge-line {
+            stroke-dasharray: 6 3;
+            animation: dashFlow 1.5s linear infinite;
+        }
+
+        .graph-schema text {
+            font-family: 'Inter', sans-serif;
+            fill: var(--text-primary);
+        }
+
+        /* Evolution Timeline */
+        .evolution-track {
+            display: flex; gap: 0; position: relative;
+            padding: 40px 0 20px; overflow-x: auto;
+        }
+
+        .evolution-phase {
+            flex: 1; min-width: 200px; position: relative;
+            padding: 20px; text-align: center;
+        }
+
+        .evolution-phase::before {
+            content: '';
+            position: absolute; top: 0; left: 50%;
+            width: 16px; height: 16px; border-radius: 50%;
+            transform: translateX(-50%);
+            border: 3px solid var(--border);
+            background: var(--bg-primary);
+            z-index: 2;
+            transition: all 0.3s;
+        }
+
+        .evolution-phase::after {
+            content: '';
+            position: absolute; top: 7px; left: 0; right: 0;
+            height: 2px; background: var(--border);
+            z-index: 1;
+        }
+
+        .evolution-phase:first-child::after { left: 50%; }
+        .evolution-phase:last-child::after { right: 50%; }
+
+        .evolution-phase.done::before {
+            background: var(--accent-green);
+            border-color: var(--accent-green);
+            box-shadow: 0 0 12px var(--glow-green);
+        }
+
+        .evolution-phase.active::before {
+            background: var(--accent-blue);
+            border-color: var(--accent-blue);
+            box-shadow: 0 0 12px var(--glow-blue);
+            animation: phaseGlow 2s ease-in-out infinite;
+        }
+
+        .evolution-phase.future::before {
+            background: var(--bg-primary);
+            border-color: var(--text-secondary);
+        }
+
+        @keyframes phaseGlow {
+            0%, 100% { box-shadow: 0 0 12px var(--glow-blue); }
+            50% { box-shadow: 0 0 24px var(--glow-blue), 0 0 48px rgba(59, 130, 246, 0.15); }
+        }
+
+        .phase-card {
+            background: var(--bg-card); border: 1px solid var(--border);
+            border-radius: 10px; padding: 16px; margin-top: 20px;
+            font-size: 0.85em;
+        }
+
+        .phase-card h4 { margin-bottom: 6px; }
+        .phase-card p { color: var(--text-secondary); font-size: 0.9em; }
+
+        /* Data flow animated */
+        .flow-diagram {
+            display: flex; flex-direction: column; align-items: center;
+            gap: 0; margin: 30px auto; max-width: 650px;
+        }
+
+        .flow-node {
+            background: var(--bg-card); border: 1px solid var(--border);
+            border-radius: 10px; padding: 14px 28px;
+            text-align: center; width: 100%;
+            transition: all 0.3s; position: relative;
+        }
+
+        .flow-node:hover {
+            border-color: var(--accent-blue);
+            transform: scale(1.02);
+        }
+
+        .flow-node h4 { font-size: 0.9em; }
+        .flow-node p { font-size: 0.78em; color: var(--text-secondary); }
+
+        .flow-arrow-container {
+            width: 2px; height: 30px; position: relative;
+            background: var(--border);
+        }
+
+        .flow-particle {
+            position: absolute; left: -3px;
+            width: 8px; height: 8px; border-radius: 50%;
+            background: var(--accent-cyan);
+            animation: particleDrop 1.5s ease-in-out infinite;
+            box-shadow: 0 0 8px var(--glow-cyan);
+        }
+
+        @keyframes particleDrop {
+            0% { top: -4px; opacity: 0; }
+            20% { opacity: 1; }
+            80% { opacity: 1; }
+            100% { top: calc(100% - 4px); opacity: 0; }
+        }
+
+        /* Code blocks */
+        .code-block {
+            background: #0d1520; border: 1px solid var(--border);
+            border-radius: 10px; padding: 18px 22px;
+            font-family: 'JetBrains Mono', 'Fira Code', monospace;
+            font-size: 0.82em; overflow-x: auto;
+            margin: 16px 0; line-height: 1.8;
+        }
+
+        .code-block .kw { color: var(--accent-purple); }
+        .code-block .fn { color: var(--accent-blue); }
+        .code-block .str { color: var(--accent-green); }
+        .code-block .cmt { color: var(--text-secondary); font-style: italic; }
+        .code-block .type { color: var(--accent-cyan); }
+        .code-block .prop { color: var(--accent-orange); }
+
+        /* Stats row */
+        .stats-row {
+            display: grid; grid-template-columns: repeat(auto-fit, minmax(160px, 1fr));
+            gap: 16px; margin: 20px 0;
+        }
+
+        .stat-card {
+            background: var(--bg-card); border: 1px solid var(--border);
+            border-radius: 12px; padding: 18px; text-align: center;
+            transition: all 0.3s;
+        }
+
+        .stat-card:hover {
+            border-color: var(--accent-blue);
+            transform: translateY(-4px);
+        }
+
+        .stat-value {
+            font-size: 2em; font-weight: 800;
+            background: linear-gradient(135deg, var(--accent-blue), var(--accent-cyan));
+            -webkit-background-clip: text; -webkit-text-fill-color: transparent;
+            background-clip: text;
+        }
+
+        .stat-label { font-size: 0.78em; color: var(--text-secondary); margin-top: 4px; }
+
+        /* Feature comparison */
+        .comparison-table {
+            width: 100%; border-collapse: collapse;
+            font-size: 0.88em; margin: 20px 0;
+        }
+
+        .comparison-table th, .comparison-table td {
+            padding: 12px 16px; text-align: left;
+            border-bottom: 1px solid var(--border);
+        }
+
+        .comparison-table th {
+            font-weight: 700; color: var(--text-secondary);
+            font-size: 0.8em; text-transform: uppercase;
+            letter-spacing: 1px;
+        }
+
+        .comparison-table tr:hover td {
+            background: rgba(59, 130, 246, 0.04);
+        }
+
+        .check { color: var(--accent-green); font-weight: 700; }
+        .cross { color: var(--accent-red); opacity: 0.5; }
+        .partial { color: var(--accent-orange); }
+
+        /* File tree */
+        .file-tree {
+            font-family: 'JetBrains Mono', monospace;
+            font-size: 0.82em; line-height: 2;
+            background: #0d1520; border: 1px solid var(--border);
+            border-radius: 10px; padding: 20px 24px;
+            margin: 16px 0;
+        }
+
+        .file-tree .dir { color: var(--accent-blue); }
+        .file-tree .file { color: var(--text-secondary); }
+        .file-tree .key-file { color: var(--accent-cyan); font-weight: 600; }
+        .file-tree .arrow { color: var(--accent-orange); }
+
+        /* Tabs */
+        .tab-bar {
+            display: flex; gap: 4px; margin-bottom: 20px;
+            border-bottom: 1px solid var(--border);
+            padding-bottom: 0;
+        }
+
+        .tab-btn {
+            padding: 10px 20px; border: none; background: none;
+            color: var(--text-secondary); font-size: 0.88em;
+            cursor: pointer; border-bottom: 2px solid transparent;
+            transition: all 0.2s; font-family: inherit;
+        }
+
+        .tab-btn:hover { color: var(--text-primary); }
+
+        .tab-btn.active {
+            color: var(--accent-blue);
+            border-bottom-color: var(--accent-blue);
+        }
+
+        .tab-panel { display: none; }
+        .tab-panel.active { display: block; }
+
+        /* Responsive */
+        @media (max-width: 768px) {
+            .hero h1 { font-size: 2em; }
+            .arch-layer-content { flex-direction: column; }
+            .stats-row { grid-template-columns: repeat(2, 1fr); }
+            .nav-links { gap: 2px; }
+            .nav-link { padding: 4px 8px; font-size: 0.78em; }
+        }
+
+        /* Scroll progress bar */
+        .scroll-progress {
+            position: fixed; top: 0; left: 0; height: 3px;
+            background: linear-gradient(90deg, var(--accent-blue), var(--accent-cyan), var(--accent-purple));
+            z-index: 200; transition: width 0.1s;
+            width: 0;
+        }
+
+        /* Tooltip */
+        .tooltip {
+            position: relative;
+        }
+
+        .tooltip .tip-text {
+            display: none;
+            position: absolute; bottom: 110%; left: 50%;
+            transform: translateX(-50%);
+            background: var(--bg-card); border: 1px solid var(--border);
+            padding: 8px 14px; border-radius: 8px;
+            font-size: 0.78em; white-space: nowrap;
+            z-index: 10;
+            box-shadow: 0 8px 30px rgba(0,0,0,0.4);
+        }
+
+        .tooltip:hover .tip-text { display: block; }
+
+        /* Animated highlight for Neo4j section */
+        .neo4j-glow {
+            background: linear-gradient(135deg, rgba(6, 182, 212, 0.05), rgba(139, 92, 246, 0.05));
+            border: 1px solid var(--accent-cyan);
+            border-radius: 14px; padding: 28px;
+            position: relative;
+        }
+
+        .neo4j-glow::before {
+            content: 'PERSISTENT KNOWLEDGE GRAPH';
+            position: absolute; top: -12px; left: 24px;
+            background: var(--bg-primary); padding: 0 12px;
+            font-size: 0.72em; font-weight: 700;
+            letter-spacing: 2px; color: var(--accent-cyan);
+        }
+
+        /* Benefit cards */
+        .benefit-grid {
+            display: grid; grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+            gap: 16px; margin: 20px 0;
+        }
+
+        .benefit-card {
+            background: var(--bg-card); border: 1px solid var(--border);
+            border-radius: 12px; padding: 22px;
+            transition: all 0.3s;
+        }
+
+        .benefit-card:hover {
+            border-color: var(--accent-cyan);
+            transform: translateY(-4px);
+            box-shadow: 0 8px 30px rgba(6, 182, 212, 0.1);
+        }
+
+        .benefit-card h4 {
+            font-size: 0.92em; margin-bottom: 6px;
+            display: flex; align-items: center; gap: 8px;
+        }
+
+        .benefit-card p { font-size: 0.82em; color: var(--text-secondary); }
+
+        .benefit-icon {
+            width: 28px; height: 28px; border-radius: 8px;
+            display: flex; align-items: center; justify-content: center;
+            font-size: 0.85em; flex-shrink: 0;
+        }
+
+        .bi-cyan { background: rgba(6, 182, 212, 0.15); }
+        .bi-blue { background: rgba(59, 130, 246, 0.15); }
+        .bi-green { background: rgba(16, 185, 129, 0.15); }
+        .bi-purple { background: rgba(139, 92, 246, 0.15); }
+        .bi-orange { background: rgba(245, 158, 11, 0.15); }
+        .bi-pink { background: rgba(236, 72, 153, 0.15); }
+    </style>
+</head>
+<body>
+
+<div class="scroll-progress" id="scrollProgress"></div>
+
+<!-- Navigation -->
+<nav class="nav">
+    <div class="nav-inner">
+        <span class="nav-brand">Multi-Repo Analysis</span>
+        <div class="nav-links">
+            <span class="nav-link active" data-target="overview">Overview</span>
+            <span class="nav-link" data-target="architecture">Architecture</span>
+            <span class="nav-link" data-target="pipeline">Pipeline</span>
+            <span class="nav-link" data-target="dataflow">Data Flow</span>
+            <span class="nav-link" data-target="persistent-store">Persistent Store</span>
+            <span class="nav-link" data-target="graph-schema">Graph Schema</span>
+            <span class="nav-link" data-target="evolution">Evolution</span>
+        </div>
+    </div>
+</nav>
+
+<div class="container">
+
+    <!-- Hero -->
+    <div class="hero" id="overview">
+        <h1>Architecture & Persistent Store</h1>
+        <p class="subtitle">Intelligent Architecture Discovery System for Enterprise Microservice Ecosystems &mdash; from ephemeral analysis to durable knowledge graph</p>
+        <div class="hero-badges">
+            <span class="badge badge-blue">AWMARCHMOD-1060</span>
+            <span class="badge badge-green">v3.2</span>
+            <span class="badge badge-purple">17-Step Pipeline</span>
+        </div>
+    </div>
+
+    <!-- Stats -->
+    <div class="stats-row">
+        <div class="stat-card">
+            <div class="stat-value">9</div>
+            <div class="stat-label">Multi-Repo Steps</div>
+        </div>
+        <div class="stat-card">
+            <div class="stat-value">8</div>
+            <div class="stat-label">C4 Diagram Steps</div>
+        </div>
+        <div class="stat-card">
+            <div class="stat-value">3</div>
+            <div class="stat-label">Language Analyzers</div>
+        </div>
+        <div class="stat-card">
+            <div class="stat-value">47+</div>
+            <div class="stat-label">Repos Analyzed</div>
+        </div>
+        <div class="stat-card">
+            <div class="stat-value">29</div>
+            <div class="stat-label">Module Columns</div>
+        </div>
+        <div class="stat-card">
+            <div class="stat-value">40+</div>
+            <div class="stat-label">Correlation Fields</div>
+        </div>
+    </div>
+
+    <!-- System Architecture -->
+    <div class="section" id="architecture">
+        <h2 class="section-title"><span class="dot" style="background:var(--accent-blue)"></span> System Architecture</h2>
+        <p class="section-desc">Four-layer architecture: from user-facing APIs down to the persistent knowledge store. Each layer is independently scalable and communicates through well-defined contracts.</p>
+
+        <div class="arch-diagram">
+            <!-- Layer 1: Frontend & API -->
+            <div class="arch-layer">
+                <span class="arch-layer-label label-blue">Presentation & API Layer</span>
+                <div class="arch-layer-content">
+                    <div class="arch-node node-blue">
+                        <h4>FastAPI Backend</h4>
+                        <p>unified_server.py &mdash; REST API serving visualization data, run management, export endpoints</p>
+                    </div>
+                    <div class="arch-node node-blue">
+                        <h4>Cytoscape.js Viewer</h4>
+                        <p>code_graph_view.html &mdash; interactive dependency graph exploration with Dagre layout</p>
+                    </div>
+                    <div class="arch-node node-blue">
+                        <h4>C4 Service</h4>
+                        <p>c4_service.py &mdash; Flask app serving C4 context/container diagrams at port 5002</p>
+                    </div>
+                    <div class="arch-node node-blue">
+                        <h4>Export APIs</h4>
+                        <p>PPTX, VSDX, SVG, PNG, CSV &mdash; multi-format architecture exports</p>
+                    </div>
+                </div>
+            </div>
+
+            <div class="layer-connector">
+                <svg width="200" height="32">
+                    <line class="connector-line" x1="100" y1="0" x2="100" y2="32"/>
+                    <circle class="connector-dot" cx="100" cy="16" r="4"/>
+                </svg>
+            </div>
+
+            <!-- Layer 2: Orchestration -->
+            <div class="arch-layer">
+                <span class="arch-layer-label label-green">Orchestration & Workflow Layer</span>
+                <div class="arch-layer-content">
+                    <div class="arch-node node-green">
+                        <h4>Unified Orchestrator</h4>
+                        <p>Entry point: manages sequential or parallel execution of MR + C4 pipelines with shared run IDs</p>
+                    </div>
+                    <div class="arch-node node-green">
+                        <h4>MR Orchestrator</h4>
+                        <p>9-step multi-repo analysis: tech detection, AST analysis, correlation, visualization</p>
+                    </div>
+                    <div class="arch-node node-green">
+                        <h4>C4 Orchestrator</h4>
+                        <p>8-step C4 generation: business grouping, external systems, context + container models</p>
+                    </div>
+                    <div class="arch-node node-green">
+                        <h4>State Manager</h4>
+                        <p>JSON checkpoint persistence &mdash; crash recovery &amp; resume from last successful step</p>
+                    </div>
+                </div>
+            </div>
+
+            <div class="layer-connector">
+                <svg width="200" height="32">
+                    <line class="connector-line" x1="100" y1="0" x2="100" y2="32"/>
+                    <circle class="connector-dot" cx="100" cy="16" r="4"/>
+                </svg>
+            </div>
+
+            <!-- Layer 3: Analysis -->
+            <div class="arch-layer">
+                <span class="arch-layer-label label-orange">Analysis & Processing Layer</span>
+                <div class="arch-layer-content">
+                    <div class="arch-node node-orange">
+                        <h4>Java AST Analyzer</h4>
+                        <p>Maven JAR: Spring patterns, REST endpoints, DI, client detection</p>
+                    </div>
+                    <div class="arch-node node-orange">
+                        <h4>Python AST Analyzer</h4>
+                        <p>Flask/Django/FastAPI endpoints, consumer patterns, config parsing</p>
+                    </div>
+                    <div class="arch-node node-orange">
+                        <h4>JS AST Analyzer</h4>
+                        <p>Babel parser: Express routes, React patterns, client libraries</p>
+                    </div>
+                    <div class="arch-node node-pink">
+                        <h4>LLM Correlation Engine</h4>
+                        <p>AWS Bedrock: semantic fuzzy matching, confidence scoring, variable correlation</p>
+                    </div>
+                </div>
+            </div>
+
+            <div class="layer-connector">
+                <svg width="200" height="32">
+                    <line class="connector-line" x1="100" y1="0" x2="100" y2="32"/>
+                    <circle class="connector-dot" cx="100" cy="16" r="4"/>
+                </svg>
+            </div>
+
+            <!-- Layer 4: Persistence -->
+            <div class="arch-layer" style="border-color: var(--accent-cyan);">
+                <span class="arch-layer-label label-cyan">Data & Persistence Layer</span>
+                <div class="arch-layer-content">
+                    <div class="arch-node node-cyan">
+                        <h4>CSV / JSON Store</h4>
+                        <p>Current: all_consumer_correlations.csv, modules.csv, cross_repo_data.json</p>
+                    </div>
+                    <div class="arch-node node-cyan">
+                        <h4>C4 Model Store</h4>
+                        <p>c4_context_model.json, c4_container_model.json &mdash; architecture diagram data</p>
+                    </div>
+                    <div class="arch-node node-purple" style="border: 2px dashed var(--accent-purple);">
+                        <h4>Neo4j Graph Database</h4>
+                        <p>Future: persistent knowledge graph for cross-run queries, drift detection, team-wide access</p>
+                    </div>
+                    <div class="arch-node node-cyan">
+                        <h4>Workflow State</h4>
+                        <p>JSON checkpoints per run: unified, MR, and C4 state files with timing metadata</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Pipeline -->
+    <div class="section" id="pipeline">
+        <h2 class="section-title"><span class="dot" style="background:var(--accent-green)"></span> 17-Step Analysis Pipeline</h2>
+        <p class="section-desc">Two coordinated orchestrators execute in sequence or parallel. Click any step to see implementation details.</p>
+
+        <div class="tab-bar">
+            <button class="tab-btn active" data-tab="mr-pipeline">Multi-Repo (9 Steps)</button>
+            <button class="tab-btn" data-tab="c4-pipeline">C4 Diagrams (8 Steps)</button>
+            <button class="tab-btn" data-tab="parallel-mode">Parallel Mode</button>
+        </div>
+
+        <!-- Multi-Repo Pipeline -->
+        <div class="tab-panel active" id="mr-pipeline">
+            <div class="pipeline-container">
+                <div class="pipeline-track"><div class="pipeline-progress" id="mrProgress"></div></div>
+
+                <div class="pipeline-step">
+                    <div class="step-marker" style="color:var(--accent-blue);">1</div>
+                    <div class="step-card" onclick="toggleStep(this)">
+                        <h4>Technology Determination</h4>
+                        <div class="step-meta">Input: Repository family directory &rarr; Output: modules.csv</div>
+                        <div class="step-tags">
+                            <span class="step-tag io">File Scan</span>
+                            <span class="step-tag">Foundation</span>
+                        </div>
+                        <div class="step-detail">
+                            Scans each repository in the family to detect programming languages (Java, Python, JS), build systems (Maven, Gradle, npm), frameworks (Spring, Flask, Express), and generates a 29-column <code>modules.csv</code> that feeds all downstream steps. Detects: has_rest_endpoints, has_maven, has_npm, technology classification.
+                        </div>
+                    </div>
+                </div>
+
+                <div class="pipeline-step">
+                    <div class="step-marker" style="color:var(--accent-orange);">2</div>
+                    <div class="step-card" onclick="toggleStep(this)">
+                        <h4>Java AST Analysis</h4>
+                        <div class="step-meta">Input: modules.csv (Java repos) &rarr; Output: Java consumers/providers CSVs</div>
+                        <div class="step-tags">
+                            <span class="step-tag">AST</span>
+                            <span class="step-tag io">Maven JAR</span>
+                        </div>
+                        <div class="step-detail">
+                            Runs <code>java-pattern-detector-1.0.0.jar</code> on each Java repository. Extracts: REST endpoint definitions (GET/POST/PUT/DELETE), Spring dependency injection patterns, Feign/RestTemplate client calls, controller-to-service mappings, and Spring configuration properties.
+                        </div>
+                    </div>
+                </div>
+
+                <div class="pipeline-step">
+                    <div class="step-marker" style="color:var(--accent-orange);">3</div>
+                    <div class="step-card" onclick="toggleStep(this)">
+                        <h4>JavaScript AST Analysis</h4>
+                        <div class="step-meta">Input: modules.csv (JS repos) &rarr; Output: JS consumers/providers CSVs</div>
+                        <div class="step-tags">
+                            <span class="step-tag">AST</span>
+                            <span class="step-tag io">Babel</span>
+                        </div>
+                        <div class="step-detail">
+                            Uses Babel parser to analyze JavaScript/TypeScript codebases. Extracts: Express route definitions, Axios/fetch HTTP client calls, React component API consumption, Node.js module dependencies, and package.json dependency graphs.
+                        </div>
+                    </div>
+                </div>
+
+                <div class="pipeline-step">
+                    <div class="step-marker" style="color:var(--accent-orange);">4</div>
+                    <div class="step-card" onclick="toggleStep(this)">
+                        <h4>Python AST Analysis</h4>
+                        <div class="step-meta">Input: modules.csv (Python repos) &rarr; Output: Python consumers/providers CSVs</div>
+                        <div class="step-tags">
+                            <span class="step-tag">AST</span>
+                            <span class="step-tag io">Built-in</span>
+                        </div>
+                        <div class="step-detail">
+                            Python's built-in AST module analyzes Flask/Django/FastAPI codebases. Extracts: route decorators, request handlers, HTTP client calls (requests, httpx, aiohttp), configuration readers, and database connection patterns.
+                        </div>
+                    </div>
+                </div>
+
+                <div class="pipeline-step">
+                    <div class="step-marker" style="color:var(--accent-green);">5</div>
+                    <div class="step-card" onclick="toggleStep(this)">
+                        <h4>CSV Consolidation</h4>
+                        <div class="step-meta">Input: Language-specific CSVs &rarr; Output: Unified consumer/provider tables</div>
+                        <div class="step-tags">
+                            <span class="step-tag io">Merge</span>
+                        </div>
+                        <div class="step-detail">
+                            Merges per-language analysis results into unified consumer and provider tables. Normalizes column schemas across Java/Python/JS, deduplicates entries, and creates the consolidated baseline for cross-repository correlation.
+                        </div>
+                    </div>
+                </div>
+
+                <div class="pipeline-step">
+                    <div class="step-marker" style="color:var(--accent-green);">6</div>
+                    <div class="step-card" onclick="toggleStep(this)">
+                        <h4>Code-to-Config Correlation</h4>
+                        <div class="step-meta">Input: Consolidated CSVs + build files &rarr; Output: Configuration mappings</div>
+                        <div class="step-tags">
+                            <span class="step-tag io">Config</span>
+                            <span class="step-tag">Extraction</span>
+                        </div>
+                        <div class="step-detail">
+                            Resolves code references to configuration values. Maps: property placeholders to actual values, environment variable references to deployment configs, JDBC/connection strings to external system identities, and Spring profiles to runtime configurations.
+                        </div>
+                    </div>
+                </div>
+
+                <div class="pipeline-step">
+                    <div class="step-marker" style="color:var(--accent-cyan);">7</div>
+                    <div class="step-card" onclick="toggleStep(this)">
+                        <h4>Consumer-Provider Correlation</h4>
+                        <div class="step-meta">Input: Code + config data &rarr; Output: all_consumer_correlations.csv</div>
+                        <div class="step-tags">
+                            <span class="step-tag">Core</span>
+                            <span class="step-tag io">Graph Edge List</span>
+                        </div>
+                        <div class="step-detail">
+                            <strong>The central artifact.</strong> Matches consumers to providers across all repos. Produces <code>all_consumer_correlations.csv</code> with 40+ columns: correlation_id, consumer_repo, provider_repo, endpoint URLs, match_type (DIRECT, INDIRECT, EXTERNAL), configuration_type (LITERAL, PROPERTY, IMPLICIT), and extracted hostnames/domains.
+                        </div>
+                    </div>
+                </div>
+
+                <div class="pipeline-step">
+                    <div class="step-marker" style="color:var(--accent-purple);">8</div>
+                    <div class="step-card" onclick="toggleStep(this)">
+                        <h4>LLM Correlation Enhancement</h4>
+                        <div class="step-meta">Input: Low-confidence correlations &rarr; Output: Enhanced CSV with scores</div>
+                        <div class="step-tags">
+                            <span class="step-tag llm">LLM Heavy</span>
+                            <span class="step-tag heavy">Hours</span>
+                        </div>
+                        <div class="step-detail">
+                            Sends low-confidence correlations to AWS Bedrock for semantic validation. The LLM evaluates whether consumer URL patterns truly match provider endpoints, scores confidence 0.0&ndash;1.0, and provides reasoning. This is the most time-intensive step and can be skipped for initial analysis.
+                        </div>
+                    </div>
+                </div>
+
+                <div class="pipeline-step">
+                    <div class="step-marker" style="color:var(--accent-blue);">9</div>
+                    <div class="step-card" onclick="toggleStep(this)">
+                        <h4>Visualization Data Generation</h4>
+                        <div class="step-meta">Input: Enhanced correlations &rarr; Output: cross_repo_data.json</div>
+                        <div class="step-tags">
+                            <span class="step-tag io">Nodes &amp; Edges</span>
+                            <span class="step-tag">Final</span>
+                        </div>
+                        <div class="step-detail">
+                            Transforms the correlation CSV into <code>cross_repo_data.json</code> &mdash; a Cytoscape.js-ready graph structure with nodes (repos, services, external systems), edges (dependencies with metadata), and detail panels for the interactive web viewer.
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- C4 Pipeline -->
+        <div class="tab-panel" id="c4-pipeline">
+            <div class="pipeline-container">
+                <div class="pipeline-track"><div class="pipeline-progress" id="c4Progress"></div></div>
+
+                <div class="pipeline-step">
+                    <div class="step-marker" style="color:var(--accent-purple);">1</div>
+                    <div class="step-card" onclick="toggleStep(this)">
+                        <h4>Business Determination</h4>
+                        <div class="step-meta">Input: modules.csv &rarr; Output: Business summaries per repo (LLM)</div>
+                        <div class="step-tags"><span class="step-tag llm">LLM</span></div>
+                        <div class="step-detail">Uses LLM to analyze each repository's codebase and generate a business summary: purpose, domain classification, key capabilities, and role in the ecosystem.</div>
+                    </div>
+                </div>
+
+                <div class="pipeline-step">
+                    <div class="step-marker" style="color:var(--accent-purple);">2</div>
+                    <div class="step-card" onclick="toggleStep(this)">
+                        <h4>Business Grouping</h4>
+                        <div class="step-meta">Input: Business summaries &rarr; Output: Domain groups JSON</div>
+                        <div class="step-tags"><span class="step-tag llm">LLM</span><span class="step-tag">Clustering</span></div>
+                        <div class="step-detail">Clusters repositories into business domains (e.g., "Portfolio Management", "Client Services", "Trading Platform") using semantic similarity of business summaries.</div>
+                    </div>
+                </div>
+
+                <div class="pipeline-step">
+                    <div class="step-marker" style="color:var(--accent-green);">3</div>
+                    <div class="step-card" onclick="toggleStep(this)">
+                        <h4>External Systems Extraction</h4>
+                        <div class="step-meta">Input: Build files &rarr; Output: Raw external systems</div>
+                        <div class="step-tags"><span class="step-tag io">Parsing</span></div>
+                        <div class="step-detail">Parses pom.xml, package.json, requirements.txt to identify external dependencies: databases, messaging systems, third-party APIs, authentication services.</div>
+                    </div>
+                </div>
+
+                <div class="pipeline-step">
+                    <div class="step-marker" style="color:var(--accent-purple);">4</div>
+                    <div class="step-card" onclick="toggleStep(this)">
+                        <h4>C4 Systems Consolidation</h4>
+                        <div class="step-meta">Input: Raw externals &rarr; Output: &le;18 C4 boxes</div>
+                        <div class="step-tags"><span class="step-tag llm">LLM</span><span class="step-tag">Cardinality</span></div>
+                        <div class="step-detail">Reduces hundreds of external dependencies to &le;18 meaningful C4 external system boxes using LLM-driven deduplication and semantic grouping.</div>
+                    </div>
+                </div>
+
+                <div class="pipeline-step">
+                    <div class="step-marker" style="color:var(--accent-purple);">5</div>
+                    <div class="step-card" onclick="toggleStep(this)">
+                        <h4>C4 Context Model (C1)</h4>
+                        <div class="step-meta">Input: Domains + C4 systems &rarr; Output: c4_context_model.json</div>
+                        <div class="step-tags"><span class="step-tag llm">LLM</span><span class="step-tag">C1 Diagram</span></div>
+                        <div class="step-detail">Generates the C4 Level 1 context diagram: the platform as a single system, 8 business domains inside, 3 actor personas (Investment Advisor, WM Client, Platform Admin), and &le;18 external systems.</div>
+                    </div>
+                </div>
+
+                <div class="pipeline-step">
+                    <div class="step-marker" style="color:var(--accent-green);">6</div>
+                    <div class="step-card" onclick="toggleStep(this)">
+                        <h4>C2 Data Assembly</h4>
+                        <div class="step-meta">Input: Correlations + relationships &rarr; Output: Index tables</div>
+                        <div class="step-tags"><span class="step-tag io">Indexing</span></div>
+                        <div class="step-detail">Builds cross-reference indexes: repo-to-external-system, domain-to-domain, and domain-to-external mappings from correlation data.</div>
+                    </div>
+                </div>
+
+                <div class="pipeline-step">
+                    <div class="step-marker" style="color:var(--accent-purple);">7</div>
+                    <div class="step-card" onclick="toggleStep(this)">
+                        <h4>C2 Relationship Wiring</h4>
+                        <div class="step-meta">Input: Data indexes &rarr; Output: Enriched relationships</div>
+                        <div class="step-tags"><span class="step-tag llm">LLM</span><span class="step-tag">Labels</span></div>
+                        <div class="step-detail">Uses LLM to generate human-readable relationship labels for each edge: "Fetches portfolio positions via REST", "Publishes trade events to Kafka", etc.</div>
+                    </div>
+                </div>
+
+                <div class="pipeline-step">
+                    <div class="step-marker" style="color:var(--accent-cyan);">8</div>
+                    <div class="step-card" onclick="toggleStep(this)">
+                        <h4>C2 Container Model</h4>
+                        <div class="step-meta">Input: All C4 data &rarr; Output: c4_container_model.json</div>
+                        <div class="step-tags"><span class="step-tag">C2 Diagram</span><span class="step-tag">Final</span></div>
+                        <div class="step-detail">Produces the C4 Level 2 container diagram: one container per business domain, repositories within each container with roles, labeled relationships between domains and external systems.</div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Parallel Mode -->
+        <div class="tab-panel" id="parallel-mode">
+            <p style="margin-bottom:16px; color:var(--text-secondary);">The unified orchestrator can run phases in parallel where LLM contention is avoided:</p>
+            <div class="code-block">
+<span class="cmt">// Parallel Phase Execution Strategy</span>
+
+<span class="kw">Phase 1</span>: MR Step 1 (Foundation)                    <span class="cmt">// Must complete first</span>
+    <span class="str">&#x2193;</span>
+<span class="kw">Phase 2</span>: MR Steps 2-7  <span class="fn">||</span>  C4 Steps 1-2            <span class="cmt">// Parallel: no LLM contention</span>
+    <span class="str">&#x2193;</span>
+<span class="kw">Phase 3</span>: MR Step 8  <span class="fn">&#x2192;</span>  C4 Steps 3-8              <span class="cmt">// LLM-heavy: serial or gated</span>
+    <span class="str">&#x2193;</span>
+<span class="kw">Phase 4</span>: MR Step 9 (Visualization)                 <span class="cmt">// Final data generation</span>
+    <span class="str">&#x2193;</span>
+<span class="kw">Phase 5</span>: Server Launch                              <span class="cmt">// Serve results</span>
+            </div>
+            <p style="margin-top:16px; font-size:0.88em; color:var(--text-secondary);">
+                <strong>Shared Run ID:</strong> A single timestamp-based ID (<code>YYYYMMDD_HHMMSS_XXXXXX</code>) is shared across all phases, ensuring all artifacts are co-located in the same output directory.
+            </p>
+        </div>
+    </div>
+
+    <!-- Data Flow -->
+    <div class="section" id="dataflow">
+        <h2 class="section-title"><span class="dot" style="background:var(--accent-cyan)"></span> Data Flow Architecture</h2>
+        <p class="section-desc">Watch data transform from raw repositories to interactive architecture diagrams. The central artifact &mdash; <code>all_consumer_correlations.csv</code> &mdash; is the complete graph edge list.</p>
+
+        <div class="flow-diagram">
+            <div class="flow-node" style="border-color:var(--accent-blue);">
+                <h4>Repository Family (47+ repos)</h4>
+                <p>Java / Python / JavaScript microservices</p>
+            </div>
+            <div class="flow-arrow-container"><div class="flow-particle"></div></div>
+
+            <div class="flow-node">
+                <h4>Technology Detection &rarr; modules.csv</h4>
+                <p>29 columns: repo, tech, has_maven, has_rest, frameworks...</p>
+            </div>
+            <div class="flow-arrow-container"><div class="flow-particle" style="animation-delay:0.3s"></div></div>
+
+            <div class="flow-node">
+                <h4>Language-Specific AST Analysis</h4>
+                <p>Java (Maven JAR) | Python (ast module) | JavaScript (Babel)</p>
+            </div>
+            <div class="flow-arrow-container"><div class="flow-particle" style="animation-delay:0.6s"></div></div>
+
+            <div class="flow-node">
+                <h4>Consolidated Consumer/Provider Tables</h4>
+                <p>Unified schema across all languages, deduplicated entries</p>
+            </div>
+            <div class="flow-arrow-container"><div class="flow-particle" style="animation-delay:0.9s"></div></div>
+
+            <div class="flow-node" style="border-color:var(--accent-cyan); border-width:2px;">
+                <h4 style="color:var(--accent-cyan);">all_consumer_correlations.csv</h4>
+                <p>40+ columns: correlation_id, consumer/provider repos, endpoints, match_type, confidence, hostnames</p>
+            </div>
+            <div class="flow-arrow-container"><div class="flow-particle" style="animation-delay:1.2s"></div></div>
+
+            <div style="display:flex; gap:16px; width:100%;">
+                <div class="flow-node" style="flex:1;">
+                    <h4>cross_repo_data.json</h4>
+                    <p>Viz: nodes, edges, detail panels</p>
+                </div>
+                <div class="flow-node" style="flex:1;">
+                    <h4>C4 Models</h4>
+                    <p>Context (C1) + Container (C2) JSON</p>
+                </div>
+            </div>
+            <div class="flow-arrow-container"><div class="flow-particle" style="animation-delay:1.5s"></div></div>
+
+            <div style="display:flex; gap:16px; width:100%;">
+                <div class="flow-node" style="flex:1; border-color:var(--accent-green);">
+                    <h4>Viz Server :5000</h4>
+                    <p>Interactive dependency graph</p>
+                </div>
+                <div class="flow-node" style="flex:1; border-color:var(--accent-green);">
+                    <h4>C4 Service :5002</h4>
+                    <p>Architecture diagrams</p>
+                </div>
+                <div class="flow-node" style="flex:1; border-color:var(--accent-purple); border-style:dashed;">
+                    <h4>Neo4j :7474 / :7687</h4>
+                    <p>Persistent graph queries</p>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Persistent Store: The Core Narrative -->
+    <div class="section" id="persistent-store">
+        <h2 class="section-title"><span class="dot" style="background:var(--accent-cyan)"></span> Persistent Store: From Files to Knowledge Graph</h2>
+        <p class="section-desc">The analysis pipeline produces rich architectural data. The persistent store transforms this from disposable output into a <strong>durable, queryable knowledge base</strong> that accumulates intelligence across runs.</p>
+
+        <!-- Current vs Future -->
+        <div class="store-vision">
+            <div class="store-current">
+                <span class="store-label" style="color:var(--accent-orange);">Today: File-Based</span>
+                <h4 style="margin-bottom:12px; margin-top:8px;">CSV + JSON Flat Files</h4>
+                <ul style="font-size:0.88em; color:var(--text-secondary); list-style:none; line-height:2;">
+                    <li>&#9679; Each run creates isolated output in <code>multi_repo_ast_output/{run_id}/</code></li>
+                    <li>&#9679; Correlations stored as CSV edge lists (40+ columns)</li>
+                    <li>&#9679; C4 models stored as nested JSON</li>
+                    <li>&#9679; State checkpoints as JSON files</li>
+                    <li>&#9679; No cross-run queries possible</li>
+                    <li>&#9679; No graph traversal or path analysis</li>
+                    <li>&#9679; Single-user, local filesystem access</li>
+                </ul>
+                <div class="file-tree" style="margin-top:16px;">
+<span class="dir">multi_repo_ast_output/{run_id}/</span>
+&#x251C;&#x2500; <span class="dir">multi_repo_analysis/</span>
+&#x2502;  &#x251C;&#x2500; <span class="dir">modules/</span><span class="key-file">modules.csv</span>
+&#x2502;  &#x251C;&#x2500; <span class="dir">csv_output_dir/{family}/</span>
+&#x2502;  &#x2502;  &#x251C;&#x2500; <span class="dir">workflow_output/</span>
+&#x2502;  &#x2502;  &#x2502;  &#x251C;&#x2500; <span class="key-file">all_consumer_correlations.csv</span> <span class="arrow">&larr; PRIMARY GRAPH</span>
+&#x2502;  &#x2502;  &#x2502;  &#x2514;&#x2500; <span class="file">LLM_correlation_output_enhanced.csv</span>
+&#x2502;  &#x2502;  &#x2514;&#x2500; <span class="dir">visualization/</span><span class="key-file">cross_repo_data.json</span>
+&#x2502;  &#x2514;&#x2500; <span class="file">workflow_steps_{run_id}.csv</span>
+&#x2514;&#x2500; <span class="dir">c4diagrams/</span>
+   &#x251C;&#x2500; <span class="dir">step5/</span><span class="key-file">c4_context_model.json</span>
+   &#x2514;&#x2500; <span class="dir">step8/</span><span class="key-file">c4_container_model.json</span>
+                </div>
+            </div>
+
+            <div class="store-future">
+                <span class="store-label" style="color:var(--accent-cyan);">Future: Neo4j Knowledge Graph</span>
+                <h4 style="margin-bottom:12px; margin-top:8px;">Persistent Graph Database</h4>
+                <ul style="font-size:0.88em; color:var(--text-secondary); list-style:none; line-height:2;">
+                    <li style="color:var(--accent-green);">&#10003; Cross-run architectural drift detection</li>
+                    <li style="color:var(--accent-green);">&#10003; Graph traversal: "What depends on Service X?"</li>
+                    <li style="color:var(--accent-green);">&#10003; Path analysis: shortest dependency chains</li>
+                    <li style="color:var(--accent-green);">&#10003; Impact analysis: "If Service X changes..."</li>
+                    <li style="color:var(--accent-green);">&#10003; Team-wide access via Bolt protocol</li>
+                    <li style="color:var(--accent-green);">&#10003; Temporal versioning: how architecture evolves</li>
+                    <li style="color:var(--accent-green);">&#10003; APOC procedures for advanced analytics</li>
+                </ul>
+                <div class="code-block" style="margin-top:16px;">
+<span class="cmt">// Neo4j 5.25 Enterprise (Docker)</span>
+<span class="kw">Port</span> <span class="str">7474</span> &rarr; Browser UI
+<span class="kw">Port</span> <span class="str">7687</span> &rarr; Bolt protocol
+<span class="kw">Auth</span> neo4j / password123
+<span class="kw">Heap</span> 512MB-1GB | Page Cache 512MB
+<span class="kw">APOC</span> Enabled for graph algorithms
+                </div>
+            </div>
+        </div>
+
+        <!-- Comparison Table -->
+        <h3 style="margin: 30px 0 16px; font-size:1.1em;">Capability Comparison</h3>
+        <table class="comparison-table">
+            <thead>
+                <tr>
+                    <th>Capability</th>
+                    <th>CSV/JSON Files</th>
+                    <th>Neo4j Graph DB</th>
+                </tr>
+            </thead>
+            <tbody>
+                <tr>
+                    <td>Single-run analysis results</td>
+                    <td><span class="check">Full</span></td>
+                    <td><span class="check">Full</span></td>
+                </tr>
+                <tr>
+                    <td>Cross-run comparison &amp; drift detection</td>
+                    <td><span class="cross">&mdash;</span></td>
+                    <td><span class="check">Native</span></td>
+                </tr>
+                <tr>
+                    <td>Graph traversal queries</td>
+                    <td><span class="cross">&mdash;</span></td>
+                    <td><span class="check">Cypher</span></td>
+                </tr>
+                <tr>
+                    <td>Impact analysis ("what breaks if X changes?")</td>
+                    <td><span class="partial">Manual</span></td>
+                    <td><span class="check">1 query</span></td>
+                </tr>
+                <tr>
+                    <td>Shortest dependency path</td>
+                    <td><span class="cross">&mdash;</span></td>
+                    <td><span class="check">APOC algo</span></td>
+                </tr>
+                <tr>
+                    <td>Team-wide concurrent access</td>
+                    <td><span class="cross">&mdash;</span></td>
+                    <td><span class="check">Bolt protocol</span></td>
+                </tr>
+                <tr>
+                    <td>Temporal architecture versioning</td>
+                    <td><span class="partial">By run_id</span></td>
+                    <td><span class="check">Node properties</span></td>
+                </tr>
+                <tr>
+                    <td>Visualization integration</td>
+                    <td><span class="check">JSON &rarr; Cytoscape</span></td>
+                    <td><span class="check">Neo4j Browser + Cytoscape</span></td>
+                </tr>
+            </tbody>
+        </table>
+
+        <!-- Why Neo4j becomes THE persistent store -->
+        <div class="neo4j-glow" style="margin-top:30px;">
+            <h3 style="margin-bottom:16px; font-size:1.1em;">Why Neo4j Becomes the Persistent Store</h3>
+            <p style="font-size:0.9em; color:var(--text-secondary); margin-bottom:20px;">
+                The analysis output is inherently a <strong>property graph</strong>: repositories are nodes, dependencies are edges, and both carry rich metadata. Flat files force consumers to reconstruct this graph on every query. Neo4j stores the graph natively and enables instant traversal.
+            </p>
+
+            <div class="benefit-grid">
+                <div class="benefit-card">
+                    <h4><span class="benefit-icon bi-cyan">Q</span> Instant Queries</h4>
+                    <p>"Show all consumers of Service X" &mdash; one Cypher query vs. parsing CSV files, filtering, and joining.</p>
+                </div>
+                <div class="benefit-card">
+                    <h4><span class="benefit-icon bi-blue">&#916;</span> Drift Detection</h4>
+                    <p>Compare graph snapshots across runs: new dependencies, removed services, changed patterns.</p>
+                </div>
+                <div class="benefit-card">
+                    <h4><span class="benefit-icon bi-green">&#8644;</span> Impact Analysis</h4>
+                    <p>"If this service goes down, what's affected?" &mdash; multi-hop graph traversal in milliseconds.</p>
+                </div>
+                <div class="benefit-card">
+                    <h4><span class="benefit-icon bi-purple">&#x1D4D2;</span> Domain Boundaries</h4>
+                    <p>Query cross-domain coupling: which domains are tightly coupled? Where are the clean boundaries?</p>
+                </div>
+                <div class="benefit-card">
+                    <h4><span class="benefit-icon bi-orange">&#x21BB;</span> Continuous Updates</h4>
+                    <p>Pipeline writes directly to Neo4j at step completion. No separate import step needed.</p>
+                </div>
+                <div class="benefit-card">
+                    <h4><span class="benefit-icon bi-pink">&#x2197;</span> Scalable Access</h4>
+                    <p>Multiple teams query the same knowledge base concurrently via Bolt protocol &mdash; no file locking.</p>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Graph Schema -->
+    <div class="section" id="graph-schema">
+        <h2 class="section-title"><span class="dot" style="background:var(--accent-purple)"></span> Neo4j Graph Schema</h2>
+        <p class="section-desc">The proposed graph model maps directly from <code>all_consumer_correlations.csv</code> and C4 model JSON. Every CSV row becomes one or more graph edges.</p>
+
+        <!-- Interactive SVG Graph Schema -->
+        <svg class="graph-schema" viewBox="0 0 900 520" xmlns="http://www.w3.org/2000/svg">
+            <!-- Edges (drawn first, behind nodes) -->
+            <!-- Repository -> Service (CALLS) -->
+            <line class="edge-line" x1="200" y1="200" x2="450" y2="100" stroke="#3b82f6" stroke-width="2" opacity="0.6"/>
+            <text x="310" y="138" font-size="11" fill="#3b82f6" font-weight="600" transform="rotate(-14,310,138)">CALLS</text>
+
+            <!-- Repository -> ExternalSystem (ACCESSES) -->
+            <line class="edge-line" x1="200" y1="200" x2="450" y2="300" stroke="#f59e0b" stroke-width="2" opacity="0.6"/>
+            <text x="300" y="262" font-size="11" fill="#f59e0b" font-weight="600" transform="rotate(14,300,262)">ACCESSES</text>
+
+            <!-- Repository -> Domain (PART_OF) -->
+            <line class="edge-line" x1="200" y1="200" x2="700" y2="200" stroke="#10b981" stroke-width="2" opacity="0.6"/>
+            <text x="440" y="192" font-size="11" fill="#10b981" font-weight="600">PART_OF</text>
+
+            <!-- Domain -> Domain (INTEGRATES_WITH) -->
+            <path d="M 750 170 C 820 110, 860 110, 830 170" fill="none" stroke="#8b5cf6" stroke-width="2" stroke-dasharray="6 3" class="edge-line"/>
+            <text x="810" y="120" font-size="10" fill="#8b5cf6" font-weight="600">INTEGRATES</text>
+
+            <!-- Domain -> ExternalSystem -->
+            <line class="edge-line" x1="700" y1="230" x2="480" y2="300" stroke="#ec4899" stroke-width="2" opacity="0.6"/>
+            <text x="580" y="278" font-size="11" fill="#ec4899" font-weight="600" transform="rotate(18,580,278)">DEPENDS_ON</text>
+
+            <!-- Service -> Configuration (CONFIGURED_BY) -->
+            <line class="edge-line" x1="450" y1="130" x2="450" y2="400" stroke="#06b6d4" stroke-width="2" opacity="0.5"/>
+            <text x="458" y="270" font-size="11" fill="#06b6d4" font-weight="600">CONFIGURED_BY</text>
+
+            <!-- Repository -> AnalysisRun (ANALYZED_IN) -->
+            <line class="edge-line" x1="170" y1="230" x2="170" y2="400" stroke="#6b7280" stroke-width="1.5" opacity="0.4"/>
+            <text x="90" y="330" font-size="10" fill="#6b7280" font-weight="600">ANALYZED_IN</text>
+
+            <!-- Node: Repository -->
+            <g class="node-circle" transform="translate(200,200)">
+                <circle r="50" fill="#1e3a5f" stroke="#3b82f6" stroke-width="2.5"/>
+                <text text-anchor="middle" y="-8" font-size="13" font-weight="700" fill="#e8edf2">Repository</text>
+                <text text-anchor="middle" y="10" font-size="9.5" fill="#8899aa">repo_id, tech</text>
+                <text text-anchor="middle" y="22" font-size="9.5" fill="#8899aa">has_rest, domain</text>
+            </g>
+
+            <!-- Node: Service/Endpoint -->
+            <g class="node-circle" transform="translate(450,100)">
+                <circle r="44" fill="#1e3a5f" stroke="#06b6d4" stroke-width="2.5"/>
+                <text text-anchor="middle" y="-8" font-size="13" font-weight="700" fill="#e8edf2">Service</text>
+                <text text-anchor="middle" y="10" font-size="9.5" fill="#8899aa">endpoint, method</text>
+                <text text-anchor="middle" y="22" font-size="9.5" fill="#8899aa">provider_repo</text>
+            </g>
+
+            <!-- Node: External System -->
+            <g class="node-circle" transform="translate(450,310)">
+                <rect x="-60" y="-35" width="120" height="70" rx="12" fill="#2d1f0f" stroke="#f59e0b" stroke-width="2.5"/>
+                <text text-anchor="middle" y="-8" font-size="13" font-weight="700" fill="#e8edf2">External</text>
+                <text text-anchor="middle" y="8" font-size="13" font-weight="700" fill="#e8edf2">System</text>
+                <text text-anchor="middle" y="24" font-size="9.5" fill="#8899aa">type, hostname</text>
+            </g>
+
+            <!-- Node: Domain -->
+            <g class="node-circle" transform="translate(700,200)">
+                <polygon points="0,-50 58,-25 58,25 0,50 -58,25 -58,-25" fill="#1f1535" stroke="#8b5cf6" stroke-width="2.5"/>
+                <text text-anchor="middle" y="-8" font-size="13" font-weight="700" fill="#e8edf2">Domain</text>
+                <text text-anchor="middle" y="10" font-size="9.5" fill="#8899aa">name, desc</text>
+                <text text-anchor="middle" y="22" font-size="9.5" fill="#8899aa">repo_count</text>
+            </g>
+
+            <!-- Node: Configuration -->
+            <g class="node-circle" transform="translate(450,430)">
+                <rect x="-55" y="-28" width="110" height="56" rx="8" fill="#0f2520" stroke="#10b981" stroke-width="2"/>
+                <text text-anchor="middle" y="-4" font-size="12" font-weight="700" fill="#e8edf2">Configuration</text>
+                <text text-anchor="middle" y="14" font-size="9.5" fill="#8899aa">key, value, type</text>
+            </g>
+
+            <!-- Node: AnalysisRun -->
+            <g class="node-circle" transform="translate(170,430)">
+                <rect x="-55" y="-28" width="110" height="56" rx="8" fill="#1a1a2e" stroke="#6b7280" stroke-width="2"/>
+                <text text-anchor="middle" y="-4" font-size="12" font-weight="700" fill="#e8edf2">AnalysisRun</text>
+                <text text-anchor="middle" y="14" font-size="9.5" fill="#8899aa">run_id, timestamp</text>
+            </g>
+
+            <!-- Legend -->
+            <g transform="translate(650,380)">
+                <rect x="0" y="0" width="230" height="130" rx="10" fill="rgba(15,25,35,0.8)" stroke="#2a3f55" stroke-width="1"/>
+                <text x="16" y="22" font-size="11" font-weight="700" fill="#8899aa">LEGEND</text>
+                <circle cx="24" cy="42" r="8" fill="#1e3a5f" stroke="#3b82f6" stroke-width="2"/>
+                <text x="40" y="46" font-size="10" fill="#e8edf2">Service node (circle)</text>
+                <rect x="16" y="56" width="16" height="16" rx="3" fill="#2d1f0f" stroke="#f59e0b" stroke-width="1.5"/>
+                <text x="40" y="68" font-size="10" fill="#e8edf2">External system (rect)</text>
+                <polygon points="24,82 32,86 32,94 24,98 16,94 16,86" fill="#1f1535" stroke="#8b5cf6" stroke-width="1.5"/>
+                <text x="40" y="94" font-size="10" fill="#e8edf2">Domain (hexagon)</text>
+                <line x1="16" y1="114" x2="32" y2="114" stroke="#3b82f6" stroke-width="2" stroke-dasharray="4 2"/>
+                <text x="40" y="118" font-size="10" fill="#e8edf2">Relationship edge</text>
+            </g>
+        </svg>
+
+        <!-- Cypher Examples -->
+        <h3 style="margin:24px 0 12px; font-size:1.1em;">Example Cypher Queries</h3>
+
+        <div class="tab-bar">
+            <button class="tab-btn active" data-tab="cypher-impact">Impact Analysis</button>
+            <button class="tab-btn" data-tab="cypher-drift">Drift Detection</button>
+            <button class="tab-btn" data-tab="cypher-domain">Domain Coupling</button>
+            <button class="tab-btn" data-tab="cypher-load">Data Load</button>
+        </div>
+
+        <div class="tab-panel active" id="cypher-impact">
+            <div class="code-block">
+<span class="cmt">// Impact Analysis: What breaks if "account-service" goes down?</span>
+
+<span class="kw">MATCH</span> (affected)-[r:<span class="type">CALLS</span>]->(target:<span class="type">Service</span> {<span class="prop">provider_repo</span>: <span class="str">'account-service'</span>})
+<span class="kw">RETURN</span> affected.repo_id <span class="kw">AS</span> impacted_service,
+       r.endpoint <span class="kw">AS</span> endpoint_called,
+       r.match_confidence <span class="kw">AS</span> confidence
+<span class="kw">ORDER BY</span> r.match_confidence <span class="kw">DESC</span>
+            </div>
+        </div>
+
+        <div class="tab-panel" id="cypher-drift">
+            <div class="code-block">
+<span class="cmt">// Drift Detection: New dependencies between two analysis runs</span>
+
+<span class="kw">MATCH</span> (r:<span class="type">Repository</span>)-[new:<span class="type">CALLS</span>]->(s:<span class="type">Service</span>)
+<span class="kw">WHERE</span> new.run_id = <span class="str">'20260329_213637'</span>
+  <span class="kw">AND NOT EXISTS</span> {
+    <span class="kw">MATCH</span> (r)-[old:<span class="type">CALLS</span>]->(s)
+    <span class="kw">WHERE</span> old.run_id = <span class="str">'20260329_103234'</span>
+  }
+<span class="kw">RETURN</span> r.repo_id <span class="kw">AS</span> consumer,
+       s.service_id <span class="kw">AS</span> new_dependency,
+       new.endpoint <span class="kw">AS</span> endpoint
+            </div>
+        </div>
+
+        <div class="tab-panel" id="cypher-domain">
+            <div class="code-block">
+<span class="cmt">// Domain Coupling: Which domains are most tightly coupled?</span>
+
+<span class="kw">MATCH</span> (d1:<span class="type">Domain</span>)-[r:<span class="type">INTEGRATES_WITH</span>]->(d2:<span class="type">Domain</span>)
+<span class="kw">WITH</span> d1, d2, <span class="fn">count</span>(r) <span class="kw">AS</span> num_connections,
+     <span class="fn">collect</span>(r.pattern) <span class="kw">AS</span> patterns
+<span class="kw">RETURN</span> d1.name, d2.name, num_connections, patterns
+<span class="kw">ORDER BY</span> num_connections <span class="kw">DESC</span>
+<span class="kw">LIMIT</span> <span class="str">10</span>
+            </div>
+        </div>
+
+        <div class="tab-panel" id="cypher-load">
+            <div class="code-block">
+<span class="cmt">// Data Load: Import all_consumer_correlations.csv into Neo4j</span>
+
+<span class="kw">LOAD CSV WITH HEADERS FROM</span> <span class="str">'file:///all_consumer_correlations.csv'</span> <span class="kw">AS</span> row
+
+<span class="cmt">// Create consumer repository node</span>
+<span class="kw">MERGE</span> (c:<span class="type">Repository</span> {<span class="prop">repo_id</span>: row.consumer_repo})
+<span class="kw">ON CREATE SET</span> c.technology = row.technology
+
+<span class="cmt">// Create provider service node</span>
+<span class="kw">MERGE</span> (p:<span class="type">Service</span> {<span class="prop">service_id</span>: row.provider_repo,
+                    <span class="prop">endpoint</span>: row.provider_endpoint})
+
+<span class="cmt">// Create the relationship edge</span>
+<span class="kw">CREATE</span> (c)-[:<span class="type">CALLS</span> {
+  <span class="prop">correlation_id</span>: row.correlation_id,
+  <span class="prop">endpoint</span>: row.provider_endpoint,
+  <span class="prop">match_type</span>: row.match_type,
+  <span class="prop">match_confidence</span>: <span class="fn">toFloat</span>(row.match_confidence),
+  <span class="prop">config_type</span>: row.configuration_type,
+  <span class="prop">run_id</span>: <span class="str">'20260329_213637'</span>
+}]->(p)
+            </div>
+        </div>
+    </div>
+
+    <!-- Evolution Roadmap -->
+    <div class="section" id="evolution">
+        <h2 class="section-title"><span class="dot" style="background:var(--accent-green)"></span> Evolution Roadmap</h2>
+        <p class="section-desc">From single-run file output to a continuously-updated architectural knowledge base.</p>
+
+        <div class="evolution-track">
+            <div class="evolution-phase done">
+                <div class="phase-card">
+                    <h4>v3.0 &mdash; Foundation</h4>
+                    <p>Unified FastAPI portal, 9-step MR pipeline, CSV/JSON output, Cytoscape viewer</p>
+                </div>
+            </div>
+            <div class="evolution-phase done">
+                <div class="phase-card">
+                    <h4>v3.1 &mdash; Multi-Language</h4>
+                    <p>Java/Python/JS AST baselines, provider endpoint correlation, gap analysis</p>
+                </div>
+            </div>
+            <div class="evolution-phase active">
+                <div class="phase-card">
+                    <h4>v3.2 &mdash; Current</h4>
+                    <p>Code graph viewer, C4 diagrams (C1+C2), unified orchestrator, parallel execution, Neo4j infra ready</p>
+                </div>
+            </div>
+            <div class="evolution-phase future">
+                <div class="phase-card">
+                    <h4>v4.0 &mdash; Persistent Store</h4>
+                    <p>Neo4j integration: auto-ingest pipeline, graph queries, drift detection, impact analysis API</p>
+                </div>
+            </div>
+            <div class="evolution-phase future">
+                <div class="phase-card">
+                    <h4>v5.0 &mdash; Living Architecture</h4>
+                    <p>CI/CD hooks trigger re-analysis, real-time graph updates, Slack alerts on dependency changes</p>
+                </div>
+            </div>
+        </div>
+
+        <!-- What v4.0 enables -->
+        <div class="neo4j-glow" style="margin-top:30px;">
+            <h3 style="margin-bottom:16px; font-size:1.05em;">What v4.0 (Persistent Store) Enables</h3>
+            <div class="benefit-grid">
+                <div class="benefit-card">
+                    <h4><span class="benefit-icon bi-cyan">1</span> Auto-Ingest Pipeline</h4>
+                    <p>Each pipeline step writes directly to Neo4j. Step 7 creates CALLS edges, Step 8 updates confidence scores, C4 steps create Domain nodes.</p>
+                </div>
+                <div class="benefit-card">
+                    <h4><span class="benefit-icon bi-blue">2</span> Architecture Diff API</h4>
+                    <p>REST endpoint: <code>GET /api/diff/{run_a}/{run_b}</code> returns new/removed/changed dependencies between any two analysis runs.</p>
+                </div>
+                <div class="benefit-card">
+                    <h4><span class="benefit-icon bi-green">3</span> Impact Assessment</h4>
+                    <p>Before deploying, query: "What are all downstream consumers of this service within N hops?" Powered by Neo4j APOC shortest path.</p>
+                </div>
+                <div class="benefit-card">
+                    <h4><span class="benefit-icon bi-purple">4</span> Architecture Governance</h4>
+                    <p>Define rules: "No direct domain-to-domain calls" or "All external access must go through gateway". Query violations from the graph.</p>
+                </div>
+                <div class="benefit-card">
+                    <h4><span class="benefit-icon bi-orange">5</span> Team Dashboard</h4>
+                    <p>Neo4j-backed metrics: services per domain, coupling scores, external dependency counts, dependency health over time.</p>
+                </div>
+                <div class="benefit-card">
+                    <h4><span class="benefit-icon bi-pink">6</span> Deprecation Tracking</h4>
+                    <p>Mark services as "deprecated" in Neo4j. Query: "Who still depends on deprecated-service?" Track migration progress over runs.</p>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Footer -->
+    <div style="text-align:center; padding:40px 0 20px; color:var(--text-secondary); font-size:0.82em;">
+        <p>Multi-Repo Analysis Platform &mdash; AWMARCHMOD-1060 &mdash; v3.2</p>
+        <p style="margin-top:4px; opacity:0.6;">Architecture & Persistent Store Documentation</p>
+    </div>
+
+</div>
+
+<script>
+    // --- Scroll Progress ---
+    window.addEventListener('scroll', () => {
+        const bar = document.getElementById('scrollProgress');
+        const scrollTop = document.documentElement.scrollTop;
+        const scrollHeight = document.documentElement.scrollHeight - window.innerHeight;
+        bar.style.width = (scrollTop / scrollHeight * 100) + '%';
+    });
+
+    // --- Scroll-based section reveal ---
+    const sections = document.querySelectorAll('.section');
+    const observer = new IntersectionObserver((entries) => {
+        entries.forEach(e => {
+            if (e.isIntersecting) {
+                e.target.classList.add('visible');
+            }
+        });
+    }, { threshold: 0.08 });
+    sections.forEach(s => observer.observe(s));
+
+    // --- Navigation ---
+    document.querySelectorAll('.nav-link').forEach(link => {
+        link.addEventListener('click', function() {
+            document.querySelectorAll('.nav-link').forEach(l => l.classList.remove('active'));
+            this.classList.add('active');
+            const target = document.getElementById(this.dataset.target);
+            if (target) {
+                target.scrollIntoView({ behavior: 'smooth', block: 'start' });
+            }
+        });
+    });
+
+    // Update active nav on scroll
+    window.addEventListener('scroll', () => {
+        const ids = ['overview','architecture','pipeline','dataflow','persistent-store','graph-schema','evolution'];
+        let current = ids[0];
+        for (const id of ids) {
+            const el = document.getElementById(id);
+            if (el && el.getBoundingClientRect().top <= 120) current = id;
+        }
+        document.querySelectorAll('.nav-link').forEach(l => {
+            l.classList.toggle('active', l.dataset.target === current);
+        });
+    });
+
+    // --- Tabs ---
+    document.querySelectorAll('.tab-btn').forEach(btn => {
+        btn.addEventListener('click', function() {
+            const parent = this.closest('.section') || this.closest('.tab-bar').parentElement;
+            const bar = this.closest('.tab-bar');
+            bar.querySelectorAll('.tab-btn').forEach(b => b.classList.remove('active'));
+            this.classList.add('active');
+
+            // Find sibling panels
+            let sibling = bar.nextElementSibling;
+            while (sibling && sibling.classList.contains('tab-panel')) {
+                sibling.classList.remove('active');
+                sibling = sibling.nextElementSibling;
+            }
+            const panel = document.getElementById(this.dataset.tab);
+            if (panel) panel.classList.add('active');
+        });
+    });
+
+    // --- Pipeline step expand ---
+    function toggleStep(card) {
+        card.classList.toggle('expanded');
+    }
+
+    // --- Animate pipeline progress on scroll ---
+    function animatePipeline() {
+        const mrProg = document.getElementById('mrProgress');
+        const c4Prog = document.getElementById('c4Progress');
+        if (mrProg) mrProg.style.height = '100%';
+        if (c4Prog) c4Prog.style.height = '100%';
+    }
+
+    const pipelineObs = new IntersectionObserver((entries) => {
+        entries.forEach(e => {
+            if (e.isIntersecting) animatePipeline();
+        });
+    }, { threshold: 0.2 });
+
+    const pipelineSection = document.getElementById('pipeline');
+    if (pipelineSection) pipelineObs.observe(pipelineSection);
+
+    // --- Animate stat counters ---
+    function animateCounters() {
+        document.querySelectorAll('.stat-value').forEach(el => {
+            const target = el.textContent.replace('+', '');
+            const isPlus = el.textContent.includes('+');
+            const num = parseInt(target);
+            if (isNaN(num)) return;
+
+            let current = 0;
+            const step = Math.max(1, Math.floor(num / 30));
+            const interval = setInterval(() => {
+                current += step;
+                if (current >= num) {
+                    current = num;
+                    clearInterval(interval);
+                }
+                el.textContent = current + (isPlus ? '+' : '');
+            }, 30);
+        });
+    }
+
+    const statsObs = new IntersectionObserver((entries) => {
+        entries.forEach(e => {
+            if (e.isIntersecting) {
+                animateCounters();
+                statsObs.disconnect();
+            }
+        });
+    }, { threshold: 0.5 });
+
+    const statsRow = document.querySelector('.stats-row');
+    if (statsRow) statsObs.observe(statsRow);
+
+    // --- SVG node hover effect ---
+    document.querySelectorAll('.graph-schema .node-circle').forEach(node => {
+        node.addEventListener('mouseenter', function() {
+            this.style.transform = 'scale(1.08)';
+            this.style.transition = 'transform 0.3s';
+        });
+        node.addEventListener('mouseleave', function() {
+            this.style.transform = 'scale(1)';
+        });
+    });
+</script>
+
+</body>
+</html>
