@@ -1,0 +1,1112 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>GPB Architecture &amp; Engineering Offsite — Structured Notes</title>
+<meta name="color-scheme" content="light dark">
+<style>
+*,*::before,*::after{box-sizing:border-box}
+:root{
+  --bg:#fbfbfa; --surface:#fff; --text:#1c1e21; --muted:#5f6570; --faint:#8b919b;
+  --line:#e4e6ea; --line-soft:#eef0f3; --accent:#2f5fd0; --accent-soft:#eaf0fd;
+  --code-bg:#f4f5f7; --mark:#fff6cc;
+  --sans:-apple-system,BlinkMacSystemFont,"Segoe UI",Inter,Helvetica,Arial,sans-serif;
+  --mono:ui-monospace,SFMono-Regular,"SF Mono",Menlo,Consolas,monospace;
+}
+@media (prefers-color-scheme:dark){
+  :root{
+    --bg:#14161a; --surface:#1a1d22; --text:#e3e6ea; --muted:#9aa1ac; --faint:#6f7681;
+    --line:#2c3037; --line-soft:#23262c; --accent:#7fa9ff; --accent-soft:#1e2634;
+    --code-bg:#22262c; --mark:#4a3f14;
+  }
+}
+html{-webkit-text-size-adjust:100%}
+body{margin:0;background:var(--bg);color:var(--text);
+  font:400 17px/1.7 var(--sans);
+  font-feature-settings:"kern","liga";-webkit-font-smoothing:antialiased}
+
+/* ---------- shell ---------- */
+.page{max-width:80rem;margin:0 auto;padding:0 1.5rem 6rem;
+  display:grid;grid-template-columns:minmax(0,1fr);gap:0 3.5rem}
+@media (min-width:64rem){
+  .page{grid-template-columns:16rem minmax(0,1fr);padding-top:1rem}
+  .masthead{grid-column:1/-1}
+}
+
+/* ---------- masthead ---------- */
+.masthead{padding:4rem 0 2rem;border-bottom:1px solid var(--line);margin-bottom:2.5rem}
+.back{display:inline-block;margin-bottom:1.1rem;font-size:.83rem;color:var(--muted);
+  text-decoration:none}
+.back::before{content:"\2190";margin-right:.4rem}
+.back:hover{color:var(--accent)}
+.back + .eyebrow{margin-left:.75rem}
+.eyebrow{display:inline-flex;align-items:center;gap:.5rem;
+  font-size:.72rem;font-weight:600;letter-spacing:.09em;text-transform:uppercase;
+  color:var(--accent);background:var(--accent-soft);
+  padding:.3rem .6rem;border-radius:999px;margin-bottom:1.1rem}
+.masthead h1{margin:0;font-size:clamp(1.9rem,4.4vw,3rem);line-height:1.14;
+  font-weight:680;letter-spacing:-.022em;max-width:22ch}
+.subtitle{margin:.85rem 0 0;font-size:1.1rem;line-height:1.5;color:var(--muted);max-width:60ch;font-weight:400}
+.meta{margin:1.6rem 0 0;padding:0;list-style:none;display:flex;flex-wrap:wrap;gap:.5rem 1.5rem;
+  font-size:.85rem;color:var(--faint)}
+.meta strong{color:var(--muted);font-weight:600}
+
+/* ---------- toc ---------- */
+.toc{font-size:.875rem;line-height:1.45}
+@media (min-width:64rem){
+  .toc{position:sticky;top:1.5rem;align-self:start;max-height:calc(100vh - 3rem);
+    overflow-y:auto;padding-right:.5rem;scrollbar-width:thin}
+}
+@media (max-width:63.99rem){
+  .toc{background:var(--surface);border:1px solid var(--line);border-radius:12px;
+    padding:.4rem 1.1rem 1.1rem;margin-bottom:2.5rem}
+  .toc-title{cursor:pointer}
+}
+.toc-title{font-size:.72rem;font-weight:650;letter-spacing:.09em;text-transform:uppercase;
+  color:var(--faint);margin:0 0 .9rem}
+.toc ol{list-style:none;margin:0;padding:0}
+.toc li{margin:0}
+.toc a{display:block;padding:.32rem 0 .32rem .8rem;color:var(--muted);text-decoration:none;
+  border-left:2px solid var(--line-soft);transition:color .12s,border-color .12s}
+.toc a:hover{color:var(--accent);border-left-color:var(--accent)}
+.toc .lv3 a{padding-left:1.6rem;font-size:.83rem;color:var(--faint)}
+
+/* ---------- prose ---------- */
+.prose{max-width:44rem;min-width:0}
+.prose > *:first-child{margin-top:0}
+.prose h1,.prose h2,.prose h3,.prose h4{line-height:1.25;font-weight:650;letter-spacing:-.014em;scroll-margin-top:1.5rem}
+.prose h1{font-size:1.75rem;margin:3.6rem 0 1rem;padding-bottom:.55rem;border-bottom:1px solid var(--line)}
+.prose h2{font-size:1.35rem;margin:2.8rem 0 .85rem}
+.prose h3{font-size:1.08rem;margin:2.1rem 0 .6rem}
+.prose h4{font-size:.98rem;margin:1.7rem 0 .5rem;color:var(--muted)}
+.prose p{margin:0 0 1.15rem}
+.prose a{color:var(--accent);text-decoration:none;border-bottom:1px solid color-mix(in srgb,var(--accent) 32%,transparent)}
+.prose a:hover{border-bottom-color:var(--accent)}
+.prose a[href^="http"]{overflow-wrap:anywhere}
+.prose td a{word-break:break-word}
+.prose strong{font-weight:640;color:var(--text)}
+.prose ul,.prose ol{margin:0 0 1.15rem;padding-left:1.35rem}
+.prose li{margin:.3rem 0}
+.prose li::marker{color:var(--faint)}
+.prose li > ul,.prose li > ol{margin:.3rem 0}
+.prose blockquote{margin:1.6rem 0;padding:.1rem 0 .1rem 1.25rem;
+  border-left:3px solid var(--accent);color:var(--muted)}
+.prose blockquote p:last-child{margin-bottom:0}
+.prose hr{border:0;height:1px;background:var(--line);margin:3rem 0}
+.prose img{max-width:100%;height:auto;border-radius:8px}
+.prose code{font-family:var(--mono);font-size:.875em;background:var(--code-bg);
+  padding:.15em .4em;border-radius:5px;border:1px solid var(--line-soft)}
+.prose pre{background:var(--code-bg);border:1px solid var(--line);border-radius:10px;
+  padding:1rem 1.15rem;overflow-x:auto;margin:0 0 1.4rem;font-size:.88rem;line-height:1.6}
+.prose pre code{background:none;border:0;padding:0;font-size:inherit}
+
+/* ---------- tables ---------- */
+.table-wrap{overflow-x:auto;margin:0 0 1.6rem;border:1px solid var(--line);
+  border-radius:10px;background:var(--surface)}
+.prose table{border-collapse:collapse;width:100%;font-size:.9rem;line-height:1.55}
+.prose th,.prose td{padding:.62rem .85rem;text-align:left;vertical-align:top;
+  border-bottom:1px solid var(--line-soft)}
+.prose th{background:var(--code-bg);font-weight:640;font-size:.78rem;
+  letter-spacing:.04em;text-transform:uppercase;color:var(--muted);white-space:nowrap}
+.prose tbody tr:last-child td{border-bottom:0}
+.prose tbody tr:hover td{background:var(--line-soft)}
+
+@media (min-width:64rem){
+  .table-wrap,.prose pre{width:min(56rem,calc(100vw - 22rem))}
+}
+
+/* ---------- footer ---------- */
+.colophon{grid-column:1/-1;margin-top:4rem;padding-top:1.5rem;border-top:1px solid var(--line);
+  font-size:.8rem;color:var(--faint);display:flex;flex-wrap:wrap;gap:.4rem 1.25rem}
+
+/* ---------- print ---------- */
+@media print{
+  :root{--bg:#fff;--surface:#fff;--text:#000;--muted:#333;--line:#ccc}
+  body{font-size:11pt}
+  .toc,.colophon{display:none}
+  .page{display:block;max-width:none;padding:0}
+  .prose{max-width:none}
+  .prose h1,.prose h2{break-after:avoid}
+  .table-wrap,.prose pre,.prose blockquote{break-inside:avoid}
+  .prose a{color:#000;border:0}
+}
+</style>
+</head>
+<body>
+<div class="page">
+  <header class="masthead">
+    <a class="back" href="index.html">All documents</a>
+    <span class="eyebrow">Working notes</span>
+    <h1>GPB Architecture &amp; Engineering Offsite — Structured Notes</h1>
+    
+    <ul class="meta"><li><strong>Source</strong> GPB-AE-Offsite-Notes.md</li><li><strong>Length</strong> 11,190 words</li></ul>
+  </header>
+  <nav class="toc" aria-label="Contents"><p class="toc-title">Contents</p><ol><li class="lv3"><a href="#how-to-read-this">How to read this</a></li>
+<li class="lv2"><a href="#part-i-architecture-as-a-product">Part I — Architecture as a Product</a></li>
+<li class="lv3"><a href="#1-framing-the-value-is-in-the-product-not-the-primitive">1. Framing: the value is in the product, not the primitive</a></li>
+<li class="lv3"><a href="#2-from-advisory-function-to-consumable-product">2. From advisory function to consumable product</a></li>
+<li class="lv3"><a href="#3-patterns-as-products">3. Patterns as products</a></li>
+<li class="lv3"><a href="#4-executable-architecture-and-automated-enforcement">4. Executable architecture and automated enforcement</a></li>
+<li class="lv2"><a href="#part-ii-event-driven-interoperability">Part II — Event-Driven Interoperability</a></li>
+<li class="lv3"><a href="#5-workflow-masquerading-why-orchestration-doesnt-scale">5. Workflow masquerading: why orchestration doesn’t scale</a></li>
+<li class="lv3"><a href="#6-domain-events-vs-system-canonical-events">6. Domain events vs system (canonical) events</a></li>
+<li class="lv3"><a href="#7-the-event-catalogue-a-business-lens-on-architecture">7. The event catalogue — a business lens on architecture</a></li>
+<li class="lv3"><a href="#8-anti-corruption-layer-and-the-meridian-strangler">8. Anti-corruption layer and the Meridian strangler</a></li>
+<li class="lv2"><a href="#part-iii-cloud-environments-and-reliability">Part III — Cloud, Environments, and Reliability</a></li>
+<li class="lv3"><a href="#9-composable-environments-slides-160166">9. Composable environments (slides ~160–166)</a></li>
+<li class="lv3"><a href="#10-reliability-by-design-and-conscious-chaos-slides-198205-246">10. Reliability by design and conscious chaos (slides ~198–205, 246)</a></li>
+<li class="lv2"><a href="#part-iv-delivery-testing-and-lifecycle">Part IV — Delivery, Testing, and Lifecycle</a></li>
+<li class="lv3"><a href="#11-branching-build-once-immutable-artefacts-slides-171-onward">11. Branching, build-once, immutable artefacts (slides ~171 onward)</a></li>
+<li class="lv3"><a href="#12-the-delivery-broker-and-the-platform-cli-slides-176180-184">12. The delivery broker and the platform CLI (slides ~176–180, 184)</a></li>
+<li class="lv3"><a href="#13-testing-behaviour-as-the-asset-slides-261268">13. Testing: behaviour as the asset (slides ~261–268)</a></li>
+<li class="lv3"><a href="#14-sbom-driven-lifecycle-management-slides-275278">14. SBOM-driven lifecycle management (slides ~275–278)</a></li>
+<li class="lv2"><a href="#part-v-data-strategy-pats-session">Part V — Data Strategy (Pat’s session)</a></li>
+<li class="lv3"><a href="#15-operating-model-and-data-ownership">15. Operating model and data ownership</a></li>
+<li class="lv3"><a href="#16-data-products-ai-readiness-lineage-masking">16. Data products, AI-readiness, lineage, masking</a></li>
+<li class="lv3"><a href="#17-data-domains-vs-functional-domains-slides-14-20">17. Data domains vs functional domains (slides 14, 20)</a></li>
+<li class="lv2"><a href="#part-vi-ai-engineering-tooling-niraja-jordan-session">Part VI — AI Engineering Tooling (Niraja &amp; Jordan session)</a></li>
+<li class="lv3"><a href="#18-skills-agent-teams-worktrees-and-orchestration">18. Skills, agent teams, worktrees, and orchestration</a></li>
+<li class="lv2"><a href="#part-vii-organisation-role-and-next-steps">Part VII — Organisation, Role, and Next Steps</a></li>
+<li class="lv3"><a href="#19-the-lda-domain-architect-role">19. The LDA / domain architect role</a></li>
+<li class="lv3"><a href="#20-mvp-ways-of-working-and-actions">20. MVP, ways of working, and actions</a></li>
+<li class="lv2"><a href="#summary">Summary</a></li>
+<li class="lv2"><a href="#appendix-a-consolidated-reference-table">Appendix A — Consolidated reference table</a></li>
+<li class="lv2"><a href="#appendix-b-transcription-corrections">Appendix B — Transcription corrections</a></li>
+<li class="lv2"><a href="#appendix-c-glossary-of-internal-terms-used">Appendix C — Glossary of internal terms used</a></li></ol></nav>
+  <main class="prose">
+<p><strong>Source:</strong> raw ASR transcript of the multi-day A&amp;E / LDA offsite hosted by Rod Thomas (GPB CTO), with sessions from Pat (data), Eddie Hsu, John (testing/behaviour capture), and Niraja + Jordan (AI tooling).
+<strong>Purpose of this document:</strong> turn the transcript into readable, section-by-section working notes that can be lifted directly into design docs, ADRs, and the platform implementation plan.</p>
+<h3 id="how-to-read-this">How to read this</h3>
+<ul>
+<li>The transcript is speech-to-text and heavily garbled. Where the intent is unambiguous I have restored the real term and flagged it in <strong>Appendix B — Transcription corrections</strong>. The most important one: <strong>&ldquo;Roman / Rowan event&rdquo; = &ldquo;domain event&rdquo;</strong> and <strong>&ldquo;flow mart / flow chart&rdquo; = EventCatalog&rsquo;s FlowMart demo catalog</strong>.</li>
+<li>Each section has: <strong>Notes</strong> (what was said), <strong>Positions &amp; decisions</strong> (what was asserted as direction), <strong>Open questions</strong> (what was left unresolved), and <strong>References &amp; standards</strong> (external anchors for the write-up).</li>
+<li>Slide numbers from the deck are preserved where they were called out, so this maps back to the ~280-page pack.</li>
+</ul>
+<hr />
+<h2 id="part-i-architecture-as-a-product">Part I — Architecture as a Product</h2>
+<h3 id="1-framing-the-value-is-in-the-product-not-the-primitive">1. Framing: the value is in the product, not the primitive</h3>
+<p><strong>Notes</strong></p>
+<ul>
+<li>Model providers have moved past selling raw intelligence. They have worked out how to consumerise and monetise beyond tokens — Claude Code, Cowork, and the equivalents from OpenAI and Google. Microsoft is deliberately set aside as a different case (Copilot as a partnership/orchestration play rather than a first-party model play).</li>
+<li>The point: the value is not in the piece, it is in the <strong>reduction of the knowledge required to use the piece</strong>. A harness on top of an engine that removes months or years of engineering effort is what creates stickiness.</li>
+<li>Applied internally: A&amp;E has no shortage of tools, vendors, or capabilities. What is lacking is <strong>understanding of how to combine them</strong>. Every org has pockets of just-enough understanding to meet local requirements, which caps what can be done at scale.</li>
+<li>Adoption of Anthropic inside the firm went from near-zero to pervasive in ~6 months. The tool of choice will change again; the platform must not be bet on a single vendor.</li>
+</ul>
+<p><strong>Positions &amp; decisions</strong></p>
+<ul>
+<li>This forum (the LDA table) is the only group with visibility across all orgs and is therefore the right body to decide which features, functions, and capabilities become platform.</li>
+<li>Shift the mental model from <em>&ldquo;we enabled a dashboard for the user to…&rdquo;</em> / <em>&ldquo;we defined 7 stages for the developer to…&rdquo;</em> (human at the front of every step) to a platform that runs the work.</li>
+<li>This is a <strong>long-horizon vision</strong>, not a delivery plan. Parts are feasible today; other parts depend on capability improvements that will arrive as accelerants.</li>
+</ul>
+<p><strong>References &amp; standards</strong></p>
+<ul>
+<li>Team Topologies — platform-as-product framing: <a href="https://teamtopologies.com/" target="_blank" rel="noopener noreferrer">https://teamtopologies.com/</a></li>
+<li>Thoughtworks / Evan Bottcher, &ldquo;What I Talk About When I Talk About Platforms&rdquo;: <a href="https://martinfowler.com/articles/talk-about-platforms.html" target="_blank" rel="noopener noreferrer">https://martinfowler.com/articles/talk-about-platforms.html</a></li>
+<li>CNCF Platforms White Paper: <a href="https://tag-app-delivery.cncf.io/whitepapers/platforms/" target="_blank" rel="noopener noreferrer">https://tag-app-delivery.cncf.io/whitepapers/platforms/</a></li>
+</ul>
+<hr />
+<h3 id="2-from-advisory-function-to-consumable-product">2. From advisory function to consumable product</h3>
+<p><strong>Notes</strong></p>
+<ul>
+<li>Architecture today = documentation, review journeys, static published standards, Confluence pages, compliance reviews, PowerPoint walkthroughs. Some of this will always be needed for communication upward and outward — but it should not be <strong>how the function operates</strong>.</li>
+<li>The shift: from <em>device/advice we offer</em> → <em>a consumable product that creates the substrate the organisation runs on</em>.</li>
+<li>Critical distinction raised in the room and accepted: a <strong>reference implementation is not a product</strong>. Existing internal frameworks (auth, logging, firm principles) are capabilities with reference implementations, and their use is discretionary. Teams deploy them five versions behind and mis-use them, and it still &ldquo;works&rdquo;. The interpretive layer is the failure.</li>
+<li>The Claude Code analogy: the model is available to be used however you want; the harness abstracts it away so the user states intent and the harness figures out how to leverage the engine.</li>
+<li>The consumer of this product is internal: ~4,500 developers who spend perhaps 20% of their time on business logic and 80% on toil, chasing CTC reports, product conversations, and handoffs.</li>
+</ul>
+<p><strong>Positions &amp; decisions</strong></p>
+<ul>
+<li>Architecture as a Product = productising the architecture function so it is embedded in the DNA and fabric of day-to-day engineering — omnipresent, guardrails included, guessing removed.</li>
+<li>Scope is deliberately the <strong>outer loop</strong> (post-build: release, deploy, environment, governance, cost), not inner-loop software development. That fight is for later (see §20).</li>
+<li>Rod&rsquo;s line to hold onto: <strong>&ldquo;Make the right way the easy way.&rdquo;</strong></li>
+</ul>
+<p><strong>Open questions</strong></p>
+<ul>
+<li>Is the product for a <em>developer</em> or for a <em>product team</em>? Challenged in the room — the definitions of developer / product owner / engineer are converging, and the product may need to target the team, not the role.</li>
+<li>Relationship to the existing <strong>Technology Domain Model (TDM)</strong>: not intended to change org structure or domain ownership. The platform starts at the <strong>point of convergence</strong> where every domain ends up doing the same operational work.</li>
+</ul>
+<p><strong>References &amp; standards</strong></p>
+<ul>
+<li>Internal Developer Platform concepts: <a href="https://internaldeveloperplatform.org/" target="_blank" rel="noopener noreferrer">https://internaldeveloperplatform.org/</a></li>
+<li>Backstage (platform portal / software catalog): <a href="https://backstage.io/" target="_blank" rel="noopener noreferrer">https://backstage.io/</a></li>
+<li>Spotify&rsquo;s &ldquo;golden paths&rdquo;: <a href="https://engineering.atspotify.com/2020/08/how-we-use-golden-paths-to-solve-fragmentation-in-our-software-ecosystem/" target="_blank" rel="noopener noreferrer">https://engineering.atspotify.com/2020/08/how-we-use-golden-paths-to-solve-fragmentation-in-our-software-ecosystem/</a></li>
+</ul>
+<hr />
+<h3 id="3-patterns-as-products">3. Patterns as products</h3>
+<p><strong>Notes</strong></p>
+<ul>
+<li>Analogy used: SpaceX reusable rockets, and buildings going up faster than software gets written — both rest on <strong>blueprints with repeatability</strong>. Every org here has patterns; what is missing is the collective scale across the table. Two teams build the same pattern, both believe theirs is better, neither reuses.</li>
+<li>Deliberate wording: <strong>pattern</strong>, not <em>reusable component</em>. A pattern does not force one implementation. A pattern is a clearly defined, agreed approach that can have multiple instances / strategy variants (AWS strategy, GCP strategy, Gaia strategy for the same pattern).</li>
+<li>The pattern is less about the API-level implementation specifics and more about <strong>how it runs</strong>: is HA on by default, is resiliency built in, is fault tolerance built in, is it actually tested at that level.</li>
+<li>Catalogue model: teams select from a catalogue of patterns (event-driven, API, batch processing, stream ingestion). Legacy gets patterns too — including possibly supporting a deliberate &ldquo;anti-pattern-as-pattern&rdquo; for old estates, or forcing transformation to a target pattern.</li>
+<li>Cross-cutting concerns (e.g. OpenTelemetry) sit as <strong>substrate</strong> beneath all patterns, or as composable patterns that other patterns compose in.</li>
+<li>Aim for the <strong>80%</strong>, not the 1% edge case. Most applications write to a table and read it back out to an API, a message, or a UI. &ldquo;We&rsquo;re not building rockets.&rdquo;</li>
+<li>Deviation is allowed but becomes an explicit exception conversation before build, not before production.</li>
+</ul>
+<p><strong>Positions &amp; decisions</strong></p>
+<ul>
+<li>The pattern is the product (slide ~139). Engineers select the proper pattern; the platform takes care of everything else.</li>
+<li>Governance is by code, not by document. Enforcement is automated, not policed by people.</li>
+<li>Prior attempts (a patterns working group ~2–3 years ago, led at one point out of a central team) failed. The stated reasons: document-centric, no teeth, and the technology wasn&rsquo;t there yet. Explicit acknowledgement: <em>&ldquo;It&rsquo;s not entirely wrong, some things are just early.&rdquo;</em> Learn from it — do not repeat the meeting-driven, documentation-first approach.</li>
+<li>New approach: reverse-engineer existing systems with AI tooling to discover the patterns already in use, cluster them, and converge on the ones with the largest population / best adoption opportunity. Data-driven, not committee-driven.</li>
+</ul>
+<p><strong>Open questions</strong></p>
+<ul>
+<li><strong>Prioritisation of which patterns to build first</strong> — raised and explicitly deferred. Suggested starting point from the room: low-risk CRUD / Spring Boot-based apps, and the backlog of known CTC/credit-related remediations.</li>
+<li>How much variability actually needs supporting to cover 80%?</li>
+</ul>
+<p><strong>References &amp; standards</strong></p>
+<ul>
+<li>AWS Amplify as the cited external analogue of a patternised assembly: <a href="https://docs.amplify.aws/" target="_blank" rel="noopener noreferrer">https://docs.amplify.aws/</a></li>
+<li>Terraform modules / Verified Modules pattern: <a href="https://developer.hashicorp.com/terraform/language/modules" target="_blank" rel="noopener noreferrer">https://developer.hashicorp.com/terraform/language/modules</a></li>
+<li>OpenTelemetry: <a href="https://opentelemetry.io/" target="_blank" rel="noopener noreferrer">https://opentelemetry.io/</a></li>
+<li>Backstage Software Templates (scaffolder): <a href="https://backstage.io/docs/features/software-templates/" target="_blank" rel="noopener noreferrer">https://backstage.io/docs/features/software-templates/</a></li>
+</ul>
+<hr />
+<h3 id="4-executable-architecture-and-automated-enforcement">4. Executable architecture and automated enforcement</h3>
+<p><strong>Notes</strong></p>
+<ul>
+<li>&ldquo;Architecture as code&rdquo; here means <strong>executable architecture</strong>, not just IaC. A pattern definition is fed in, codified, and auto-generates the constituent components — networking, VPCs, pipelines, security, observability — resulting in a running environment.</li>
+<li>Contrast with today: raising a request, answering the same set of questions, waiting weeks for an AWS account, with no visibility of where the request sits.</li>
+<li>Hierarchical policy: firm → AWM → CTO → LOB → team, with defaults set to known best practice and an override path where genuinely needed.</li>
+<li>Enforcement points named: pattern-constrained provisioning, build fails on non-compliance, deployment policy gates.</li>
+<li>The architect role shifts: from reviewing designs and chasing compliance evidence → to <strong>building patterns, defining capabilities, encoding standards into the platform</strong>. There is then no path to production that bypasses the standards.</li>
+<li>Abstraction goes all the way down: if the pattern is the contract, the underlying cloud (AWS / GCP / Azure / Gaia / Atlas) becomes an implementation detail. This is the actual fulfilment of the Terraform promise — describe in code, don&rsquo;t care where it runs.</li>
+<li>Cost/risk feedback loop: because the platform knows the infrastructure, it knows the cost. A platform costing $100k/month serving 150 requests/month produces a poor <strong>risk score</strong>, and the platform can then recommend cheaper patterns and hold the LDA accountable.</li>
+<li>Adoption lever discussed openly: <em>&ldquo;You don&rsquo;t get a Claude Code licence unless you adopt.&rdquo;</em> And: the platform is the fast path to fixing an existing amber/red posture — <strong>the illusion of choice</strong>.</li>
+</ul>
+<p><strong>Positions &amp; decisions</strong></p>
+<ul>
+<li>Outcome-oriented, not documentation-oriented: the deliverable is a working, adopted platform.</li>
+<li>FinOps must be built in from the start; it cannot be retrofitted culturally. Cloud spend is up ~45% YoY without a corresponding increase in adoption — that is the cost-avoidance thesis that funds the whole programme.</li>
+<li>Named cost trap to educate on: decommissioning a private-cloud (Gaia) SEAL without telling the charge-back team means you keep paying the forecast for years while also paying for public cloud.</li>
+</ul>
+<p><strong>References &amp; standards</strong></p>
+<ul>
+<li>Policy as code: Open Policy Agent / Rego — <a href="https://www.openpolicyagent.org/" target="_blank" rel="noopener noreferrer">https://www.openpolicyagent.org/</a> ; Conftest — <a href="https://www.conftest.dev/" target="_blank" rel="noopener noreferrer">https://www.conftest.dev/</a></li>
+<li>HashiCorp Sentinel: <a href="https://developer.hashicorp.com/sentinel" target="_blank" rel="noopener noreferrer">https://developer.hashicorp.com/sentinel</a></li>
+<li>FinOps Foundation framework: <a href="https://www.finops.org/framework/" target="_blank" rel="noopener noreferrer">https://www.finops.org/framework/</a></li>
+<li>Crossplane (control-plane provisioning): <a href="https://www.crossplane.io/" target="_blank" rel="noopener noreferrer">https://www.crossplane.io/</a></li>
+<li>Score (workload specification): <a href="https://score.dev/" target="_blank" rel="noopener noreferrer">https://score.dev/</a></li>
+</ul>
+<hr />
+<h2 id="part-ii-event-driven-interoperability">Part II — Event-Driven Interoperability</h2>
+<h3 id="5-workflow-masquerading-why-orchestration-doesnt-scale">5. Workflow masquerading: why orchestration doesn&rsquo;t scale</h3>
+<p><strong>Notes</strong></p>
+<ul>
+<li>Today&rsquo;s systems are built with tight coupling: CRM → order management → system D → system B, with dependency sequencing, retries, callbacks, loops, codified inside a workflow that is often maintained by Operations.</li>
+<li>Many defined workflows never cross the application boundary — no handoff to another person or team — so they create operational maintenance overhead for no interoperability benefit.</li>
+<li>Consequence: nobody can say what the system&rsquo;s actual state is, and the advisor cannot tell the client where their request sits. Name change example: client submits, forms go out unpopulated, documents already provided are re-requested, work sits in queues, advisor and client both blind.</li>
+<li>On the client-onboarding and client-information teams, the pivot has been away from orchestration toward <strong>choreography</strong> — observing behaviours rather than prescribing &ldquo;it must be this next step&rdquo;.</li>
+<li>Business driver: advisors are being asked to go from ~16 clients to a much larger book. They cannot hold both the business events and the personal context (client&rsquo;s daughter&rsquo;s birthday, graduation) for that many relationships. Today only the case-management system captures a partial view, and only for service requests.</li>
+<li>Claimed outcome from the choreography model: account opening moved from multiple weeks (domestic) / ~11 weeks (international, already best-in-market) to <strong>~7 minutes</strong>.</li>
+</ul>
+<p><strong>Positions &amp; decisions</strong></p>
+<ul>
+<li>Move from rigid, point-to-point, dependency-chained integration to loosely coupled event-driven interoperability. System A does its job and announces it; interested parties filter and react. The onus moves from the invoker to the subscriber.</li>
+<li>Parallelism is the scale argument: many consumers process the same event concurrently; a new business process can join with no coordination with the producer.</li>
+<li>A2A (agent-to-agent) is explicitly <strong>not</strong> the same thing: A2A is a rigid contract in a dependency chain, effectively a workflow. Use it only where the dependency genuinely fits; prefer events. Specs will churn — the platform, not 4,000 developers, should absorb spec changes.</li>
+<li>Cultural/education need acknowledged: developers default to a service + database + synchronous call. Teaching what an event is, what a domain event is, what a system event is, is a real workstream.</li>
+</ul>
+<p><strong>References &amp; standards</strong></p>
+<ul>
+<li>Choreography vs orchestration (Microservices patterns, Chris Richardson): <a href="https://microservices.io/patterns/data/saga.html" target="_blank" rel="noopener noreferrer">https://microservices.io/patterns/data/saga.html</a></li>
+<li>Martin Fowler, &ldquo;What do you mean by Event-Driven?&rdquo;: <a href="https://martinfowler.com/articles/201701-event-driven.html" target="_blank" rel="noopener noreferrer">https://martinfowler.com/articles/201701-event-driven.html</a></li>
+<li>A2A protocol: <a href="https://a2a-protocol.org/" target="_blank" rel="noopener noreferrer">https://a2a-protocol.org/</a></li>
+</ul>
+<hr />
+<h3 id="6-domain-events-vs-system-canonical-events">6. Domain events vs system (canonical) events</h3>
+<blockquote>
+<p>This is the single most important conceptual section in the pack. In the transcript &ldquo;domain event&rdquo; is consistently mis-rendered as &ldquo;Roman event&rdquo; / &ldquo;Rowan event&rdquo;.</p>
+</blockquote>
+<p><strong>Notes</strong></p>
+<ul>
+<li><strong>Domain event = a business fact.</strong> Source of truth, endures over time, past tense. Systems change; the fact that on this date this client changed their name does not. Example facts: party created, entity joined a plan, affiliations established, trade ordered and executed.</li>
+<li><strong>Canonical / system-behaviour event = system mechanics.</strong> &ldquo;My system synchronised with profile&rdquo;, &ldquo;requested a screen&rdquo;, &ldquo;propagated a profile change&rdquo;, &ldquo;allocation completed&rdquo;, &ldquo;step 7 of 12 done&rdquo;. Indicative of how systems operate; usually irrelevant to the business or the client.</li>
+<li>Ownership split: <strong>business facts are owned by product owners and defined with Data</strong>; system behaviour events are owned by technical architects and created freely by engineering. Anything not defined by the data owners defaults to a system behaviour event.</li>
+<li>Domain events are modelled on <strong>parties</strong> (client, prospect, lead, entity) to build a relationship graph and accumulate knowledge over time — replacing today&rsquo;s &ldquo;query every domain system individually&rdquo; pattern (ask KYC when KYC completed, ask the mortgage system when the last request was, etc.).</li>
+<li>A system behaviour can <em>trigger</em> a domain event: all the order-processing steps are system behaviours; &ldquo;trade ordered on this date, executed on that date&rdquo; is the business fact published at the end.</li>
+<li>Ambient agents will subscribe to <strong>both</strong> — an agent may care about &ldquo;allocation finished&rdquo; (a system behaviour) with no interest in the rest of the journey.</li>
+<li>Warning discussed: the boundary erodes. Teams start calling &ldquo;the batch is done&rdquo; a business fact. It isn&rsquo;t — that&rsquo;s a component of how you wrote it.</li>
+<li>Payload discipline: the inherited Meridian event carries ~700 attributes. That is data dumping labelled as an event. Correct model = metadata envelope + business payload; if you need the full object, take the identifier and query the owning domain (API / GraphQL through the service mesh), so entitlement policy is enforced at the front door.</li>
+<li>Naming discipline: Meridian has ~350 bespoke event names because variability is encoded in the <strong>name</strong> (<code>PartyCreated.CWM…</code>). Every new variant forces a new subscription in every consumer. Correct model: <code>PartyCreated</code> is the event; line of business, region, and other variables are <strong>attributes you filter on</strong>. Same rule applies to global vs LOB flavours — no <code>GPB.PartyCreated</code> vs <code>USPB.PartyCreated</code>; one event, conditional payloads where genuinely needed.</li>
+</ul>
+<p><strong>Positions &amp; decisions</strong></p>
+<ul>
+<li>Federated by default. There is <strong>no single central bus</strong> as an architectural requirement — but there will be a <strong>pattern</strong> for the event bus, and aggregation for consumption is a separate concern from transport.</li>
+<li>Bus choice (Kafka/MSK vs EventBridge) becomes a pattern default, with EventBridge preferred for filtering capability and managed infrastructure unless there is a reason. &ldquo;You never even know it&rsquo;s running.&rdquo;</li>
+<li>The <strong>outbox pattern</strong> is built into the pattern out of the box: persist the fact in the domain database in the same transaction, then publish — no publishing of events for transactions that failed.</li>
+<li>Event definitions are part of the code, validated and versioned through CI, and registered against firm standards. Prefer <strong>skills over standardised libraries/SDKs</strong> to enforce this — an explicit anti-SDK position.</li>
+<li>Adhere to published event naming/schema standards (CloudEvents-class specs) as the standard contract.</li>
+<li>Anti-corruption layer used as the migration mechanism (see §8).</li>
+</ul>
+<p><strong>Open questions</strong></p>
+<ul>
+<li>Where exactly the line sits for external consumers — should external/partner systems only ever consume business events? (Leaning yes.)</li>
+<li>How to handle the transitional estate where point-to-point synchronous mutation genuinely requires a response.</li>
+</ul>
+<p><strong>References &amp; standards</strong></p>
+<ul>
+<li>CloudEvents specification (CNCF): <a href="https://cloudevents.io/" target="_blank" rel="noopener noreferrer">https://cloudevents.io/</a></li>
+<li>AsyncAPI: <a href="https://www.asyncapi.com/" target="_blank" rel="noopener noreferrer">https://www.asyncapi.com/</a></li>
+<li>Transactional Outbox pattern: <a href="https://microservices.io/patterns/data/transactional-outbox.html" target="_blank" rel="noopener noreferrer">https://microservices.io/patterns/data/transactional-outbox.html</a></li>
+<li>Domain events / DDD: Eric Evans DDD, and <a href="https://martinfowler.com/eaaDev/DomainEvent.html" target="_blank" rel="noopener noreferrer">https://martinfowler.com/eaaDev/DomainEvent.html</a></li>
+<li>Event Storming (for the fact-discovery workshops this implies): <a href="https://www.eventstorming.com/" target="_blank" rel="noopener noreferrer">https://www.eventstorming.com/</a></li>
+<li>Schema Registry / compatibility modes: <a href="https://docs.confluent.io/platform/current/schema-registry/fundamentals/index.html" target="_blank" rel="noopener noreferrer">https://docs.confluent.io/platform/current/schema-registry/fundamentals/index.html</a></li>
+</ul>
+<hr />
+<h3 id="7-the-event-catalogue-a-business-lens-on-architecture">7. The event catalogue — a business lens on architecture</h3>
+<p><strong>Notes</strong></p>
+<ul>
+<li>Demo shown (slide ~153) was <strong>EventCatalog</strong> using its <strong>FlowMart</strong> sample catalog. Open source, markdown/MDX-backed, versioned, overridable, with a Backstage plugin.</li>
+<li>What it shows, per domain (e.g. Payments): overview and metadata, services offered, the <strong>ubiquitous domain language / domain model as business definitions</strong>, entities and value types, data products published to the mesh, and the events with their producers, subscribers, channel/bus, and delivery semantics (e.g. &ldquo;this Kafka channel is not exactly-once&rdquo;).</li>
+<li>Environment-aware: dev / test / prod views, each showing the version of the schema actually running there.</li>
+<li>Journey view: &ldquo;walk me through the renewal flow&rdquo; traverses placed order → order initiated → … so journey and behaviour questions stop requiring an architect in the room. &ldquo;PowerPoints become outdated; this is a real-time view of the system as built.&rdquo;</li>
+<li>Positioning against the internal <strong>AI3 / Architecture Workbench</strong>: not a tool bake-off. AI3 is rich and appropriate for architecture/AM users, but too complex for product owners and business stakeholders. The catalogue is the simplified, domain-only, business-facing lens; AI3 is the deeper code/SEAL/repo layer. The AI3 team&rsquo;s response was that they already model business/functional/data domains as the metamodel and that switching between the simple view and the code-level view is a straightforward extension.</li>
+<li>Regulatory value called out explicitly: the ability to stand in front of the OCC / SEC / ECB and explain what we do, why, and how, at every level of granularity — with the controls implemented at business-domain level and at pattern level visible in the same place. Tie-in to conversations with the controls organisation.</li>
+<li><strong>This is also the agent interface.</strong> The catalogue is a queryable registry of behaviour across every registered domain, so an agent can discover tools, interfaces, and eventing mechanisms without a separate service registry.</li>
+</ul>
+<p><strong>Positions &amp; decisions</strong></p>
+<ul>
+<li>Registration is a <strong>platform capability, not a team chore</strong>. Metadata is captured incrementally, one repo at a time, through the CI/CD pipeline: infer at build, publish at deploy, register into a central context. Asynchronous, non-blocking, always current, self-registering.</li>
+<li><strong>Carrot and stick:</strong> you only get the capability if you are on the platform, and you get the catalogue automatically once you are. If you fail the standards, you deploy but you are <strong>quarantined</strong> out of the catalogue, the LDA is notified in Teams, and the risk score reflects it. Not officially in the ecosystem.</li>
+<li>Discoverability must serve <strong>both humans and agents</strong>.</li>
+</ul>
+<p><strong>Open questions</strong></p>
+<ul>
+<li>Build-time capture vs runtime &ldquo;phone home&rdquo; — the demo relies on deployed instances registering at runtime; how much is inferred from code at build vs reported at runtime needs settling.</li>
+<li>Canary deployments with two schemas live simultaneously — flagged as a good edge case, deferred (and noted that divergent DB configuration is the bigger problem there).</li>
+<li>Whether events should also be treated as a data asset registered in the data catalogue (Dex/DAX) — &ldquo;concept over implementation, as long as the interfaces interoperate&rdquo;.</li>
+</ul>
+<p><strong>References &amp; standards</strong></p>
+<ul>
+<li>EventCatalog: <a href="https://www.eventcatalog.dev/" target="_blank" rel="noopener noreferrer">https://www.eventcatalog.dev/</a> · GitHub: <a href="https://github.com/event-catalog/eventcatalog" target="_blank" rel="noopener noreferrer">https://github.com/event-catalog/eventcatalog</a></li>
+<li>EventCatalog Backstage plugin: <a href="https://github.com/event-catalog/backstage-plugin-eventcatalog" target="_blank" rel="noopener noreferrer">https://github.com/event-catalog/backstage-plugin-eventcatalog</a></li>
+<li>FlowMart demo catalog: <a href="https://github.com/event-catalog/flowmart-schema-registry" target="_blank" rel="noopener noreferrer">https://github.com/event-catalog/flowmart-schema-registry</a></li>
+<li>Backstage Software Catalog + descriptor format: <a href="https://backstage.io/docs/features/software-catalog/descriptor-format" target="_blank" rel="noopener noreferrer">https://backstage.io/docs/features/software-catalog/descriptor-format</a></li>
+<li>CNCF TAG App Delivery on catalogues/discoverability: <a href="https://tag-app-delivery.cncf.io/" target="_blank" rel="noopener noreferrer">https://tag-app-delivery.cncf.io/</a></li>
+</ul>
+<hr />
+<h3 id="8-anti-corruption-layer-and-the-meridian-strangler">8. Anti-corruption layer and the Meridian strangler</h3>
+<p><strong>Notes</strong></p>
+<ul>
+<li>Meridian is a single system holding every domain type — party, relationships, coverage — in one ball. The target is to separate it into finer sub-domains aligned to the client-information domain.</li>
+<li>Mechanism: Meridian continues running in production and publishing its events. Those events cross the wire into an <strong>anti-corruption layer</strong> which filters, maps, and transforms them into the new sub-domain types, then publishes through the same service interface into the new model.</li>
+<li>This lets the new world be built against the <strong>behaviours</strong> it needs, with zero awareness of the legacy model, while running in parallel and verifying that new behaves the same as old. Over time resourcing shifts, the ACL goes away, and the old system goes away.</li>
+<li>Noted in the room: this matches an earlier original design document for the same system — worth comparing notes.</li>
+<li>Caveat raised: system-to-system comparison ignores heavy downstream operational processes. The approach is right as a starting point, but the model must be stress-tested by consumption (e.g. re-engineering KYC, IPB regulatory reports) rather than assumed.</li>
+<li>Reframing offered by Pat: this is an ecosystem seeking <strong>homeostasis</strong> — actors (agents, clients, regulators, CARDS 2.0 as the regulatory reporting platform) stress the ecosystem, and the event catalogue and publishing model adjust to meet the demand. A regulatory change should trigger &ldquo;your event catalogue is no longer sufficient for my need&rdquo;, with a human in the loop at that point.</li>
+</ul>
+<p><strong>Positions &amp; decisions</strong></p>
+<ul>
+<li>The important pattern is the <strong>domain + domain event</strong> model; the ACL is contingent on what you&rsquo;re migrating and is illustrative rather than mandated.</li>
+<li>No expectation of SEAL/deployment model changes from this (&ldquo;deploy however you want&rdquo;) — though SEAL-level lineage of producers/consumers is seen as a valuable by-product for AI3.</li>
+</ul>
+<p><strong>References &amp; standards</strong></p>
+<ul>
+<li>Anti-corruption layer: <a href="https://learn.microsoft.com/azure/architecture/patterns/anti-corruption-layer" target="_blank" rel="noopener noreferrer">https://learn.microsoft.com/azure/architecture/patterns/anti-corruption-layer</a></li>
+<li>Strangler Fig: <a href="https://martinfowler.com/bliki/StranglerFigApplication.html" target="_blank" rel="noopener noreferrer">https://martinfowler.com/bliki/StranglerFigApplication.html</a></li>
+<li>Parallel Run: <a href="https://martinfowler.com/bliki/ParallelChange.html" target="_blank" rel="noopener noreferrer">https://martinfowler.com/bliki/ParallelChange.html</a></li>
+</ul>
+<hr />
+<h2 id="part-iii-cloud-environments-and-reliability">Part III — Cloud, Environments, and Reliability</h2>
+<h3 id="9-composable-environments-slides-160166">9. Composable environments (slides ~160–166)</h3>
+<p><strong>Notes</strong></p>
+<ul>
+<li>Today: bespoke, hand-crafted environments everywhere. Every team interprets the general &ldquo;if you go to public cloud you must…&rdquo; standards differently, with variation even inside a single CTO tower — different tooling, different compute choices, different database choices. Everyone becomes an accidental infrastructure engineer.</li>
+<li>Precedent within AWM: alignment on an IaC module/pattern library that turned Terraform modules into controlled, reusable services — described as having delivered real benefit.</li>
+<li>The proposal is a level up: <strong>environment as a composition of four codified profiles</strong></li>
+<li><strong>Application pattern</strong> (what you&rsquo;re running)</li>
+<li><strong>Environment profile</strong> (where — AWS today, GCP tomorrow, Atlas 1 today, Atlas 2 tomorrow)</li>
+<li><strong>Resilience profile</strong> (codified from business need, not chosen ad hoc)</li>
+<li><strong>Deployment / rollout strategy</strong> (inclusive of rollback)</li>
+<li>Deployment strategy is deliberately separated from resilience profile: canary at 10%→100% is a release concern; multi-instance failover is a resilience concern. Challenged in the room (application criticality drives both) and left as &ldquo;possibly related, deliberately modelled separately&rdquo;.</li>
+<li>The deployment-window debate: most teams deploy on weekends or after hours because of confidence, not capability. Blue/green and canary largely aren&rsquo;t used in-place. Positions taken: developers should not be doing 15-hour weekend shifts and &ldquo;eyes on glass like it&rsquo;s 1999&rdquo;; agents generating code at pace cannot be made to wait until Saturday; deploy during the day when everyone is already there. Counter-point acknowledged: infrastructure/EKS upgrades are the genuinely hard weekend toil, and JPMC&rsquo;s setup makes in-place vs blue/green a real constraint (teams choose ECS over EKS specifically to avoid blue/green upgrades).</li>
+<li>Immutable infrastructure is not practised: &ldquo;we definitely don&rsquo;t treat our infrastructure as cattle&rdquo;. Target is create-new / route / destroy-old, including for infra upgrades.</li>
+<li>Terraform instability and ticket-driven remediation was named as the real elephant — worth taking on as a problem in its own right.</li>
+<li>Also floated: an internal-only <strong>CDN</strong> so UI-facing, mostly-static apps stop running on always-on compute containers.</li>
+</ul>
+<p><strong>Positions &amp; decisions</strong></p>
+<ul>
+<li>Standardise the inputs, keep variability in the configuration, make the outcomes consistent and the environments identical by construction.</li>
+<li>&ldquo;Designing for the cloud you actually want&rdquo; — invisible infrastructure, not just a nicer developer experience.</li>
+</ul>
+<p><strong>Open questions</strong></p>
+<ul>
+<li>Success metrics — DORA metrics (deployment frequency, change failure rate, MTTR, lead time) were proposed as the baseline; Rod&rsquo;s stated success measure was different and softer: developers get their weekends back, releases trigger from policy rather than eyes-on-glass, and the idea→production journey has less bureaucracy. <strong>Both should be captured.</strong></li>
+<li>Who owns infra when it&rsquo;s abstracted — developers or SREs? Direction: neither carries the cognitive load; the platform holds the knowledge and the SRE focus moves to mitigation and reliability-by-design.</li>
+</ul>
+<p><strong>References &amp; standards</strong></p>
+<ul>
+<li>DORA / DevOps Research metrics: <a href="https://dora.dev/" target="_blank" rel="noopener noreferrer">https://dora.dev/</a></li>
+<li>Immutable infrastructure &amp; cattle-not-pets: <a href="https://martinfowler.com/bliki/ImmutableServer.html" target="_blank" rel="noopener noreferrer">https://martinfowler.com/bliki/ImmutableServer.html</a></li>
+<li>Argo Rollouts (progressive delivery): <a href="https://argo-rollouts.readthedocs.io/" target="_blank" rel="noopener noreferrer">https://argo-rollouts.readthedocs.io/</a></li>
+<li>Crossplane / Terraform module registry patterns (as above)</li>
+</ul>
+<hr />
+<h3 id="10-reliability-by-design-and-conscious-chaos-slides-198205-246">10. Reliability by design and conscious chaos (slides ~198–205, 246)</h3>
+<p><strong>Notes</strong></p>
+<ul>
+<li>Problem statement: reliability is decided <strong>too late and too locally</strong> — one team makes a choice without understanding the ecosystem effect. Determining failover behaviour for a managed service is a manual research exercise every time.</li>
+<li>Proposed tiering, declared rather than designed:</li>
+</ul>
+<div class="table-wrap"><table>
+<thead>
+<tr>
+<th>Tier</th>
+<th>Topology</th>
+<th>RTO/RPO</th>
+<th>Cost</th>
+<th>Failure behaviour</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>1 — Standard</td>
+<td>Single region, multi-AZ</td>
+<td>Moderate to low</td>
+<td>Moderate to low</td>
+<td>AZ failover only; regional loss accepted</td>
+</tr>
+<tr>
+<td>2 — Enhanced</td>
+<td>Multi-region, active/passive</td>
+<td>Near-zero</td>
+<td>Manageable</td>
+<td>Regional failover with transition back</td>
+</tr>
+<tr>
+<td>3 — Critical</td>
+<td>Multi-region, active/active</td>
+<td>Near-zero</td>
+<td>High</td>
+<td>Active/active, high availability</td>
+</tr>
+<tr>
+<td>4 — Mission critical</td>
+<td>Multi-region, self-healing</td>
+<td>Zero downtime intent</td>
+<td>Highest</td>
+<td>Self-healing, multi-site active/active, geo-resilient</td>
+</tr>
+</tbody>
+</table></div>
+<ul>
+<li>A distinct pattern was called out for <strong>regionally localised</strong> applications (e.g. Connect runs in every major region, EMEA down means EMEA is down, no cross-region traffic) — multi-AZ within region, no cross-region failover. Limited but real.</li>
+<li>Choosing a profile encodes: topology/region, traffic routing, failover logic, data replication, health checks. The platform then provisions multi-region compute, Route 53 + ALB traffic management, failover configuration, DB failover, and so on.</li>
+<li>Cost feedback is inseparable from this: observability (Dynatrace) is instrumented at deploy, so unit cost per request becomes visible. The $100k/month platform serving ~1,000 requests over 30 days gets a poor risk rating, and the platform recommends alternatives (e.g. spot/reserved, scale to zero, serverless) with a generated migration plan the LDA can act on.</li>
+<li><strong>Chaos engineering</strong> becomes a first-class platform primitive rather than an annual fire-drill: latency injection, killing services, network drops, AZ/region failures, throttling — injected at every component level, continuously, unannounced.</li>
+<li>What is actually being tested is as much the <strong>human response</strong> as the system: do the alerts fire, does the team converge, are the comms channels right, does failover actually complete. The named pain: when something breaks, whose job is it to tell the business? Today the answer is unclear, and a generic firm-wide email doesn&rsquo;t land — business partners only react to named senders.</li>
+<li>Positive note from the room: AWS <strong>FIS</strong> is already wired into at least one pipeline with multiple experiments, including a production run (on a Saturday). Also noted: resilience and reliability were previously split into technical and business teams and have now converged.</li>
+</ul>
+<p><strong>Positions &amp; decisions</strong></p>
+<ul>
+<li>If resilience is optional it will be inconsistent. Resilience embedded = default. Declared ≠ optional: incomplete or inaccurate profiles block provisioning and block the CD stage.</li>
+<li>Reliability is not separate from patterns — it is a <strong>description of the composition</strong> (application pattern + environment profile + resilience profile + deployment strategy).</li>
+<li>Chaos must become a shared quad view: technology, operations, product, business continuity/risk. Because it&rsquo;s a risk issue, everyone is accountable.</li>
+<li>Self-funding logic: ephemeral, on-demand non-prod pays for higher production resilience.</li>
+</ul>
+<p><strong>References &amp; standards</strong></p>
+<ul>
+<li>AWS Fault Injection Service: <a href="https://aws.amazon.com/fis/" target="_blank" rel="noopener noreferrer">https://aws.amazon.com/fis/</a></li>
+<li>Principles of Chaos Engineering: <a href="https://principlesofchaos.org/" target="_blank" rel="noopener noreferrer">https://principlesofchaos.org/</a></li>
+<li>Chaos Mesh / LitmusChaos (CNCF): <a href="https://chaos-mesh.org/" target="_blank" rel="noopener noreferrer">https://chaos-mesh.org/</a> · <a href="https://litmuschaos.io/" target="_blank" rel="noopener noreferrer">https://litmuschaos.io/</a></li>
+<li>AWS Well-Architected Reliability Pillar: <a href="https://docs.aws.amazon.com/wellarchitected/latest/reliability-pillar/welcome.html" target="_blank" rel="noopener noreferrer">https://docs.aws.amazon.com/wellarchitected/latest/reliability-pillar/welcome.html</a></li>
+<li>Google SRE Book (error budgets, incident response): <a href="https://sre.google/books/" target="_blank" rel="noopener noreferrer">https://sre.google/books/</a></li>
+</ul>
+<hr />
+<h2 id="part-iv-delivery-testing-and-lifecycle">Part IV — Delivery, Testing, and Lifecycle</h2>
+<h3 id="11-branching-build-once-immutable-artefacts-slides-171-onward">11. Branching, build-once, immutable artefacts (slides ~171 onward)</h3>
+<p><strong>Notes</strong></p>
+<ul>
+<li>The observed pattern challenged: merge to a release branch triggers a <strong>new build</strong>, so the artefact deployed to production is not the artefact tested in lower environments. Contested in the room — some pipelines do enforce a lower-environment deployment, a new control point is being built to block direct-to-prod, and monthly checks categorise questionable deployments. The refined statement everyone converged on: <strong>the build may traverse the environments, but no one re-tests the release-branch build</strong> — teams upload prior evidence, so the evidence is not tied to an execution of automated tests against that artefact.</li>
+<li>Deeper challenge raised: why is there a release branch at all? Why not trunk-based development? Counter: release branches isolate release code — a 25-year-old practice that has been outgrown. Hotfixes can branch from the last release or from a tag; the real problem is that Git itself is not well understood (moving pointers, tags, worktrees).</li>
+<li>Semantic versioning is nominally in place but meaningless in practice — versions are shipped with no semantic intent.</li>
+<li>Root cause fix: <strong>build once, promote many.</strong> Every CI run is a potential release candidate. Move dev → test → prod without rebuilding. Tag at release. Immutable artefacts with evidence that cannot be disputed — &ldquo;almost like a blockchain&rdquo;.</li>
+<li>Agent-era implication: if AI agents and humans both work feature branches, collisions are guaranteed. Use <strong>git worktrees</strong> as per-agent isolation (a folder per branch) rather than five agents in one branch. This must be managed on the developer&rsquo;s behalf so complexity doesn&rsquo;t surface.</li>
+<li>A striking aside worth keeping: <strong>git history is context.</strong> It is the best context reference an agent has, and nobody talks about it. The &ldquo;what happened in the last five days while I was away&rdquo; skill is exactly this, applied at scale.</li>
+<li>Artifactory segmentation: develop branch → sandbox artifactory; release/master → release artifactory. This is part of why develop and release branches are separated, and it conflates CI and CD. Fix the tooling rather than the branch model — we own Harness and can make it do what we want.</li>
+<li>Testing is named as the real bottleneck once coding is accelerated: not enough automated testing, and &ldquo;evidence of testing&rdquo; is often manual.</li>
+</ul>
+<p><strong>Positions &amp; decisions</strong></p>
+<ul>
+<li>Separate CI from CD. A CI-only pipeline that produces a promotable artefact is missing today.</li>
+<li>Branch strategy should not be a per-team choice for ~80% of the organisation. The 20% who know what they&rsquo;re doing get freedom.</li>
+<li>Developers should not have to know the branching strategy at all — the workspace is created for them; this table knows the strategy, nobody else needs to.</li>
+<li>Templatised pipelines, not per-app pipeline instances created in a UI. One Java pipeline template with the rules codified; teams trigger it with data, not by cloning it.</li>
+</ul>
+<p><strong>References &amp; standards</strong></p>
+<ul>
+<li>Trunk-based development: <a href="https://trunkbaseddevelopment.com/" target="_blank" rel="noopener noreferrer">https://trunkbaseddevelopment.com/</a></li>
+<li>Build once, deploy many / Continuous Delivery (Humble &amp; Farley): <a href="https://continuousdelivery.com/" target="_blank" rel="noopener noreferrer">https://continuousdelivery.com/</a></li>
+<li>SemVer: <a href="https://semver.org/" target="_blank" rel="noopener noreferrer">https://semver.org/</a></li>
+<li>Git worktrees: <a href="https://git-scm.com/docs/git-worktree" target="_blank" rel="noopener noreferrer">https://git-scm.com/docs/git-worktree</a></li>
+<li>SLSA (artefact provenance / immutability + attestation): <a href="https://slsa.dev/" target="_blank" rel="noopener noreferrer">https://slsa.dev/</a></li>
+<li>Sigstore / in-toto attestations: <a href="https://www.sigstore.dev/" target="_blank" rel="noopener noreferrer">https://www.sigstore.dev/</a> · <a href="https://in-toto.io/" target="_blank" rel="noopener noreferrer">https://in-toto.io/</a></li>
+</ul>
+<hr />
+<h3 id="12-the-delivery-broker-and-the-platform-cli-slides-176180-184">12. The delivery broker and the platform CLI (slides ~176–180, 184)</h3>
+<p><strong>Notes</strong></p>
+<ul>
+<li>Split the model into <strong>experience</strong> and <strong>execution</strong>. Harness is the execution engine behind the scenes and nobody needs to know it exists. The experience layer owns intent interpretation, policy enforcement, and pipeline mapping.</li>
+<li>Consumers of the experience layer are developers <strong>and agents</strong>. The Versel/Netlify analogy: an agent doesn&rsquo;t need to be told how to deploy.</li>
+<li><strong>CLI over MCP</strong> was an explicit preference — a CLI becomes a tool that is leverageable in an IDE, in a sandbox container, and by humans and agents alike; MCP would restrict it to an agent contract. (Note: this aligns with the SCG/ELAERA constraint of bash/Python wrappers inside Skills.)</li>
+<li>Developer declares intent in configuration (services in this repo, deployment strategy, target environment, per-environment overrides) and then runs something as simple as <code>platform deploy dev</code>. A <strong>delivery broker</strong> in the middle resolves everything else.</li>
+<li>Broker responsibilities: resolve developer/team intent, load application metadata, select pipeline archetype, bind execution, report status. It also owns ALB/URL creation, blue-green/canary setup, and first-time configuration — the parts that today require a conversation with a named person.</li>
+<li>Metadata catalogue behind the broker holds: app class, runtime, environment model, rollout policy, compliance profile. Policy is hierarchical (firm / AWM / GPB / LOB / team) so what&rsquo;s permitted differs by level with defined override.</li>
+<li>Skill/agent inference: nothing prevents a skill from assessing the repo (AI3-style) and generating the intent configuration for you, with human override retained.</li>
+<li>Alignment noted with an external design introducing <strong>deployment intent</strong> and <strong>deployment scope</strong> — worth comparing and possibly adopting terminology.</li>
+</ul>
+<p><strong>Positions &amp; decisions</strong></p>
+<ul>
+<li><strong>Preview environments per feature/PR.</strong> PR accepted → build that branch → deploy into an isolated preview → business user or product partner clicks and validates working software → accept or feed back → environment destroyed. If untouched, it expires after ~12 hours.</li>
+<li><strong>Candidate-cut policy</strong> replaces &ldquo;build on every merge&rdquo;, because an army of agents merging continuously makes per-merge builds wasteful (two million merge events is a lot of wasted compute). Options: time-based cuts, threshold-based (e.g. &gt;50% of an epic&rsquo;s stories complete), full-epic completion, environment-readiness-based, or explicit request. The platform decides when to materialise because it has the context.</li>
+<li>The hierarchy to hold: feature branch → preview (validate in isolation) → merge (safe integration into trunk) → eligible change ledger → release set → candidate artefact (immutable) → promotion record → progression history. <strong>Teams express intent; the platform owns the mechanics.</strong></li>
+<li>Governance is a function of policy definition: a risk-scored app might get a one-time exception with notification and then no more releases until remediated.</li>
+</ul>
+<p><strong>Open questions</strong></p>
+<ul>
+<li>Upstream/downstream dependencies for preview environments → mocking (see §13), explicitly flagged as a bigger problem.</li>
+<li>Cost of an environment per PR — acknowledged; mitigated by short TTL and destroy-on-idle.</li>
+<li>Database/schema changes must be sequenced atomically with app deployment (Liquibase-style, admin-privilege model). Recognised as codifiable into the pattern with pipeline dependencies, but not solved.</li>
+</ul>
+<p><strong>References &amp; standards</strong></p>
+<ul>
+<li>Backstage / IDP + Harness IDP (Backstage-based, already licensed): <a href="https://developer.harness.io/docs/internal-developer-portal/" target="_blank" rel="noopener noreferrer">https://developer.harness.io/docs/internal-developer-portal/</a></li>
+<li>Score workload spec (intent-based deployment): <a href="https://score.dev/" target="_blank" rel="noopener noreferrer">https://score.dev/</a></li>
+<li>Ephemeral/preview environments: <a href="https://vercel.com/docs/deployments/preview-deployments" target="_blank" rel="noopener noreferrer">https://vercel.com/docs/deployments/preview-deployments</a> (as the reference experience)</li>
+<li>Liquibase / Flyway for schema change sequencing: <a href="https://www.liquibase.org/" target="_blank" rel="noopener noreferrer">https://www.liquibase.org/</a> · <a href="https://flywaydb.org/" target="_blank" rel="noopener noreferrer">https://flywaydb.org/</a></li>
+</ul>
+<hr />
+<h3 id="13-testing-behaviour-as-the-asset-slides-261268">13. Testing: behaviour as the asset (slides ~261–268)</h3>
+<p><strong>Notes</strong></p>
+<ul>
+<li>Cost framing: <strong>non-prod costs more than production</strong> across GPB. The firm tolerates paying more for prod because of the value proposition; that logic doesn&rsquo;t hold for non-prod. Dev environments are spun up and left forever; branches and environments are never cleaned up; always-on is inherited habit.</li>
+<li>The real driver of always-on non-prod is <strong>dependency-driven environments</strong> — your system must be up because ten other systems need it to test, so everything stays up 24/7. Contested (follow-the-sun usage across UK/US/India) but the counter-observation stands: dev environments are more idle than used.</li>
+<li>The proposed model, in phases:</li>
+<li><strong>Record real behaviour.</strong> Capture production user interactions — clicks, accessibility tree, form elements, assertions/waits, and the data involved — plus the API request/response traffic.</li>
+<li><strong>Transform into reusable test artefacts.</strong> Generate scripts (Playwright for web, desktop automation for thick clients) from a JSON representation of each step. Use <strong>intent-based locators</strong> rather than CSS selectors so the scripts self-heal when a button changes from &ldquo;Submit&rdquo; to &ldquo;Enter&rdquo;.</li>
+<li><strong>Replay as a platform substrate.</strong> On any deployment into a provisioned environment, replay the captured journeys — with downstream dependencies <strong>proxied/simulated</strong> rather than running.</li>
+<li><strong>Synthesise data.</strong> Obfuscate production data into lower environments while preserving referential integrity across domains via the linkage/join graph on the data mesh.</li>
+<li>Implementation detail shared: WireMock deployed as a service in the CI/CD pipeline captures request/response traffic, writes Parquet, and that is used to derive an <strong>API spec</strong>; the spec is then matched against the data mesh metadata to find which elements exist as authoritative data and which must be synthesised. The Parquet is only used to build the spec, not to serve data at test time — the test data platform serves it. Interception is either byte-code injection at build or a sidecar proxy that routes based on a flag (sidecar preferred, since we don&rsquo;t own the code).</li>
+<li>Faker and SDV-class synthetic generators are both in use; the hard part is <strong>referential integrity</strong>, plus &ldquo;seed data&rdquo; that must pre-exist (e.g. valid ECIs when creating a mandate).</li>
+<li>Coverage insight offered: production behaviour tells you where the hotspots are and which paths are actually travelled. If only 40% of what you built is used, exhaustive coverage of the rest is wasted effort — cover the core the business depends on and evolve.</li>
+<li>Concrete corroboration from the room: a GSTP/USDP team is already building exactly this in Harness for their rebalancer component — every parameter of every production run is logged and replayed. Key insight: <strong>choose components strategically.</strong> Don&rsquo;t try to record UI clicks for the whole system (brittle); do it for the core calculation component of a well-componentised app.</li>
+<li>Second use case, arguably bigger than testing: <strong>training and operational uplift.</strong> Capture how the best operations user does a workflow, then show everyone else &ldquo;the best person does this in five fewer steps&rdquo;, then eventually do it for them. Before we make everything an agent, we make a person an agent.</li>
+</ul>
+<p><strong>Positions &amp; decisions</strong></p>
+<ul>
+<li>You are testing <strong>the system you control</strong>. Downstream databases and behaviour are a black box you consume through a contract; contract-based verification plus mocking replaces full integration environments for the 80%.</li>
+<li>The platform can still stand up the real dependency chain on demand when the replay substrate is turned off — that&rsquo;s a configuration flag, not a request to another team. Turning it off affects your risk score and your accountability.</li>
+<li>Once deployed with no traffic on it, a fully integrated instance exists, so full end-to-end integration testing by replay is still available.</li>
+</ul>
+<p><strong>Open questions / known limits</strong></p>
+<ul>
+<li><strong>State mutation.</strong> Multi-step flows that mutate state and depend on prior mutations need a resettable, test-scoped state machine in the mock, plus a hash/versioned snapshot per instance so a test can be reset and rerun. Called out as unsolved from prior GPB work.</li>
+<li><strong>Overnight / T+1 / T+2 batch cycles.</strong> Trading and settlement flows need the batch to play out; simulating elapsed time and accelerating date changes was suggested but not proven. These are the 20% that turn the substrate off.</li>
+<li><strong>Volume/performance</strong> in containerised local mocks.</li>
+<li>Should the developer be able to run this fully locally (LocalStack + Docker + mocks)? Attempted; LocalStack lacks support for the required services. Atlas Workspace was floated as a possible answer.</li>
+<li>Testing pyramid / unit-test standards were raised and deferred as inner-loop scope.</li>
+</ul>
+<p><strong>References &amp; standards</strong></p>
+<ul>
+<li>Consumer-driven contract testing: Pact — <a href="https://pact.io/" target="_blank" rel="noopener noreferrer">https://pact.io/</a> ; Spring Cloud Contract — <a href="https://spring.io/projects/spring-cloud-contract" target="_blank" rel="noopener noreferrer">https://spring.io/projects/spring-cloud-contract</a></li>
+<li>WireMock: <a href="https://wiremock.org/" target="_blank" rel="noopener noreferrer">https://wiremock.org/</a> · Hoverfly: <a href="https://hoverfly.io/" target="_blank" rel="noopener noreferrer">https://hoverfly.io/</a> · Karate: <a href="https://karatelabs.github.io/karate/" target="_blank" rel="noopener noreferrer">https://karatelabs.github.io/karate/</a></li>
+<li>Playwright: <a href="https://playwright.dev/" target="_blank" rel="noopener noreferrer">https://playwright.dev/</a></li>
+<li>Synthetic Data Vault (SDV): <a href="https://sdv.dev/" target="_blank" rel="noopener noreferrer">https://sdv.dev/</a> · Faker: <a href="https://faker.readthedocs.io/" target="_blank" rel="noopener noreferrer">https://faker.readthedocs.io/</a></li>
+<li>Testcontainers (for the Dockerised dependency idea): <a href="https://testcontainers.com/" target="_blank" rel="noopener noreferrer">https://testcontainers.com/</a></li>
+<li>LocalStack: <a href="https://www.localstack.cloud/" target="_blank" rel="noopener noreferrer">https://www.localstack.cloud/</a></li>
+</ul>
+<hr />
+<h3 id="14-sbom-driven-lifecycle-management-slides-275278">14. SBOM-driven lifecycle management (slides ~275–278)</h3>
+<p><strong>Notes</strong></p>
+<ul>
+<li>Today&rsquo;s loop: scanners run (Snyk, Sonar, SAST), SBOMs are generated at scale, dependency trees and version drift are known — and <strong>nothing is automated from it</strong>. Findings become a manual triage queue, then a backlog that never shrinks. Log4Shell over Christmas is the canonical memory.</li>
+<li>The tooling that exists is human-initiated: FARM breaks are created, then a human triggers the remediation assistant. Feedback given: the assistant should <strong>review the breaks and work through them itself</strong>, escalating only exceptions.</li>
+<li>The bigger prize is not CVEs, it is <strong>version currency</strong>. If policy is &ldquo;no more than N versions behind&rdquo; and the platform keeps you current, most vulnerabilities disappear as a by-product. Fixing a CVE on a version you should not be running is wasted effort.</li>
+<li>Policy engine inputs: CVE severity threshold, compliance state, version currency (current minus two), with a hierarchical override model.</li>
+<li>SBOM risk ratings and firm risk ratings do not yet align — an active workstream with the corporate team; a managed-API offering gives an equivalent supported/end-of-life/recommended rating in the meantime, and the two can be swapped once the ratings align.</li>
+<li><strong>Why teams don&rsquo;t do it</strong> — the most valuable part of this session was the honest diagnosis:</li>
+<li>It isn&rsquo;t the version bump. It&rsquo;s the compile break, the removed method, the runtime failure discovered late.</li>
+<li>It&rsquo;s the <strong>regression testing burden</strong> and the lack of automation — i.e. a confidence problem, not a prioritisation problem.</li>
+<li>Product pressure: features vs no-joy work, every sprint.</li>
+<li>Automated PR bots already exist and the PRs &ldquo;wither and die&rdquo; because nobody picks them up.</li>
+<li>Prior autonomous attempt failed on confidence: the tool did 90%, the human did 10%, and the human credited themselves with all of it.</li>
+<li>Counterpoint that lands: teams already carry a ~20–25% budget haircut for maintenance, and the list still isn&rsquo;t getting shorter.</li>
+<li>What works, evidenced by one team in the room with a single-digit FARM break count: <strong>break the build in front of the developer, at development time.</strong> A central registry of allowed versions; unknown or prohibited versions won&rsquo;t start locally, won&rsquo;t build, won&rsquo;t do anything. Breaking late means the person who introduced the problem never sees it.</li>
+</ul>
+<p><strong>Positions &amp; decisions</strong></p>
+<ul>
+<li>SBOM is the trigger, not the report. Detection → policy → <strong>automated action</strong> → exceptions only to the human backlog.</li>
+<li>Prioritise version currency uplift first, then residual CVEs.</li>
+<li>Confidence is bought with the <strong>preview environment + replay testing</strong> from §12–13: launch the environment, replay the journeys, observe, evidence it. That evidence has never existed before.</li>
+<li>Incentive alignment: unaccepted merges after the platform has done the work drive the risk score down, and that feeds year-end accountability. Also floated: shift-left to a PR blocker / mandatory PR-review gate, and a shared <code>create-PR</code> skill with hooks covering the 80% (XSS, SQL injection, secrets in code) across AWM.</li>
+</ul>
+<p><strong>References &amp; standards</strong></p>
+<ul>
+<li>CycloneDX: <a href="https://cyclonedx.org/" target="_blank" rel="noopener noreferrer">https://cyclonedx.org/</a> · SPDX: <a href="https://spdx.dev/" target="_blank" rel="noopener noreferrer">https://spdx.dev/</a></li>
+<li>OpenSSF Scorecard: <a href="https://securityscorecards.dev/" target="_blank" rel="noopener noreferrer">https://securityscorecards.dev/</a> · OpenSSF best practices: <a href="https://openssf.org/" target="_blank" rel="noopener noreferrer">https://openssf.org/</a></li>
+<li>Dependabot / Renovate as the reference automation: <a href="https://docs.renovatebot.com/" target="_blank" rel="noopener noreferrer">https://docs.renovatebot.com/</a></li>
+<li>OpenRewrite (automated framework/version migration recipes): <a href="https://docs.openrewrite.org/" target="_blank" rel="noopener noreferrer">https://docs.openrewrite.org/</a></li>
+<li>EPSS + KEV for CVE prioritisation: <a href="https://www.first.org/epss/" target="_blank" rel="noopener noreferrer">https://www.first.org/epss/</a> · <a href="https://www.cisa.gov/known-exploited-vulnerabilities-catalog" target="_blank" rel="noopener noreferrer">https://www.cisa.gov/known-exploited-vulnerabilities-catalog</a></li>
+<li>NIST SSDF (SP 800-218): <a href="https://csrc.nist.gov/Projects/ssdf" target="_blank" rel="noopener noreferrer">https://csrc.nist.gov/Projects/ssdf</a></li>
+</ul>
+<hr />
+<h2 id="part-v-data-strategy-pats-session">Part V — Data Strategy (Pat&rsquo;s session)</h2>
+<h3 id="15-operating-model-and-data-ownership">15. Operating model and data ownership</h3>
+<p><strong>Notes</strong></p>
+<ul>
+<li>Starting diagnosis: no mechanism to manage dependencies, no alerting when a data product landed, and a data strategy that was &ldquo;a series of point events&rdquo; rather than a cohesive whole. Positives: the culture had already shifted (nobody asks &ldquo;why are we doing this?&rdquo;), and there was no shortage of capability (Starburst, Snowflake, Databricks).</li>
+<li>The structural fix: align data management to the <strong>product structure</strong> (~55–68 products organised into 5 service verticals), and embed data into the org so the <strong>triad becomes a quad</strong> — technology, data, operations, product. That gives an operating model with escalation paths and real teeth.</li>
+<li>First vertical stood up on the acquisition/onboarding lifecycle with a data executive hired in February; benefits already visible in SME coverage and in complete cohesion between the tech and data teams. Explicitly <em>not</em> building a CDO organisation for its own sake — the closer the integration, the more the lines disappear.</li>
+<li><strong>Data owner</strong> = someone who knows their data, makes it consumable, and manages data quality — from preventative controls at digitisation (are we duplicating ECIs? are we assigning them at all?) through detective controls to use-case-level accountability.</li>
+<li><strong>Validated reliance</strong>: you cannot say &ldquo;I got the data from someone else, not my problem&rdquo;. Producers, distributors, and consumers all have skin in the game.</li>
+<li><strong>Data executive</strong> rolls up data ownership from the systems of record so one accountable leader can staff and execute the duties (simplified into four buckets), rather than leaving data ownership as a side-of-desk checkbox. Cautionary tale: another firm&rsquo;s &ldquo;application business owner&rdquo; role appeared in ~2,200 policies and 10,000+ desktop procedures — and the regulator asked to interview ten of them.</li>
+<li>Peacetime vs wartime: we are not under a consent order, unlike peers who spent ~$1bn putting regulatory report lineage on spreadsheets. Use the window and the tooling.</li>
+</ul>
+<p><strong>Positions &amp; decisions</strong></p>
+<ul>
+<li>Strategic data provisioning: build data products <strong>with purpose</strong>, derived from Big Rock CEO priorities and risk/regulatory priorities — not &ldquo;if you build it they will come&rdquo;.</li>
+<li>Normalise those use-case needs into domains, subdomains, data products, elements, and attributes, producing a <strong>global logical model</strong> for each core data product, with v1 satisfying the chosen use cases. Build once, use many.</li>
+<li>Use cases were chosen as <strong>clusters</strong> with common core data concepts — mostly party, account, relationship, coverage — which is why party/account came first.</li>
+<li>System of capture ≠ system of record ≠ data product. A data product is abstracted from any application, even when only one SOR holds it.</li>
+</ul>
+<p><strong>References &amp; standards</strong></p>
+<ul>
+<li>Data Mesh (Zhamak Dehghani): <a href="https://martinfowler.com/articles/data-mesh-principles.html" target="_blank" rel="noopener noreferrer">https://martinfowler.com/articles/data-mesh-principles.html</a></li>
+<li>Data product &amp; data contract specs: <a href="https://bitol.io/" target="_blank" rel="noopener noreferrer">https://bitol.io/</a> (ODCS/ODPS) · <a href="https://datacontract.com/" target="_blank" rel="noopener noreferrer">https://datacontract.com/</a></li>
+<li>DAMA-DMBOK: <a href="https://www.dama.org/cpages/body-of-knowledge" target="_blank" rel="noopener noreferrer">https://www.dama.org/cpages/body-of-knowledge</a></li>
+<li>BCBS 239 (risk data aggregation principles): <a href="https://www.bis.org/publ/bcbs239.htm" target="_blank" rel="noopener noreferrer">https://www.bis.org/publ/bcbs239.htm</a></li>
+<li>DCAM: <a href="https://edmcouncil.org/frameworks/dcam/" target="_blank" rel="noopener noreferrer">https://edmcouncil.org/frameworks/dcam/</a></li>
+</ul>
+<hr />
+<h3 id="16-data-products-ai-readiness-lineage-masking">16. Data products, AI-readiness, lineage, masking</h3>
+<p><strong>Notes</strong></p>
+<ul>
+<li>Contents of a data product: content and features, latency/temporality, data quality rules (technical and business) with quality scores, metadata, logical model / ontology, glossary terms, and a surrounding <strong>data contract</strong> — enough for you and others to be comfortable consuming it.</li>
+<li>The maturity gap: current practice is pipeline-centric (get the data out, put it in S3, expose via Snowflake) with ~1,100 raw datasets on the mesh. The leap is upgrading raw datasets to actual governed data products, done as controlled pilots so nothing breaks. Full global delivery targeted for 2027 if the pilot lands.</li>
+<li>One logical model underpinning <strong>multiple distribution pipelines</strong> — analytical, operational, transactional. Non-functional characteristics feed the technical architecture choice per pipeline.</li>
+<li><strong>AI-ready</strong> primarily means uplifting metadata quality: if the machine cannot determine fitness for purpose from a clear expression of intent, the metadata isn&rsquo;t good enough. Data quality is the other half.</li>
+<li>Fitness for purpose is contextual, not absolute. The worked example: notional value published to seven decimal places is a data quality issue for FR Y-14 Schedule H (which requires truncation to five) and not an issue for anyone else — so it must be described, and intent must be granular enough to match.</li>
+<li>Consumption-side contracts are as important as producer contracts. CARDS 2.0 maintains a normalised understanding of the ~400 regulatory reports required for IPB, uses that as a requirements set, and then validates fitness for purpose against the mesh. A new court verdict in Germany changes what &ldquo;good&rdquo; looks like and should propagate back into the data procurement strategy — change management in both directions.</li>
+<li><strong>Lineage strategy:</strong> eliminate the hops. Rather than tracing every hop back through aggregators and pass-throughs, standardise on system of record → mesh (as a core data product) → consumer, and maintain the system-of-capture / system-of-record relationship separately. Pass-through systems are heavily scrutinised — you have to prove the negative (no transformation logic).</li>
+<li><strong>Consistency of provisioning is the number one data quality rule.</strong> Regulators examine across reports; the same element sourced two different ways for two reports is the finding, even if both are correct.</li>
+<li>Versioning: every data product is versioned. Grain may need to change as agents start consuming products — expect to split products into more discrete components to satisfy privacy, entitlement, and storage/compute constraints. Transmit as little data as necessary.</li>
+<li><strong>Bitemporality / milestoning</strong> is a data product requirement, not an afterthought — as-is vs as-was is a regulatory requirement, and the performance-reporting example (an asset class that no longer exists but contributed to lifetime performance) is unsolved in several systems today.</li>
+<li>Compute-in-the-data-product (from the data mesh literature) was raised: if there&rsquo;s only one way to calculate a position, the logic shouldn&rsquo;t be replicated. Position taken: deliver it through the core data product mechanism, but <strong>ownership of the logic stays with the business owner who owns the logic</strong>, with model risk policy scoped explicitly.</li>
+<li>2027 initiative flagged: standardised, governed <strong>metrics</strong> — extending the ontology/taxonomy into the metrics plane, including how metrics are visualised.</li>
+<li><strong>Masking and test data</strong>: mask centrally as part of the data product offering rather than every team masking the same data. A project already exists taking production data, masking PII, and allowing pick-and-choose — to be connected to automated migration/regression testing (see §13).</li>
+<li>On MCP: teams are asking to build MCP servers to expose their data. Position taken — <strong>don&rsquo;t proliferate MCPs</strong>; point people at the mesh. Prefer a <strong>data agent</strong> / analytic skill that knows how to connect to Snowflake, do the processing, and act as the interface to the domain. Entitlements are already enforced at the mesh; bypassing it is dangerous. Analytical → mesh; transactional/journey → service mesh + GraphQL against the domain.</li>
+</ul>
+<p><strong>References &amp; standards</strong></p>
+<ul>
+<li>Open Data Contract Standard (Bitol/ODCS): <a href="https://bitol.io/" target="_blank" rel="noopener noreferrer">https://bitol.io/</a></li>
+<li>OpenLineage: <a href="https://openlineage.io/" target="_blank" rel="noopener noreferrer">https://openlineage.io/</a> · Marquez: <a href="https://marquezproject.ai/" target="_blank" rel="noopener noreferrer">https://marquezproject.ai/</a></li>
+<li>Great Expectations / Soda (DQ rules as code): <a href="https://greatexpectations.io/" target="_blank" rel="noopener noreferrer">https://greatexpectations.io/</a> · <a href="https://www.soda.io/" target="_blank" rel="noopener noreferrer">https://www.soda.io/</a></li>
+<li>dbt semantic layer / metrics governance: <a href="https://docs.getdbt.com/docs/build/semantic-models" target="_blank" rel="noopener noreferrer">https://docs.getdbt.com/docs/build/semantic-models</a></li>
+<li>FR Y-14 reporting forms: <a href="https://www.federalreserve.gov/apps/reportingforms/" target="_blank" rel="noopener noreferrer">https://www.federalreserve.gov/apps/reportingforms/</a></li>
+<li>Model Context Protocol: <a href="https://modelcontextprotocol.io/" target="_blank" rel="noopener noreferrer">https://modelcontextprotocol.io/</a></li>
+</ul>
+<hr />
+<h3 id="17-data-domains-vs-functional-domains-slides-14-20">17. Data domains vs functional domains (slides 14, 20)</h3>
+<p><strong>Notes</strong></p>
+<ul>
+<li>Legacy functional domains were designed around human org structures, UIs, and workflows (front office, wealth planning, middle office, investment office), and applications were then built to fill those boxes.</li>
+<li>Data domains are abstracted from applications and normalised. Mapping example for the client lifecycle vertical: functional domains = client info management, client lifecycle management, client service, product innovation; data domains = party, account, client, relationship, mandate, suitability, coverage.</li>
+<li>A data domain can span multiple functional domains, but exactly one functional domain owns it; the rest are consumers.</li>
+<li>Tension acknowledged: the external view of the business is the four services on the public site (wealth planning, banking, lending, investing). Functional domains exist because financial services doesn&rsquo;t organise like a product company (Apple has a MacBook team and an iPhone team; we don&rsquo;t).</li>
+<li>Two directions debated:</li>
+<li><strong>Collapse toward the verticals / business domains</strong> (Rod&rsquo;s and Shane&rsquo;s preference) — map systems directly to how we support the business, down to the bounded context.</li>
+<li><strong>Sync the two concepts</strong> and have systems/application/functional/data architecture operate front-to-back in the same domain-bounded context within the verticals (Pat&rsquo;s proposal on slide 14).</li>
+<li>Counter-argument recorded: collapsing to data domains alone ignores the compute and business logic that sits in the functional domain, and would imply reorganising all of GPB — aspirational.</li>
+<li>The forward-looking argument for eventually collapsing: with agentic and hyper-personalised experiences, what remains is data, storage, and compute; the connective tissue of UIs and applications becomes less of a requirement. Not close today.</li>
+<li>Practical mitigation already applied: each functional domain mapped to exactly one vertical with a named domain owner, even where it&rsquo;s messy (fees exist everywhere but are mapped to the investment vertical so someone owns the fees data model).</li>
+<li>Party as the test case: a true party master enabling net-exposure roll-ups (total GPB exposure to a large institutional client, including its employee base) is not possible today.</li>
+</ul>
+<p><strong>Positions &amp; decisions</strong></p>
+<ul>
+<li>Move toward a single <strong>architect</strong> role at the vertical level rather than separate data / systems / functional architect roles.</li>
+<li>Skills and knowledge bases must be governed the same way data domains are — bounded by domain, reusable, not scattered across teams and MCP stores. <strong>This is an architecture function.</strong> (See §18.)</li>
+</ul>
+<p><strong>Open questions</strong></p>
+<ul>
+<li>Whether knowledge bases are data products. Explicitly left open — &ldquo;it&rsquo;s a discussion&rdquo;.</li>
+<li>Whether logical models can be generated from data products / physical metadata with industry models (e.g. FIBO) as an overlay. Consensus: an LLM can generate a draft, but a human data executive must sign it off until a baseline is established; after that it should snowball quickly.</li>
+</ul>
+<p><strong>References &amp; standards</strong></p>
+<ul>
+<li>FIBO (Financial Industry Business Ontology): <a href="https://spec.edmcouncil.org/fibo/" target="_blank" rel="noopener noreferrer">https://spec.edmcouncil.org/fibo/</a></li>
+<li>BIAN service landscape (banking domain reference): <a href="https://bian.org/" target="_blank" rel="noopener noreferrer">https://bian.org/</a></li>
+<li>DDD bounded context: <a href="https://martinfowler.com/bliki/BoundedContext.html" target="_blank" rel="noopener noreferrer">https://martinfowler.com/bliki/BoundedContext.html</a></li>
+</ul>
+<hr />
+<h2 id="part-vi-ai-engineering-tooling-niraja-jordan-session">Part VI — AI Engineering Tooling (Niraja &amp; Jordan session)</h2>
+<h3 id="18-skills-agent-teams-worktrees-and-orchestration">18. Skills, agent teams, worktrees, and orchestration</h3>
+<p><strong>Notes — client tooling</strong></p>
+<ul>
+<li><strong>Roo/Cline 3.58 (beta)</strong>: skills can now be attached to slash commands; a skills marketplace is auto-discovered; the same skill file runs in the VS Code extension, the Roo CLI, Claude Code, and Copilot. <strong>Write the skill once, use it everywhere</strong> — that portability is the headline.</li>
+<li><strong>Git worktrees</strong> now supported in the client: one code base, multiple parallel agent workstreams, each committing into its own worktree, merged at the end. Directly enables the human-vs-agent collision problem from §11.</li>
+<li>Composite slash command demo (<code>/commit</code>): diff → find or create the Jira via the Jira MCP → update it with what was done → commit with the reference → resolve it → push. The point is not the specific workflow but that MCP + skills + slash commands <strong>compose</strong>. Challenged in the room on whether create-Jira-after-the-fact is the behaviour we want to encourage; alternative shown by another team is <code>/create-jira-and-branch</code> which creates the branch with the Jira ID embedded so subsequent commits inherit it. Rod&rsquo;s intervention worth recording: <strong>the motivation is traceability and culture, not scoring on an AI-for-tech metric.</strong></li>
+<li>Slash commands are currently <strong>not shareable</strong> across teams (no marketplace for them) — they live per-user unless committed into a repo. Flagged as something the platform should own so this doesn&rsquo;t stay IDE- and user-specific.</li>
+</ul>
+<p><strong>Notes — subagents vs agent teams</strong></p>
+<ul>
+<li><strong>Subagents</strong>: each has its own context; can run in parallel across models (Opus for one, Haiku for another); results return to the main agent. Roo cannot yet run agents in parallel — it will do the work sequentially. This is the main functional divergence from Claude Code today.</li>
+<li><strong>Agent teams</strong>: a lead agent forms a team, assigns tasks, and the members communicate with each other over a mailbox/message bus, acknowledging and re-planning. Each member has its own context. Reported wins:</li>
+<li><strong>Deep repo analysis</strong> — ~250–400 repos analysed in under ~30 minutes, producing architecture, infra, front-end/back-end, functional breakdown, dependency maps, and identification of dead repos.</li>
+<li><strong>Java version upgrade remediation</strong> — fixing compilation and unit/integration test failures after a major upgrade. Pass rate moved from ~50–60% to ~90% by switching from a sequential approach to agent teams.</li>
+<li><strong>Deep multi-lens code review</strong> — separate security, performance, and functional agents on the same code base.</li>
+<li>Where it breaks down: over-decomposition. Extending agent teams across a whole long workflow burns context and coordination cost and produces worse results than breaking the work into specialised, bounded jobs. The judgement call (&ldquo;which tasks parallelise well vs which cost more to renegotiate than to do&rdquo;) is a real, unsolved cost/benefit question — and the right question for a shared benchmark before rolling skills out broadly.</li>
+</ul>
+<p><strong>Notes — orchestration frontier</strong></p>
+<ul>
+<li><strong>Beads</strong> — git-backed, dependency-graph issue tracker designed as agent memory; replaces markdown plan files. Attractive because task dependency graphs are exactly what multi-agent work needs. Position: we live in the real world and Jira is our system of capture, so Jira stays — but the dependency-graph model is worth stealing.</li>
+<li><strong>Gastown</strong> — the hybrid everyone pointed at: 20–30 agents in parallel, beads as the control/data plane, worktree-based persistent storage, clear task dependencies, tmux UI, multi-harness (Claude Code, Copilot, Codex, Gemini). Described as the best combination available today, and as expert-oriented rather than enterprise-ready.</li>
+<li><strong>Paperclip</strong> demo — an agentic &ldquo;organisation&rdquo;: hire a CEO agent, it decomposes the task, defines the personas needed, requests board approval to hire (a deliberate human cost control), then assigns and rebalances work across agent employees. Each employee has a persona, a skill set, and an <strong>agent harness adaptor</strong> (Claude Code today, Roo tomorrow) — so the model/vendor is swappable while the persona and skills stay. Postgres holds the org and task state; the real work state lives in the Claude sessions and the git repos. Memory is enabled so mistakes learned on one project persist rather than being re-typed into CLAUDE.md every time.</li>
+<li>Real workload run through it: Rod&rsquo;s <strong>hexagonal architecture</strong> skill (discover patterns, find anti-patterns, identify value objects, detect pattern variations, measure drift from target state) applied across ~30–40 repos. Parallelism at three levels — agent teams inside each repo skill, multiple repos per engineer agent, and a lead rebalancing when an engineer fell behind.</li>
+<li>Skills authoring philosophy from this session, worth adopting: <strong>write pure atomic skills and give the agent the tools and the goal, rather than a regimental workflow.</strong> Rigid workflows can&rsquo;t be re-planned mid-flight.</li>
+</ul>
+<p><strong>Marketplace constraint (unresolved, needs a decision)</strong></p>
+<ul>
+<li>Claude Code&rsquo;s managed enterprise settings restrict which marketplaces can be loaded, and central has allocated <strong>one marketplace for all of AWM</strong>. Nested marketplaces are not supported (a deliberate security choice), so everything must be flattened at the plugin level in a single <code>marketplace.json</code>.</li>
+<li>Current workaround: seven code repositories exposed as seven plugins, namespaced by prefix (<code>am-core</code>, <code>am-sdlc</code>, <code>gstp-*</code>, etc.), with git submodules being explored to spread the underlying repos.</li>
+<li>Concerns raised in the room: context cost when plugins load, discoverability across thousands of skills, and management of the aggregate. Clarification given: plugin definitions and skill <em>descriptions</em> load; full skill bodies load only on invocation.</li>
+<li>Naming critique that landed: <strong>&ldquo;marketplace&rdquo; should have been called &ldquo;namespace&rdquo;</strong> — much of the confusion is the word.</li>
+</ul>
+<p><strong>Positions &amp; decisions</strong></p>
+<ul>
+<li>Skills authoring should be <strong>democratised</strong>, not gated — but the architecture function should own and publish the architecture-related skills (drift assessment against target-state patterns, hexagonal/microservice/serverless conformance, event-model conformance) and mandate their use so architecture decisions shift left.</li>
+<li>Orgs should each own their agentic swarm, not run from a central instance — they own the cost, the security posture, and the outcomes; central operation would not scale. Export/import of a working org (personas + skills) between teams is the sharing mechanism.</li>
+<li>Every capability we build should be <strong>dogfooded through our own platform</strong>, tested and released the same way, not built first and integrated later.</li>
+<li>AI-for-tech / the catalyst community are enablers, not the group that decides how skills should be structured. That guidance has to come from this table, and quickly, because the platform needs to know where skills, hooks, subagents, and agents live.</li>
+</ul>
+<p><strong>References &amp; standards</strong></p>
+<ul>
+<li>Claude Code skills, plugins, subagents: <a href="https://docs.claude.com/en/docs/claude-code/overview" target="_blank" rel="noopener noreferrer">https://docs.claude.com/en/docs/claude-code/overview</a></li>
+<li>Agent Skills / SKILL.md format: <a href="https://docs.claude.com/en/docs/agents-and-tools/agent-skills" target="_blank" rel="noopener noreferrer">https://docs.claude.com/en/docs/agents-and-tools/agent-skills</a></li>
+<li>Beads: <a href="https://github.com/steveyegge/beads" target="_blank" rel="noopener noreferrer">https://github.com/steveyegge/beads</a> · Yegge&rsquo;s write-up: <a href="https://steve-yegge.medium.com/introducing-beads-your-coding-agents-new-memory-upgrade-05a5a06fa1cc" target="_blank" rel="noopener noreferrer">https://steve-yegge.medium.com/introducing-beads-your-coding-agents-new-memory-upgrade-05a5a06fa1cc</a></li>
+<li>Gastown: <a href="https://github.com/gastownhall/gastown" target="_blank" rel="noopener noreferrer">https://github.com/gastownhall/gastown</a> · <a href="https://steve-yegge.medium.com/welcome-to-gas-town-4f25ee16dd04" target="_blank" rel="noopener noreferrer">https://steve-yegge.medium.com/welcome-to-gas-town-4f25ee16dd04</a></li>
+<li>Roo Code: <a href="https://docs.roocode.com/" target="_blank" rel="noopener noreferrer">https://docs.roocode.com/</a></li>
+<li>MCP: <a href="https://modelcontextprotocol.io/" target="_blank" rel="noopener noreferrer">https://modelcontextprotocol.io/</a></li>
+<li>Hexagonal architecture (ports &amp; adapters): <a href="https://alistair.cockburn.us/hexagonal-architecture/" target="_blank" rel="noopener noreferrer">https://alistair.cockburn.us/hexagonal-architecture/</a></li>
+<li>OWASP Top 10 for LLM/agentic applications: <a href="https://genai.owasp.org/" target="_blank" rel="noopener noreferrer">https://genai.owasp.org/</a></li>
+</ul>
+<hr />
+<h2 id="part-vii-organisation-role-and-next-steps">Part VII — Organisation, Role, and Next Steps</h2>
+<h3 id="19-the-lda-domain-architect-role">19. The LDA / domain architect role</h3>
+<p><strong>Notes</strong></p>
+<ul>
+<li>The role was renamed from design authority to <strong>domain architect</strong> deliberately: you are the chief architect for the domains you support, accountable for everything architecture-related in them.</li>
+<li>Definition offered: architecture is design <em>and</em> engineering. Design and build go together — you need to operate at every level, from business domain to capability to system design, including drawbacks and target state. <strong>Ownership</strong> is the key word: when the business head or CTO asks &ldquo;who do I go to?&rdquo;, you are the answer.</li>
+<li>Counterweight from the room: the point of all of it is delivering business results to customers. Understanding how your role connects to the business is not always clear or direct, and that gap is itself a problem.</li>
+<li>Two honest observations:</li>
+<li>Many LDAs describe the role as a side job on top of a day job. Left as an open question by Rod: is that true, is it a problem, and does it need fixing?</li>
+<li>Multiple teams don&rsquo;t know who their LDA is, and some actively push back (&ldquo;I don&rsquo;t need an architect&rdquo;). The architect is often only pulled in for an approval or a fire.</li>
+<li>Reactivity: consensus that some reactivity is healthy — dogfooding your own product and feeling the pain of outages is part of being a good architect — but there is more opportunity to be proactive than is being taken.</li>
+<li>Branding problem named directly: engineers who don&rsquo;t believe you appreciate what they do, technically, won&rsquo;t bring work to you. Closing that chasm is a real workstream, and it differs by org.</li>
+</ul>
+<p><strong>Positions &amp; decisions</strong></p>
+<ul>
+<li>The LDA table is where the change happens. If this group doesn&rsquo;t push it, it doesn&rsquo;t move — regardless of what CTOs say.</li>
+<li>The Architecture Council can be pivoted to focus on this, one topic at a time, with lightweight decision records.</li>
+</ul>
+<p><strong>References &amp; standards</strong></p>
+<ul>
+<li>Architecture Decision Records: <a href="https://adr.github.io/" target="_blank" rel="noopener noreferrer">https://adr.github.io/</a> · <a href="https://github.com/joelparkerhenderson/architecture-decision-record" target="_blank" rel="noopener noreferrer">https://github.com/joelparkerhenderson/architecture-decision-record</a></li>
+<li>Team Topologies enabling teams: <a href="https://teamtopologies.com/key-concepts" target="_blank" rel="noopener noreferrer">https://teamtopologies.com/key-concepts</a></li>
+</ul>
+<hr />
+<h3 id="20-mvp-ways-of-working-and-actions">20. MVP, ways of working, and actions</h3>
+<p><strong>Notes</strong></p>
+<ul>
+<li>This is a <strong>vision</strong>, not a Monday execution plan. Expectation: months, not a year, given business pace — divide and conquer, bring capabilities back into the whole.</li>
+<li>Most of the pieces already exist somewhere in the room. The plan is to assemble working versions from existing parts and demonstrate a thin end-to-end slice, then break it apart into capabilities people own.</li>
+<li>Choose an MVP target that is meaningful, not trivial: not a system untouched for a decade, and not somebody&rsquo;s guarded flagship either. Suggested filters — teams not demonstrating the cultural pivot, applications that were never prioritised for transformation, work that has fallen below the line. Something where the win is visible precisely because it wasn&rsquo;t planned.</li>
+<li>Ways of working proposed: four hours a week each — but as <strong>orchestrator of agents</strong>, not four hours of hand-coding. Shared repos, the same tooling we&rsquo;re advocating, eating our own dog food.</li>
+<li>Funding logic: the efficiency freed by these improvements should be partly reinvested into building more of it, negotiated with CTOs, not fully absorbed into delivery velocity.</li>
+<li>Licences: anyone without Claude Code should raise their hand, with the explicit condition that a licence carries an expectation to contribute.</li>
+<li>On scope discipline: the pre-build / inner-loop conversation is deliberately deferred. The reason given is political variability, not lack of value — and it was noted that most of the time is spent post-build anyway, so accelerating code generation without fixing the outer loop realises nothing.</li>
+</ul>
+<p><strong>Action list (as captured)</strong></p>
+<ol>
+<li>Read the ~280-page pack and come back with reflections; weekly cadence to be set up (Teams channel, follow-up sessions).</li>
+<li>Each LDA: identify candidate capabilities from your own CTO area, and what you can bring to the table — offered, not assigned.</li>
+<li>Identify the MVP candidate application(s) — one or two examples, ideally one per CTO area to try something out.</li>
+<li>Decide the skills/agents/hooks structure quickly (where they live, how they&rsquo;re governed, how they&rsquo;re published) because the platform depends on it.</li>
+<li>Take the vision to your CTOs; Rod will run the leadership conversations in parallel, but assume you need to sell it.</li>
+<li>Prioritise pattern build order (deferred from §3).</li>
+<li>Compare notes on the ACL/Meridian design against the earlier original design document.</li>
+<li>Collaborate with the AI-for-tech catalyst group rather than duplicating.</li>
+</ol>
+<hr />
+<h2 id="summary">Summary</h2>
+<p>The offsite made one argument in seven variations: <strong>the firm has all the pieces and none of the assembly.</strong> Every session — patterns, events, environments, delivery, testing, lifecycle, data — described the same failure mode, which is that a capability exists as a reference implementation whose correct use depends on an individual engineer&rsquo;s knowledge, and therefore gets used five versions behind, inconsistently, at the wrong cost, with no evidence.</p>
+<p>The proposed fix is <strong>Architecture as a Product</strong>: stop offering advice and reference implementations, and ship a platform that makes the right way the easy way. Concretely that means patterns as versioned products with automated enforcement; domain events (business facts) cleanly separated from system-behaviour events and both discoverable through a self-registering catalogue that serves humans, regulators, and agents; environments composed from four declared profiles (application pattern, environment, resilience tier, deployment strategy) rather than hand-crafted; a delivery broker that turns developer intent into pipelines, preview environments, and immutable build-once artefacts; testing built from recorded production behaviour and replayed against proxied dependencies rather than always-on integration estates; and SBOM findings that trigger automated remediation with the confidence supplied by that replay evidence.</p>
+<p>The economic engine underneath all of it is cost. Cloud spend is up ~45% year over year without a matching increase in adoption, non-prod costs more than production, and roughly a quarter of every team&rsquo;s budget is already allocated to maintenance that never shrinks. The claim is that the platform is self-funding: ephemeral non-prod and right-sized patterns pay for higher production resilience and buy back the engineering capacity to build the rest.</p>
+<p>The data session made the same case in its own vocabulary — data products rather than pipelines, use-case-driven provisioning rather than build-it-and-they-will-come, consistency of provisioning as the number one quality rule, and metadata good enough that a machine can judge fitness for purpose. Its unresolved tension is structural: data domains and functional domains do not line up, and the room split between collapsing toward business verticals and syncing the two concepts front-to-back.</p>
+<p>The AI tooling session showed that the execution capability is real and available now — portable skills, agent teams, worktrees, dependency-graph task planning, and multi-agent orchestration already delivering measurable results on version upgrades and repo analysis. The constraints are governance ones (a single flattened marketplace, unshared slash commands, no agreed skills taxonomy) and judgement ones (knowing which work parallelises and which does not).</p>
+<p>What remains genuinely unresolved: pattern build order; the developer-vs-product-team question for who the product serves; state mutation and T+1/T+2 batch flows in the replay model; database schema sequencing in the delivery pipeline; the domain map reconciliation; whether knowledge bases are data products; and the LDA role itself — whether being an architect on the side of a day job is a fact to accept or a problem to fix. The next move is small and deliberate: pick one or two MVP candidates, assemble from what already exists, dogfood it through the platform being built, and reconvene weekly.</p>
+<hr />
+<h2 id="appendix-a-consolidated-reference-table">Appendix A — Consolidated reference table</h2>
+<div class="table-wrap"><table>
+<thead>
+<tr>
+<th>Theme</th>
+<th>Anchor references</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Platform as product</td>
+<td>Team Topologies · CNCF Platforms White Paper · <a href="https://internaldeveloperplatform.org" target="_blank" rel="noopener noreferrer">internaldeveloperplatform.org</a> · Backstage</td>
+</tr>
+<tr>
+<td>Patterns &amp; golden paths</td>
+<td>Backstage Software Templates · Terraform modules · AWS Amplify · Spotify golden paths</td>
+</tr>
+<tr>
+<td>Policy as code</td>
+<td>Open Policy Agent / Rego · Conftest · HashiCorp Sentinel</td>
+</tr>
+<tr>
+<td>Event-driven architecture</td>
+<td>CloudEvents · AsyncAPI · Transactional Outbox · <a href="https://microservices.io" target="_blank" rel="noopener noreferrer">microservices.io</a> · Event Storming</td>
+</tr>
+<tr>
+<td>Event documentation</td>
+<td>EventCatalog (+ Backstage plugin, FlowMart demo) · Schema Registry compatibility modes</td>
+</tr>
+<tr>
+<td>Legacy migration</td>
+<td>Strangler Fig · Anti-Corruption Layer · Parallel Change</td>
+</tr>
+<tr>
+<td>Environments &amp; IaC</td>
+<td>Crossplane · Score · Argo Rollouts · Immutable Server</td>
+</tr>
+<tr>
+<td>Reliability &amp; chaos</td>
+<td>AWS FIS · Principles of Chaos · Chaos Mesh · LitmusChaos · AWS Well-Architected Reliability Pillar · Google SRE Book</td>
+</tr>
+<tr>
+<td>Delivery</td>
+<td>Trunk-Based Development · Continuous Delivery · SemVer · SLSA · Sigstore / in-toto · DORA</td>
+</tr>
+<tr>
+<td>Testing</td>
+<td>Pact · Spring Cloud Contract · WireMock · Hoverfly · Karate · Playwright · Testcontainers · SDV · LocalStack</td>
+</tr>
+<tr>
+<td>Supply chain / TLM</td>
+<td>CycloneDX · SPDX · OpenSSF Scorecard · Renovate · OpenRewrite · EPSS · CISA KEV · NIST SSDF</td>
+</tr>
+<tr>
+<td>Data</td>
+<td>Data Mesh principles · Bitol ODCS/ODPS · <a href="https://datacontract.com" target="_blank" rel="noopener noreferrer">datacontract.com</a> · OpenLineage · Marquez · Great Expectations · DAMA-DMBOK · BCBS 239 · DCAM · FIBO · BIAN</td>
+</tr>
+<tr>
+<td>Agentic engineering</td>
+<td>Claude Code docs · Agent Skills (SKILL.md) · MCP · Beads · Gastown · Roo Code · OWASP GenAI Top 10</td>
+</tr>
+<tr>
+<td>Architecture practice</td>
+<td>ADRs · Hexagonal architecture · Bounded Context</td>
+</tr>
+</tbody>
+</table></div>
+<hr />
+<h2 id="appendix-b-transcription-corrections">Appendix B — Transcription corrections</h2>
+<p>The ASR output was heavily corrupted. These are the substitutions applied, worth knowing before anyone else reads the raw file.</p>
+<div class="table-wrap"><table>
+<thead>
+<tr>
+<th>Transcript</th>
+<th>Actual</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>&ldquo;Roman event&rdquo;, &ldquo;Rowan event&rdquo;, &ldquo;Romain&rdquo;</td>
+<td><strong>domain event</strong></td>
+</tr>
+<tr>
+<td>&ldquo;flow mart&rdquo;, &ldquo;flow chart&rdquo; (in the catalogue demo)</td>
+<td><strong>FlowMart</strong> (EventCatalog demo catalog)</td>
+</tr>
+<tr>
+<td>&ldquo;sneak&rdquo; / &ldquo;snake&rdquo;</td>
+<td><strong>Snyk</strong></td>
+</tr>
+<tr>
+<td>&ldquo;dino trace&rdquo;</td>
+<td><strong>Dynatrace</strong></td>
+</tr>
+<tr>
+<td>&ldquo;Round 53&rdquo;</td>
+<td><strong>Route 53</strong></td>
+</tr>
+<tr>
+<td>&ldquo;AOB&rdquo;, &ldquo;ALB&rdquo;, &ldquo;GOB&rdquo;</td>
+<td><strong>ALB / NLB</strong> (AWS load balancers)</td>
+</tr>
+<tr>
+<td>&ldquo;a 5S&rdquo;, &ldquo;fall injection service&rdquo;</td>
+<td><strong>AWS FIS</strong> (Fault Injection Service)</td>
+</tr>
+<tr>
+<td>&ldquo;Likubes&rdquo;, &ldquo;liquor based&rdquo;</td>
+<td><strong>Liquibase</strong></td>
+</tr>
+<tr>
+<td>&ldquo;coffee&rdquo;, &ldquo;Kafta&rdquo;, &ldquo;copper&rdquo;</td>
+<td><strong>Kafka</strong></td>
+</tr>
+<tr>
+<td>&ldquo;event braves&rdquo;, &ldquo;a vent bridge&rdquo;</td>
+<td><strong>EventBridge</strong></td>
+</tr>
+<tr>
+<td>&ldquo;Monada / Monata / minata upgrade&rdquo;</td>
+<td><strong>Java version upgrade</strong> (Maven-based)</td>
+</tr>
+<tr>
+<td>&ldquo;the DeNoto / Denota&rdquo;</td>
+<td><strong>Denodo</strong></td>
+</tr>
+<tr>
+<td>&ldquo;Starbur&rdquo;</td>
+<td><strong>Starburst</strong></td>
+</tr>
+<tr>
+<td>&ldquo;cards 2.0&rdquo;</td>
+<td><strong>CARDS 2.0</strong> (regulatory reporting platform)</td>
+</tr>
+<tr>
+<td>&ldquo;23 wall&rdquo;</td>
+<td><strong>23 Wall</strong> (programme)</td>
+</tr>
+<tr>
+<td>&ldquo;Y14 / FRY 14 schedule H&rdquo;</td>
+<td><strong>FR Y-14 Schedule H</strong></td>
+</tr>
+<tr>
+<td>&ldquo;dorametrics&rdquo;</td>
+<td><strong>DORA metrics</strong></td>
+</tr>
+<tr>
+<td>&ldquo;Versaill&rdquo;, &ldquo;Barcel&rdquo;, &ldquo;Versel&rdquo;</td>
+<td><strong>Vercel</strong></td>
+</tr>
+<tr>
+<td>&ldquo;clot code&rdquo;, &ldquo;Paul Coe&rdquo;, &ldquo;plot code&rdquo;</td>
+<td><strong>Claude Code</strong></td>
+</tr>
+<tr>
+<td>&ldquo;Rue&rdquo;, &ldquo;Roo&rdquo;, &ldquo;Klein&rdquo;, &ldquo;cline&rdquo;</td>
+<td><strong>Roo Code / Cline</strong></td>
+</tr>
+<tr>
+<td>&ldquo;paper clip&rdquo;, &ldquo;paperclips&rdquo;</td>
+<td><strong>Paperclip</strong> (agentic org orchestrator)</td>
+</tr>
+<tr>
+<td>&ldquo;Gistan&rdquo;, &ldquo;Gas town&rdquo;, &ldquo;Guess them&rdquo;</td>
+<td><strong>Gastown</strong></td>
+</tr>
+<tr>
+<td>&ldquo;beets&rdquo;, &ldquo;beeds&rdquo;, &ldquo;bees&rdquo;</td>
+<td><strong>Beads</strong></td>
+</tr>
+<tr>
+<td>&ldquo;wire mark&rdquo;, &ldquo;warm what&rdquo;</td>
+<td><strong>WireMock</strong></td>
+</tr>
+<tr>
+<td>&ldquo;over fly&rdquo;</td>
+<td><strong>Hoverfly</strong></td>
+</tr>
+<tr>
+<td>&ldquo;karate model&rdquo;</td>
+<td><strong>Karate</strong></td>
+</tr>
+<tr>
+<td>&ldquo;AirSyn / SDV&rdquo;</td>
+<td><strong>SDV (Synthetic Data Vault)</strong></td>
+</tr>
+<tr>
+<td>&ldquo;Farm Genie&rdquo;</td>
+<td><strong>FARM remediation assistant</strong> (internal)</td>
+</tr>
+<tr>
+<td>&ldquo;seal&rdquo;, &ldquo;CEO&rdquo;, &ldquo;seals&rdquo; (in deployment context)</td>
+<td><strong>SEAL</strong> (application identifier)</td>
+</tr>
+<tr>
+<td>&ldquo;Jules&rdquo;, &ldquo;Jewels&rdquo;</td>
+<td><strong>Jules</strong> (internal CI platform)</td>
+</tr>
+<tr>
+<td>&ldquo;hardness&rdquo;, &ldquo;harness&rdquo;</td>
+<td><strong>Harness</strong></td>
+</tr>
+<tr>
+<td>&ldquo;Atlas won / Atlas 2&rdquo;</td>
+<td><strong>Atlas 1 / Atlas 2</strong> (internal cloud platform)</td>
+</tr>
+<tr>
+<td>&ldquo;Guy / Gaia&rdquo;</td>
+<td><strong>Gaia</strong> (internal private cloud)</td>
+</tr>
+<tr>
+<td>&ldquo;AI free&rdquo;, &ldquo;AI 3&rdquo;</td>
+<td><strong>AI3 / Architecture Workbench</strong></td>
+</tr>
+<tr>
+<td>&ldquo;Dax&rdquo;, &ldquo;Dex&rdquo;, &ldquo;decks&rdquo;, &ldquo;depths&rdquo;</td>
+<td><strong>DAX / Dex</strong> (data catalogue)</td>
+</tr>
+<tr>
+<td>&ldquo;ECI&rdquo;, &ldquo;DCI&rdquo;, &ldquo;CCI&rdquo;</td>
+<td><strong>ECI</strong> (client/entity identifier)</td>
+</tr>
+<tr>
+<td>&ldquo;TCF&rdquo;, &ldquo;CTC&rdquo;</td>
+<td><strong>Tech Control Forum / technology controls</strong></td>
+</tr>
+<tr>
+<td>&ldquo;Krivon / tier 4&rdquo;</td>
+<td><strong>Tier 4 — mission critical</strong></td>
+</tr>
+<tr>
+<td>&ldquo;Kane&rsquo;s algorithm&rdquo;</td>
+<td><strong>Kahn&rsquo;s algorithm</strong> (topological sort)</td>
+</tr>
+</tbody>
+</table></div>
+<hr />
+<h2 id="appendix-c-glossary-of-internal-terms-used">Appendix C — Glossary of internal terms used</h2>
+<ul>
+<li><strong>A&amp;E</strong> — Architecture &amp; Engineering</li>
+<li><strong>AWM / GPB / IPB / CWM / USPB</strong> — Asset &amp; Wealth Management / Global Private Bank / International Private Bank / Chase Wealth Management / U.S. Private Bank</li>
+<li><strong>LDA</strong> — Lead/Domain Architect (renamed from design authority to domain architect)</li>
+<li><strong>TDM</strong> — Technology Domain Model</li>
+<li><strong>SEAL</strong> — application/system identifier used for deployment, controls, and lineage</li>
+<li><strong>AI3 / Architecture Workbench</strong> — internal architecture metadata and lineage tooling</li>
+<li><strong>Meridian (DSP)</strong> — legacy client-information system being decomposed by sub-domain</li>
+<li><strong>Connect</strong> — client-facing platform, regionally deployed</li>
+<li><strong>GSTP / USDP</strong> — platforms referenced for the rebalancer replay-testing example</li>
+<li><strong>CARDS 2.0</strong> — regulatory reporting platform maintaining the normalised view of ~400 IPB reports</li>
+<li><strong>FARM</strong> — firm application risk/break management (source of &ldquo;farm breaks&rdquo;)</li>
+<li><strong>Harness / Jules / Spinnaker</strong> — CI/CD tooling in use</li>
+<li><strong>Atlas / Gaia / EAC / Kickstart</strong> — internal cloud platform, private cloud, infrastructure-as-code layer and module set</li>
+<li><strong>Quad</strong> — technology + data + operations + product (the triad plus data)</li>
+</ul>
+  </main>
+  <footer class="colophon">
+    <span>GPB Architecture &amp; Engineering Offsite — Structured Notes</span>
+    <span>Converted from GPB-AE-Offsite-Notes.md</span>
+  </footer>
+</div>
+</body>
+</html>
